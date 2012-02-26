@@ -16,7 +16,7 @@ using namespace std;
 class MustacheData {
   public:
     string val;
-    map<string,MustacheData> dat;
+    list< map<string,MustacheData> > dat;
 };
 
 class Mustache {
