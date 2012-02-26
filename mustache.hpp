@@ -13,6 +13,12 @@ extern "C" {
 
 using namespace std;
 
+class MustacheData {
+  public:
+    string val;
+    map<string,MustacheData> dat;
+};
+
 class Mustache {
   private:
     string startSequence;
@@ -24,7 +30,7 @@ class Mustache {
     void setStopSequence(string stop);
     string getStartSequence();
     string getStopSequence();
-    string * render(string * tmpl, HashTable * data_hash);
+    string * render(string * tmpl, map<string,MustacheData> * data);
 };
 
 
