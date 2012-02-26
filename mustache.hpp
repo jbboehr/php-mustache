@@ -2,21 +2,29 @@
 #ifndef MUSTACHE_HPP
 #define MUSTACHE_HPP
 
+extern "C" {
+#include "php.h"
+}
+
 #include <iostream>
 #include <string>
+#include <map>
+#include <list>
+
+using namespace std;
 
 class Mustache {
   private:
-    std::string startSequence;
-    std::string stopSequence;
+    string startSequence;
+    string stopSequence;
   public:
     Mustache();
     ~Mustache();
-    void setStartSequence(std::string start);
-    void setStopSequence(std::string stop);
-    std::string getStartSequence();
-    std::string getStopSequence();
-    //std::string render(std::string, std::map);
+    void setStartSequence(string start);
+    void setStopSequence(string stop);
+    string getStartSequence();
+    string getStopSequence();
+    string * render(string * tmpl, HashTable * data_hash);
 };
 
 

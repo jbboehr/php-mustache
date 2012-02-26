@@ -7,6 +7,9 @@ extern "C" {
 }
 
 #include <string>
+#include <map>
+
+using namespace std;
 
 PHP_METHOD(Mustache, __construct);
 ZEND_BEGIN_ARG_INFO_EX(Mustache____construct_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)

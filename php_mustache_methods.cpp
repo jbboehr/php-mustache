@@ -134,12 +134,14 @@ PHP_METHOD(Mustache, render)
   zval * _this_zval;
   php_obj_Mustache *payload;
   
-  char *template_str;
+  char * template_str;
   long template_len;
+  
   zval * data = NULL;
   HashTable * data_hash = NULL;
-  char *return_str;
-  long return_len = 0;
+  
+  string * template_str_obj;
+  string * return_str;
 
   if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Osa/", &_this_zval, Mustache_ce_ptr, &template_str, &template_len, &data) == FAILURE) {
           return;
@@ -150,7 +152,12 @@ PHP_METHOD(Mustache, render)
 
   payload = (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
   
+  data_hash = HASH_OF(data);
+  template_str_obj = new string(template_str, template_len);
   
-  RETURN_STRINGL(return_str, return_len, 0); // Do not reallocate
+  return_str = payload->mustache->render(template_str_obj, data_hash);
+  
+  RETURN_STRING(return_str->c_str(), 0); // Do reallocate
+  //RETURN_STRINGL(return_str, return_len, 0); // Do not reallocate
 }
 /* }}} setStartSequence */
