@@ -1,0 +1,39 @@
+
+#ifndef PHP_MUSTACHE_METHODS_HPP
+#define PHP_MUSTACHE_METHODS_HPP
+
+extern "C" {
+  #include <php.h>
+}
+
+#include <string>
+
+PHP_METHOD(Mustache, __construct);
+ZEND_BEGIN_ARG_INFO_EX(Mustache____construct_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(Mustache, getStartSequence);
+ZEND_BEGIN_ARG_INFO_EX(Mustache__getStartSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(Mustache, getStopSequence);
+ZEND_BEGIN_ARG_INFO_EX(Mustache__getStopSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(Mustache, setStartSequence);
+ZEND_BEGIN_ARG_INFO_EX(Mustache__setStartSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, startSequence)
+ZEND_END_ARG_INFO()
+
+PHP_METHOD(Mustache, setStopSequence);
+ZEND_BEGIN_ARG_INFO_EX(Mustache__setStopSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, stopSequence)
+ZEND_END_ARG_INFO()
+        
+PHP_METHOD(Mustache, render);
+ZEND_BEGIN_ARG_INFO_EX(Mustache__render_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 2)
+	ZEND_ARG_INFO(0, str)
+        ZEND_ARG_INFO(0, vars)
+ZEND_END_ARG_INFO()
+
+#endif
