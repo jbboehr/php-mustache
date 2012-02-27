@@ -178,6 +178,11 @@ void mustache_data_from_zend_hash(map<string,MustacheData> * mstruct, HashTable 
   char * val_str;
   uint val_len;
   
+  string * ckey = NULL;
+  MustacheData * cdata = NULL;
+  
+  HashTable * sub_data_hash;
+  
   data_count = zend_hash_num_elements(data_hash);
   zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
   while( zend_hash_get_current_data_ex(data_hash, (void**) &data_entry, &data_pointer) == SUCCESS ) {
@@ -195,12 +200,16 @@ void mustache_data_from_zend_hash(map<string,MustacheData> * mstruct, HashTable 
             convert_to_string(*data_entry);
             val_str = Z_STRVAL_PP(data_entry);
             val_len = Z_STRLEN_PP(data_entry);
-//            arr.insert(std::pair<*std::string, *std::string>(
-//                new std::string(data_curkey, data_curkey_len),
-//                new std::string(data_curval, data_curval_len))
-//            );
+            ckey = new string(key_str);
+            cdata = new MustacheData();
+            cdata->val.assign(val_str);
+            mstruct->insert(pair<string,MustacheData>(*ckey,*cdata));
             break;
       case IS_ARRAY:
+            sub_data_hash = Z_ARRVAL_PP(data_entry);
+            ckey = new string(key_str);
+            cdata = new MustacheData();
+            // @todo
             break;
       default:
             php_error(E_WARNING, "Invalid data type");
