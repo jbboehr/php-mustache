@@ -6,8 +6,10 @@ extern "C" {
   #include <php.h>
 }
 
+#include <iostream>
 #include <string>
 #include <map>
+#include "mustache.hpp"
 
 using namespace std;
 
@@ -38,5 +40,7 @@ ZEND_BEGIN_ARG_INFO_EX(Mustache__render_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALU
 	ZEND_ARG_INFO(0, str)
         ZEND_ARG_INFO(0, vars)
 ZEND_END_ARG_INFO()
+
+void mustache_data_from_zend_hash(map<string,MustacheData> * mstruct, HashTable * data_hash);
 
 #endif
