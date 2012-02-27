@@ -92,12 +92,19 @@ class MustacheNative
       
       // Tag
       if( !$inTag && $tokenBuffer ) {
-        $tokens[] = array(
-          'type' => 'tag',
-          'data' => $tokenBuffer,
-          'sectionStart' => $tagIsStartSection,
-          'sectionStop' => $tagIsStopSection,
-        );
+        if( $tagIsStartSection || $tagIsStopSection ) {
+          $tokens[] = array(
+            'type' => 'section',
+            'data' => $tokenBuffer,
+            'isStart' => $tagIsStartSection,
+            'isStop' => $tagIsStopSection,
+          );
+        } else {
+          $tokens[] = array(
+            'type' => 'var',
+            'data' => $tokenBuffer,
+          );
+        }
         $tokenBuffer = '';
         $tagIsStartSection = false;
         $tagIsStopSection = false;
@@ -135,8 +142,8 @@ class MustacheNative
     
     foreach( array_keys($tokens) as $i ) {
       $v = &$tokens[$i];
-      if( $v['type'] == 'tag' ) {
-        if( $v['sectionStart'] ) {
+      if( $v['type'] == 'section' ) {
+        if( $v['isStart'] ) {
           // Add to tree
           $stack[$depth]['children'][] = &$v; //$i;
           // Push stack
@@ -144,7 +151,7 @@ class MustacheNative
           $depth++;
           $stack[$depth] = &$v;
           continue;
-        } else if( $v['sectionStop'] ) {
+        } else if( $v['isStop'] ) {
           if( $v['data'] != $stack[$depth]['data'] ) {
             trigger_error('Mismatched section');
             return false;
@@ -166,11 +173,99 @@ class MustacheNative
       trigger_error('Mismatched section');
     }
     
-    // @todo processing
     
+    if( true ) {
+      $output = '';
+      foreach( $tree['children'] as $token ) {
+        $output .= $this->_renderToken($token, $data);
+      }
+    } else {
+      $output = $this->_renderTree($tree, $data);
+    }
+    
+    return $output;
+  }
+  
+  protected function _renderTree($tree, $data)
+  {
+    $depth = 0;
+    $stack = array();
+    $stack[$depth] = array(
+      'i' => 0,
+      'v' => &$tree,
+    );
+    do {
+      $i = &$stack[$depth]['i'];
+      $v = &$stack[$depth]['v'];
+      if( !isset($v['children'][$i]) ) {
+        if( $depth > 0 ) {
+          unset($stack[$depth]);
+          $depth--;
+          //$stack[$depth]['i']++;
+        } else {
+          break;
+        }
+      } else {
+        $c = $v['children'][$i];
+        $i++;
+        if( $c['type'] == 'section' &&
+            $c['isStart'] ) {
+          $depth++;
+          $stack[$depth] = array(
+            'i' => 0,
+            'v' => &$c,
+          );
+        }
+      }
+    } while(1);
+  }
+  
+  protected function _renderToken($token, array $data)
+  {
+    $output = '';
+    if( $token['type'] == 'string' ) {
+      $output .= $token['data'];
+    } else if( $token['type'] == 'var' ) {
+      $output .= @$data[$token['data']];
+    } else if( $token['type'] == 'section' ) {
+      if( $token['isStart'] ) {
+        if( isset($data[$token['data']]) &&
+            is_array($data[$token['data']]) ) {
+          if( !empty($token['children']) ) {
+            foreach( $data[$token['data']] as $newData ) {
+              foreach( $token['children'] as $child ) {
+                $output .= $this->_renderToken($child, $newData);
+              }
+            }
+          }
+        } else {
+          if( !empty($data[$token['data']]) ) {
+            if( !empty($token['children']) ) {
+              foreach( $token['children'] as $child ) {
+                $output .= $this->_renderToken($child, $data);
+              }
+            }
+          }
+        }
+      }
+    }
+    return $output;
   }
 }
 
-//$mustache = new MustacheNative();
-//echo $mustache->render('test {{var}} test {{#aa}} aha! {{/aa}}', array('var' => 'val'));
 
+//$data = array();
+//for( $i = 0; $i < 10000; $i++ ) {
+//  $data[] = array(
+//    'comment_id' => $i,
+//    'body' => md5($i),
+//  );
+//}
+//$start = microtime(true);
+//$mustache = new MustacheNative();
+//echo $mustache->render('{{#comments}} {{comment_id}} {{body}} {{/comments}}', array(
+//  'comments' => $data,
+//));
+//$stop = microtime(true);
+//var_dump($stop - $start);
+//var_dump(memory_get_peak_usage());
