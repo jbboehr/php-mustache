@@ -4,6 +4,12 @@ class MustacheNative
 {
   private $_startSequence = '{{';
   private $_stopSequence = '}}';
+  private $_escapeByDefault = true;
+  
+  public function getEscapeByDefault()
+  {
+    return $this->_escapeByDefault;
+  }
   
   public function getStartSequence()
   {
@@ -13,6 +19,12 @@ class MustacheNative
   public function getStopSequence()
   {
     return $this->_stopSequence;
+  }
+  
+  public function setEscapeByDefault($flag)
+  {
+    $this->_escapeByDefault = (bool) $flag;
+    return $this;
   }
   
   public function setStartSequence($start)
@@ -27,7 +39,72 @@ class MustacheNative
     return $this;
   }
   
+  public function compile($tmpl)
+  {
+    // Tokenize
+    $tokens = $this->tokenize($tmpl);
+    if( !$tokens ) {
+      return false;
+    }
+    
+    // Treeify
+    $tree = $this->treeify($tokens);
+    if( !$tree ) {
+      return false;
+    }
+    
+    $output = $this->_compileTree($tree);
+    if( !$output ) {
+      return false;
+    }
+    
+    return $output;
+  }
+  
+  public function renderCompiled($cmpl, array $data)
+  {
+    $fn = include $cmpl;
+    return $fn($data);
+  }
+  
   public function render($tmpl, array $data)
+  {
+    // Tokenize
+    $tokens = $this->tokenize($tmpl);
+    if( !$tokens ) {
+      return false;
+    }
+    
+    // Treeify
+    $tree = $this->treeify($tokens);
+    if( !$tree ) {
+      return false;
+    }
+    
+    // Render
+    $output = $this->renderTree($tree, $data);
+    if( !$output ) {
+      return false;
+    }
+    
+    return $output;
+  }
+  
+  public function renderTree($tree, $data)
+  {
+    if( true ) {
+      $output = '';
+      foreach( $tree['children'] as $token ) {
+        $output .= $this->_renderToken($token, $data);
+      }
+    } else {
+      $output = $this->_renderTree($tree, $data);
+    }
+    
+    return $output;
+  }
+  
+  public function tokenize($tmpl)
   {
     $tmpl .= ' '; // Hack
     $tmplL = strlen($tmpl);
@@ -47,6 +124,7 @@ class MustacheNative
     $inTag = false;
     $tagIsStartSection = false;
     $tagIsStopSection = false;
+    $escaped = $this->_escapeByDefault;
     for( $i = 0; $i < $tmplL; $i++ ) {
       $c = $tmpl[$i];
       // Start Tag
@@ -81,6 +159,12 @@ class MustacheNative
         continue;
       }
       
+      // Escape
+      if( $inTag && $c == '&' ) {
+        $escaped = !$this->_escapeByDefault;
+        continue;
+      }
+      
       // Static
       if( $inTag && $outputBuffer ) {
         $tokens[] = array(
@@ -103,11 +187,13 @@ class MustacheNative
           $tokens[] = array(
             'type' => 'var',
             'data' => $tokenBuffer,
+            'escaped' => $escaped,
           );
         }
         $tokenBuffer = '';
         $tagIsStartSection = false;
         $tagIsStopSection = false;
+        $escaped = $this->_escapeByDefault;
       }
       
       if( $inTag ) {
@@ -131,6 +217,11 @@ class MustacheNative
         $outputBuffer = '';
     }
     
+    return $tokens;
+  }
+  
+  public function treeify($tokens)
+  {
     // Treeify
     $tree = array(
       'type' => 'root',
@@ -171,19 +262,10 @@ class MustacheNative
     
     if( $depth > 0 ) {
       trigger_error('Mismatched section');
+      return false;
     }
     
-    
-    if( true ) {
-      $output = '';
-      foreach( $tree['children'] as $token ) {
-        $output .= $this->_renderToken($token, $data);
-      }
-    } else {
-      $output = $this->_renderTree($tree, $data);
-    }
-    
-    return $output;
+    return $tree;
   }
   
   protected function _renderTree($tree, $data)
@@ -260,7 +342,11 @@ class MustacheNative
     if( $token['type'] == 'string' ) {
       $output .= $token['data'];
     } else if( $token['type'] == 'var' ) {
-      $output .= @$data[$token['data']];
+      if( $token['escaped'] ) {
+        $output .= htmlspecialchars(@$data[$token['data']], ENT_QUOTES, 'UTF-8');
+      } else {
+        $output .= @$data[$token['data']];
+      }
     } else if( $token['type'] == 'section' ) {
       if( $token['isStart'] ) {
         if( isset($data[$token['data']]) &&
@@ -285,8 +371,89 @@ class MustacheNative
     }
     return $output;
   }
+  
+  protected function _compileTree($tree)
+  {
+    $output = '';
+    foreach( $tree['children'] as $token ) {
+      $output .= $this->_compileToken($token, 1);
+    }
+    return 'return function(&$data) {' . PHP_EOL
+      . '  $buf = "";' . PHP_EOL
+      . $output . PHP_EOL
+      . '  return $buf;' . PHP_EOL
+      . '};';
+  }
+  
+  protected function _compileToken($token, $depth = 0)
+  {
+    $tokenStr = var_export($token['data'], true);
+    $pre = str_repeat(' ', $depth * 2);
+    //$ref = '&';
+    $ref = '';
+    
+    $output = '';
+    if( $token['type'] == 'string' ) {
+      $output .= $pre . '$buf .= ' . $tokenStr . ';' . PHP_EOL;
+    } else if( $token['type'] == 'var' ) {
+      if( $token['escaped'] ) {
+        $output .= $pre . '$buf .= htmlspecialchars(@$data[' . $tokenStr . '], ENT_QUOTES, "UTF-8");' . PHP_EOL;
+      } else {
+        $output .= $pre . '$buf .= @$data[' . $tokenStr . '];' . PHP_EOL;
+      }
+    } else if( $token['type'] == 'section' ) {
+      if( $token['isStart'] && !empty($token['children']) ) {
+        $output .= $pre . '$fn = function(' . $ref . '$cdata, $isSection = true) {' . PHP_EOL;
+        $output .= $pre . '  $buf = "";' . PHP_EOL;
+        $output .= $pre . '  if( $isSection ) {' . PHP_EOL;
+        $output .= $pre . '    $fdata = ' . $ref . '$cdata;' . PHP_EOL;
+        $output .= $pre . '  } else {' . PHP_EOL;
+        $output .= $pre . '    $fdata = array(' . $ref . '$cdata);' . PHP_EOL;
+        $output .= $pre . '  }' . PHP_EOL;
+        $output .= $pre . '  foreach( $fdata as ' . $ref . '$data ) {' . PHP_EOL;
+        foreach( $token['children'] as $child ) {
+          $output .= $this->_compileToken($child, $depth + 2);
+        }
+        $output .= $pre . '  }' . PHP_EOL;
+        $output .= $pre . '  return $buf;' . PHP_EOL;
+        $output .= $pre . '};' . PHP_EOL;
+        
+        $output .= $pre . 'if( empty($data[' . $tokenStr . ']) ) {' . PHP_EOL;
+        $output .= $pre . '  // Do nothing' . PHP_EOL;
+        $output .= $pre . '} else if( is_scalar($data[' . $tokenStr . ']) ) {' . PHP_EOL;
+        $output .= $pre . '  $buf .= $fn($data, false);' . PHP_EOL;
+        $output .= $pre . '} else if( is_array($data[' . $tokenStr . ']) ) {' . PHP_EOL;
+        $output .= $pre . '  $buf .= $fn($data[' . $tokenStr . ']);' . PHP_EOL;
+        $output .= $pre . '}' . PHP_EOL;
+      }
+    }
+    return $output;
+  }
 }
 
+
+//error_reporting(E_ALL);
+
+//$mustache = new MustacheNative();
+//$cmpl = $mustache->compile("{{#comments}} {{comment_id}} {{body}} \n{{/comments}}");
+//echo '<?php' . PHP_EOL . $cmpl;
+
+//$data = array();
+//for( $i = 0; $i < 10000; $i++ ) {
+//  $data[] = array(
+//    'comment_id' => $i,
+//    'body' => '<' . md5($i) . '>',
+//  );
+//}
+//$start = microtime(true);
+//$mustache = new MustacheNative();
+//$ret = $mustache->render("{{#comments}} {{comment_id}} {{body}} \n{{/comments}}", array(
+//  'comments' => $data,
+//));
+//$stop = microtime(true);
+//echo $ret;
+//var_dump($stop - $start);
+//var_dump(memory_get_peak_usage());
 
 //$data = array();
 //for( $i = 0; $i < 10000; $i++ ) {
@@ -297,7 +464,7 @@ class MustacheNative
 //}
 //$start = microtime(true);
 //$mustache = new MustacheNative();
-//$ret = $mustache->render("{{#comments}} {{comment_id}} {{body}} \n{{/comments}}", array(
+//$ret = $mustache->renderCompiled("./test.php", array(
 //  'comments' => $data,
 //));
 //$stop = microtime(true);
