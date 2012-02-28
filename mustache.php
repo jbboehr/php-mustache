@@ -188,36 +188,70 @@ class MustacheNative
   
   protected function _renderTree($tree, $data)
   {
+    $output = '';
     $depth = 0;
     $stack = array();
     $stack[$depth] = array(
       'i' => 0,
       'v' => &$tree,
+      'a' => &$data,
+      'ai' => null,
     );
     do {
       $i = &$stack[$depth]['i'];
       $v = &$stack[$depth]['v'];
+      $a = &$stack[$depth]['a'];
+      $ai = &$stack[$depth]['ai'];
+      
       if( !isset($v['children'][$i]) ) {
-        if( $depth > 0 ) {
+        if( null !== $ai ) {
+          if( isset($a[$ai]) ) {
+            $ai++;
+            $i = 0;
+          } else {
+            unset($stack[$depth]);
+            $depth--;
+          }
+        } else if( $depth > 0 ) {
           unset($stack[$depth]);
           $depth--;
           //$stack[$depth]['i']++;
+          continue;
         } else {
           break;
         }
       } else {
-        $c = $v['children'][$i];
+        $c = &$v['children'][$i];
         $i++;
         if( $c['type'] == 'section' &&
             $c['isStart'] ) {
           $depth++;
+          if( isset($a[$c['data']]) &&
+              is_array($a[$c['data']]) ) {
+            $ca = &$a[$c['data']];
+            $cai = 0;
+          } else {
+            $ca = &$a;
+            $cai = null;
+          }
           $stack[$depth] = array(
             'i' => 0,
             'v' => &$c,
+            'a' => &$ca,
+            'ai' => $cai,
           );
+        } else if( $c['type'] == 'string' ) {
+          $output .= $c['data'];
+        } else if( $c['type'] == 'var' ) {
+          if( null == $ai ) {
+            $output .= @$a[$c['data']];
+          } else {
+            $output .= @$a[$ai][$c['data']];
+          }
         }
       }
     } while(1);
+    return $output;
   }
   
   protected function _renderToken($token, array $data)
@@ -263,9 +297,10 @@ class MustacheNative
 //}
 //$start = microtime(true);
 //$mustache = new MustacheNative();
-//echo $mustache->render('{{#comments}} {{comment_id}} {{body}} {{/comments}}', array(
+//$ret = $mustache->render("{{#comments}} {{comment_id}} {{body}} \n{{/comments}}", array(
 //  'comments' => $data,
 //));
 //$stop = microtime(true);
+//echo $ret;
 //var_dump($stop - $start);
 //var_dump(memory_get_peak_usage());
