@@ -2,9 +2,10 @@
 
 class MustacheNative
 {
-  private $_startSequence = '{{';
-  private $_stopSequence = '}}';
-  private $_escapeByDefault = true;
+  protected $_startSequence = '{{';
+  protected $_stopSequence = '}}';
+  protected $_escapeByDefault = true;
+  protected $_errors;
   
   public function getEscapeByDefault()
   {
@@ -37,6 +38,11 @@ class MustacheNative
   {
     $this->_stopSequence = (string) $stop;
     return $this;
+  }
+  
+  public function getErrors()
+  {
+    return $this->_errors;
   }
   
   public function compile($tmpl)
@@ -125,15 +131,30 @@ class MustacheNative
     $tagIsStartSection = false;
     $tagIsStopSection = false;
     $escaped = $this->_escapeByDefault;
+    
+    $line = 0;
+    $char = 0;
+    $tagStartInfo = array();
+    
     for( $i = 0; $i < $tmplL; $i++ ) {
       $c = $tmpl[$i];
+      
+      // Track line/char
+      if( $c == "\n" ) {
+        $line++;
+        $char = 0;
+      } else {
+        $char++;
+      }
+      
       // Start Tag
       if( !$inTag &&
           $c == $startC &&
           substr($tmpl, $i, $startL) == $startS ) {
         // Start tag
         $inTag = true;
-        $i += $startL - 1;
+        $tagStartInfo = array($line, $char);
+        $i += $startL - 1; // this messes up stuff
         continue;
       }
       
@@ -143,7 +164,8 @@ class MustacheNative
           substr($tmpl, $i, $stopL) == $stopS ) {
         // Stop tag
         $inTag = false;
-        $i += $stopL - 1;
+        $tagStartInfo = array();
+        $i += $stopL - 1; // this messes up stuff
         continue;
       }
       
@@ -163,6 +185,12 @@ class MustacheNative
       if( $inTag && $c == '&' ) {
         $escaped = !$this->_escapeByDefault;
         continue;
+      }
+      
+      // Whoops
+      if( $inTag && $c == '{' ) {
+        $this->_error('Unclosed tag, line: ' . $tagStartInfo[0] . ', char: ' . $tagStartInfo[1], E_USER_WARNING);
+        return false;
       }
       
       // Static
@@ -205,7 +233,7 @@ class MustacheNative
     
     // Whoops
     if( $inTag || $tokenBuffer ) {
-      trigger_error('Unclosed tag');
+      $this->_error('Unclosed tag, line: ' . $tagStartInfo[0] . ', char: ' . $tagStartInfo[1], E_USER_WARNING);
       return false;
     }
     
@@ -244,7 +272,7 @@ class MustacheNative
           continue;
         } else if( $v['isStop'] ) {
           if( $v['data'] != $stack[$depth]['data'] ) {
-            trigger_error('Mismatched section');
+            $this->_error('Mismatched section');
             return false;
           }
           // Pop stack
@@ -261,7 +289,7 @@ class MustacheNative
     }
     
     if( $depth > 0 ) {
-      trigger_error('Mismatched section');
+      $this->_error('Mismatched section', E_USER_WARNING);
       return false;
     }
     
@@ -348,22 +376,23 @@ class MustacheNative
         $output .= @$data[$token['data']];
       }
     } else if( $token['type'] == 'section' ) {
-      if( $token['isStart'] ) {
-        if( isset($data[$token['data']]) &&
-            is_array($data[$token['data']]) ) {
-          if( !empty($token['children']) ) {
+      if( $token['isStart'] && !empty($token['children']) ) {
+        if( empty($data[$token['data']]) ) {
+          // Do nothing
+        } else if( is_scalar($data[$token['data']]) ) {
+          foreach( $token['children'] as $child ) {
+            $output .= $this->_renderToken($child, $data);
+          }
+        } else if( is_array($data[$token['data']]) ) {
+          if( isset($data[$token['data']][0]) ) {
             foreach( $data[$token['data']] as $newData ) {
               foreach( $token['children'] as $child ) {
                 $output .= $this->_renderToken($child, $newData);
               }
             }
-          }
-        } else {
-          if( !empty($data[$token['data']]) ) {
-            if( !empty($token['children']) ) {
-              foreach( $token['children'] as $child ) {
-                $output .= $this->_renderToken($child, $data);
-              }
+          } else {
+            foreach( $token['children'] as $child ) {
+              $output .= $this->_renderToken($child, $data[$token['data']]);
             }
           }
         }
@@ -423,20 +452,36 @@ class MustacheNative
         $output .= $pre . '} else if( is_scalar($data[' . $tokenStr . ']) ) {' . PHP_EOL;
         $output .= $pre . '  $buf .= $fn($data, false);' . PHP_EOL;
         $output .= $pre . '} else if( is_array($data[' . $tokenStr . ']) ) {' . PHP_EOL;
-        $output .= $pre . '  $buf .= $fn($data[' . $tokenStr . ']);' . PHP_EOL;
+        $output .= $pre . '  if( isset($data[' . $tokenStr . '][0]) ) {' . PHP_EOL;
+        $output .= $pre . '    $buf .= $fn($data[' . $tokenStr . ']);' . PHP_EOL;
+        $output .= $pre . '  } else {' . PHP_EOL;
+        $output .= $pre . '    $buf .= $fn($data[' . $tokenStr . '], false);' . PHP_EOL;
+        $output .= $pre . '  }' . PHP_EOL;
         $output .= $pre . '}' . PHP_EOL;
       }
     }
     return $output;
   }
+  
+  protected function _error($message, $level = E_USER_NOTICE)
+  {
+    trigger_error($message, $level);
+    $this->_errors[] = $message;
+    return $this;
+  }
 }
+
 
 
 //error_reporting(E_ALL);
 
+
+
 //$mustache = new MustacheNative();
 //$cmpl = $mustache->compile("{{#comments}} {{comment_id}} {{body}} \n{{/comments}}");
 //echo '<?php' . PHP_EOL . $cmpl;
+
+
 
 //$data = array();
 //for( $i = 0; $i < 10000; $i++ ) {
@@ -447,13 +492,21 @@ class MustacheNative
 //}
 //$start = microtime(true);
 //$mustache = new MustacheNative();
-//$ret = $mustache->render("{{#comments}} {{comment_id}} {{body}} \n{{/comments}}", array(
-//  'comments' => $data,
+//$ret = $mustache->render("{{#comments}} {{#list}} {{comment_id}} {{body}} {{/list}} {{test}} \n{{/comments}}", array(
+//  'comments' => array(
+//    'test' => 'test',
+//    'list' => $data,
+//  ),
 //));
+//if( ($err = $mustache->getErrors()) ) {
+//  var_dump($err);
+//}
 //$stop = microtime(true);
 //echo $ret;
 //var_dump($stop - $start);
 //var_dump(memory_get_peak_usage());
+
+
 
 //$data = array();
 //for( $i = 0; $i < 10000; $i++ ) {
