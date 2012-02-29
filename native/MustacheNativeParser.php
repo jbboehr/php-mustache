@@ -51,7 +51,8 @@ class MustacheNativeParser
               $depth--;
             } else {
               $stack[$depth]->children[] = $node;
-              if( $flags & self::FLAG_SECTION_START ) {
+              if( $flags & self::FLAG_SECTION_START ||
+                  $flags & self::FLAG_NEGATE ) {
                 $node->type = self::NODE_SECTION;
                 $depth++;
                 $stack[$depth] = $node;

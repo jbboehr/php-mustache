@@ -64,7 +64,7 @@ class MustacheNativeTokenizer
             if( substr($tmpl, $pos, $stopL) == $stop ) {
               // Close previous buffer
               if( '' !== $buffer ) {
-                if( strlen($buffer) != strcspn($buffer, '{}#&!^/') ) {
+                if( !$inComment && strlen($buffer) != strcspn($buffer, '{}#&!^/') ) {
                   self::_errorWithLocation('Invalid char in tag', $startLine, $startChar);
                 }
                 $data = trim($buffer); // TRIM THE VARIABLE BUFFER;
@@ -236,6 +236,20 @@ class MustacheNativeTokenizer
       if( null === $skipUntil ) {
         $buffer .= $char;
       }
+    }
+    
+    if( $inTag ) {
+      self::_errorWithLocation('Unclosed tag', $startLine, $startChar);
+    } else if( $buffer ) {
+      $tokens[] = array(
+        'type' => self::TOKEN_OUTPUT,
+        'name' => 'output',
+        'data' => $buffer,
+        'startLineNo' => $startLine,
+        'startCharNo' => $startChar,
+        'lineNo' => $lineNo,
+        'charNo' => $charNo,
+      );
     }
     
     return $tokens;

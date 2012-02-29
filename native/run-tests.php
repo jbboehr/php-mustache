@@ -41,17 +41,28 @@ $mustache = new MustacheNative();
 $results = array();
 $nFailed = 0;
 $nPassed = 0;
+$debug = false;
 
 foreach( $specData as $spec => $data ) {
   $tests = $data['tests'];
   foreach( $tests as $test ) {
+    $error = null;
     try {
-      $given = $mustache->render($test['template'], $test['data']);
-      $error = null;
+      if( !$debug ) {
+        $given = $mustache->render($test['template'], $test['data']);
+      } else {
+        $tmpl = $test['template'];
+        $data = $test['data'];
+
+        $tokens = MustacheNativeTokenizer::tokenize($tmpl);
+        $tree = MustacheNativeParser::parse($tokens);
+        $given = MustacheNativeRenderer::render($tree, $data);
+      }
     } catch( Exception $e ) {
       $given = null;
       $error = $e;
     }
+    
     if( $given !== $test['expected'] ) {
       $results[$spec][] = array(
         'test' => $test,
@@ -77,7 +88,7 @@ foreach( $specData as $spec => $data ) {
         'error' => $error,
       );
       $nPassed++;
-      printf("[%s] %s %s" . PHP_EOL, $spec, $test['name'], 'FAILED');
+      printf("[%s] %s %s" . PHP_EOL, $spec, $test['name'], 'PASSED');
     }
   }
 }
