@@ -11,6 +11,7 @@ class MustacheNativeTokenizer
   const TOKEN_ESCAPE = 6;
   const TOKEN_NEGATION = 7;
   const TOKEN_COMMENT = 8;
+  const TOKEN_PARTIAL = 9;
   
   const TOKEN_ROOT = 100;
   
@@ -169,6 +170,23 @@ class MustacheNativeTokenizer
                 $tokens[] = array(
                   'type' => self::TOKEN_COMMENT,
                   'name' => 'comment',
+                  'data' => $char,
+                  'lineNo' => $lineNo,
+                  'charNo' => $charNo,
+                );
+                $skipUntil = $pos;
+                $inComment = true;
+              }
+            }
+            break;
+          case '>': // PARTIAL
+            if( !$inComment ) {
+              if( strlen($buffer) !== 0 ) {
+                self::_errorWithLocation('Unexpected token: ' . $char, $lineNo, $charNo);
+              } else {
+                $tokens[] = array(
+                  'type' => self::TOKEN_PARTIAL,
+                  'name' => 'partial',
                   'data' => $char,
                   'lineNo' => $lineNo,
                   'charNo' => $charNo,

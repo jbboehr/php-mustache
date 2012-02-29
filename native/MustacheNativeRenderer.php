@@ -44,6 +44,10 @@ class MustacheNativeRenderer
         }
         break;
       case MustacheNativeParser::NODE_TAG:
+        if( $node->flags & MustacheNativeParser::FLAG_PARTIAL ) {
+          throw new Exception('Partials not supported');
+        }
+        
         $str = '';
         if( is_scalar($data) ) {
           if( $node->data == '.' ) {
