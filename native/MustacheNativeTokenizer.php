@@ -225,7 +225,7 @@ class MustacheNativeTokenizer
   
   protected static function _errorWithLocation($msg, $line, $char)
   {
-    $message .= ' [Line: ' . $line . ', Char: ' . $char . ']';
-    throw new Exception($message);
+    $msg .= ' [Line: ' . $line . ', Char: ' . $char . ']';
+    throw new Exception($msg);
   }
 }

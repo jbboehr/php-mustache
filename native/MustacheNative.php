@@ -50,6 +50,51 @@ class MustacheNative
   {
     return $this->_errors;
   }
+  
+  public function render($tmpl, array $data)
+  {
+    $tokens = MustacheNativeTokenizer::tokenize($tmpl, $this->_startSequence, $this->_stopSequence);
+    if( !$tokens ) {
+      return false;
+    }
+    
+    $tree = MustacheNativeParser::parse($tokens);
+    if( !$tree ) {
+      return false;
+    }
+    
+    return MustacheNativeRenderer::render($tree, $data);
+  }
+  
+  public function compile($tmpl)
+  {
+    $tokens = MustacheNativeTokenizer::tokenize($tmpl, $this->_startSequence, $this->_stopSequence);
+    if( !$tokens ) {
+      return false;
+    }
+    
+    $tree = MustacheNativeParser::parse($tokens);
+    if( !$tree ) {
+      return false;
+    }
+    
+    return MustacheNativeCompiler::compile($tree);
+  }
+  
+  public function parse($tokens)
+  {
+    return MustacheNativeParser::parse($tokens);
+  }
+  
+  public function tokenize($tmpl)
+  {
+    return MustacheNativeTokenizer::tokenize($tmpl, $this->_startSequence, $this->_stopSequence);
+  }
+  
+  public function renderTree($tree, array $data)
+  {
+    return MustacheNativeRenderer::render($tree, $data);
+  }
 }
 
 

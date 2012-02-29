@@ -11,7 +11,7 @@ class MustacheNativeRenderer
     return $output;
   }
   
-  protected static function _renderNode($node, array $data)
+  protected static function _renderNode($node, $data)
   {
     $output = '';
     switch( $node->type ) {
@@ -44,12 +44,20 @@ class MustacheNativeRenderer
         }
         break;
       case MustacheNativeParser::NODE_TAG:
+        $str = '';
+        if( is_scalar($data) ) {
+          if( $node->data == '.' ) {
+            $str = $data;
+          }
+        } else {
+          $str = @$data[$node->data];
+        }
         if( $node->flags & MustacheNativeParser::FLAG_COMMENT ) {
           // Do nothing
         } else if( $node->flags & MustacheNativeParser::FLAG_ESCAPE ) {
-          $output .= htmlspecialchars(@$data[$node->data], ENT_QUOTES, 'UTF-8');
+          $output .= htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
         } else {
-          $output .= @$data[$node->data];
+          $output .= $str;
         }
         break; 
       default:
