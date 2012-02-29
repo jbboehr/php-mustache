@@ -44,7 +44,9 @@ class MustacheNativeRenderer
         }
         break;
       case MustacheNativeParser::NODE_TAG:
-        if( $node->flags & MustacheNativeParser::FLAG_ESCAPE ) {
+        if( $node->flags & MustacheNativeParser::FLAG_COMMENT ) {
+          // Do nothing
+        } else if( $node->flags & MustacheNativeParser::FLAG_ESCAPE ) {
           $output .= htmlspecialchars(@$data[$node->data], ENT_QUOTES, 'UTF-8');
         } else {
           $output .= @$data[$node->data];

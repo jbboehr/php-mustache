@@ -11,6 +11,7 @@ class MustacheNativeParser
   const FLAG_NEGATE = 2;
   const FLAG_SECTION_START = 4;
   const FLAG_SECTION_STOP = 8;
+  const FLAG_COMMENT = 16;
   
   static public function parse($tokens)
   {
@@ -76,6 +77,9 @@ class MustacheNativeParser
             break;
           case MustacheNativeTokenizer::TOKEN_NEGATION:
             $flags |= self::FLAG_NEGATE;
+            break;
+          case MustacheNativeTokenizer::TOKEN_COMMENT:
+            $flags |= self::FLAG_COMMENT;
             break;
           default:
             throw new Exception('Unknown token: ' . $token['name']);

@@ -10,6 +10,7 @@ class MustacheNativeTokenizer
   const TOKEN_STOP_SECTION = 5;
   const TOKEN_ESCAPE = 6;
   const TOKEN_NEGATION = 7;
+  const TOKEN_COMMENT = 8;
   
   const TOKEN_ROOT = 100;
   
@@ -24,6 +25,7 @@ class MustacheNativeTokenizer
     $pos = 0;
     $char = null;
     $inTag = false;
+    $inComment = false;
     $startLine = null;
     $startChar = null;
     $skipUntil = null;
@@ -61,13 +63,17 @@ class MustacheNativeTokenizer
             if( substr($tmpl, $pos, $stopL) == $stop ) {
               // Close previous buffer
               if( '' !== $buffer ) {
-                if( strlen($buffer) != strcspn($buffer, '{}#&!/') ) {
-                  self::_errorWithLocation('Invalid char in tag', $tagStartLine, $tagStartChar);
+                if( strlen($buffer) != strcspn($buffer, '{}#&!^/') ) {
+                  self::_errorWithLocation('Invalid char in tag', $startLine, $startChar);
+                }
+                $data = trim($buffer); // TRIM THE VARIABLE BUFFER;
+                if( !$data ) {
+                  self::_errorWithLocation('Empty tag', $startLine, $startChar);
                 }
                 $tokens[] = array(
                   'type' => self::TOKEN_STRING,
                   'name' => 'string',
-                  'data' => $buffer,
+                  'data' => $data,
                   'startLineNo' => $startChar,
                   'startCharNo' => $startChar,
                   'lineNo' => $lineNo,
@@ -85,65 +91,91 @@ class MustacheNativeTokenizer
               );
               // Now outside tag
               $inTag = false;
+              $inComment = false;
               $startLine = $lineNo;
               $startChar = $charNo;
               $skipUntil = $pos + $stopL - 1;
             }
             break;
           case '#': // START SECTION
-            if( strlen($buffer) !== 0 ) {
-              self::_errorWithLocation('Unexpected token: ' . $char, $lineNo, $charNo);
-            } else {
-              $tokens[] = array(
-                'type' => self::TOKEN_START_SECTION,
-                'name' => 'start_section',
-                'data' => $char,
-                'lineNo' => $lineNo,
-                'charNo' => $charNo,
-              );
-              $skipUntil = $pos;
+            if( !$inComment ) {
+              if( strlen($buffer) !== 0 ) {
+                self::_errorWithLocation('Unexpected token: ' . $char, $lineNo, $charNo);
+              } else {
+                $tokens[] = array(
+                  'type' => self::TOKEN_START_SECTION,
+                  'name' => 'start_section',
+                  'data' => $char,
+                  'lineNo' => $lineNo,
+                  'charNo' => $charNo,
+                );
+                $skipUntil = $pos;
+              }
             }
             break;
           case '/': // STOP SECTION
-            if( strlen($buffer) !== 0 ) {
-              self::_errorWithLocation('Unexpected token: ' . $char, $lineNo, $charNo);
-            } else {
-              $tokens[] = array(
-                'type' => self::TOKEN_STOP_SECTION,
-                'name' => 'stop_section',
-                'data' => $char,
-                'lineNo' => $lineNo,
-                'charNo' => $charNo,
-              );
-              $skipUntil = $pos;
+            if( !$inComment ) {
+              if( strlen($buffer) !== 0 ) {
+                self::_errorWithLocation('Unexpected token: ' . $char, $lineNo, $charNo);
+              } else {
+                $tokens[] = array(
+                  'type' => self::TOKEN_STOP_SECTION,
+                  'name' => 'stop_section',
+                  'data' => $char,
+                  'lineNo' => $lineNo,
+                  'charNo' => $charNo,
+                );
+                $skipUntil = $pos;
+              }
             }
             break;
           case '&': // ESCAPE/UNESCAPE
-            if( strlen($buffer) !== 0 ) {
-              self::_errorWithLocation('Unexpected token: ' . $char, $lineNo, $charNo);
-            } else {
-              $tokens[] = array(
-                'type' => self::TOKEN_ESCAPE,
-                'name' => 'escape',
-                'data' => $char,
-                'lineNo' => $lineNo,
-                'charNo' => $charNo,
-              );
-              $skipUntil = $pos;
+            if( !$inComment ) {
+              if( strlen($buffer) !== 0 ) {
+                self::_errorWithLocation('Unexpected token: ' . $char, $lineNo, $charNo);
+              } else {
+                $tokens[] = array(
+                  'type' => self::TOKEN_ESCAPE,
+                  'name' => 'escape',
+                  'data' => $char,
+                  'lineNo' => $lineNo,
+                  'charNo' => $charNo,
+                );
+                $skipUntil = $pos;
+              }
             }
             break;
           case '^': // SECTION NEGATION
-            if( strlen($buffer) !== 0 ) {
-              self::_errorWithLocation('Unexpected token: ' . $char, $lineNo, $charNo);
-            } else {
-              $tokens[] = array(
-                'type' => self::TOKEN_NEGATION,
-                'name' => 'negation',
-                'data' => $char,
-                'lineNo' => $lineNo,
-                'charNo' => $charNo,
-              );
-              $skipUntil = $pos;
+            if( !$inComment ) {
+              if( strlen($buffer) !== 0 ) {
+                self::_errorWithLocation('Unexpected token: ' . $char, $lineNo, $charNo);
+              } else {
+                $tokens[] = array(
+                  'type' => self::TOKEN_NEGATION,
+                  'name' => 'negation',
+                  'data' => $char,
+                  'lineNo' => $lineNo,
+                  'charNo' => $charNo,
+                );
+                $skipUntil = $pos;
+              }
+            }
+            break;
+          case '!': // COMMENT
+            if( !$inComment ) {
+              if( strlen($buffer) !== 0 ) {
+                self::_errorWithLocation('Unexpected token: ' . $char, $lineNo, $charNo);
+              } else {
+                $tokens[] = array(
+                  'type' => self::TOKEN_COMMENT,
+                  'name' => 'comment',
+                  'data' => $char,
+                  'lineNo' => $lineNo,
+                  'charNo' => $charNo,
+                );
+                $skipUntil = $pos;
+                $inComment = true;
+              }
             }
             break;
         }

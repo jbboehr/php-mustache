@@ -68,20 +68,20 @@ class MustacheNative
 //    'list' => $data,
 //  ),
 //);
-
+//
 //try {
 //  $start = microtime(true);
 //  
-//  $tmpl = "{{#comments}} {{#list}} {{comment_id}} {{body}} {{/list}} {{test}} \n{{/comments}}";
+//  $tmpl = "{{! this is a comment}} {{#comments}} {{#list}} {{comment_id}} {{body}} {{/list}} {{test}} \n{{/comments}}";
 //  $tokens = MustacheNativeTokenizer::tokenize($tmpl);
 //  $tree = MustacheNativeParser::parse($tokens);
-////  $output = MustacheNativeRenderer::render($tree, $data);
-//  $output = MustacheNativeCompiler::compile($tree);
-//  echo '<?php ' . $output;
+//  $output = MustacheNativeRenderer::render($tree, $data);
+////  $output = MustacheNativeCompiler::compile($tree);
 //  $stop = microtime(true);
+//  echo '<?php ' . $output;
 //
 //  //var_dump($output);
-//  //var_dump($stop - $start);
+//  var_dump($stop - $start);
 //} catch( Exception $e ) {
 //  echo $e;
 //}
