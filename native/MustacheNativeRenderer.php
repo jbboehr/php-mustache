@@ -2,7 +2,7 @@
 
 class MustacheNativeRenderer
 {
-  static public function render($tree, array $data)
+  static public function render($tree, array $data, array $partials = array())
   {
     $output = '';
     foreach( $tree->children as $node ) {
