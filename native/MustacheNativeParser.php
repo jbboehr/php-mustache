@@ -13,6 +13,7 @@ class MustacheNativeParser
   const FLAG_SECTION_STOP = 8;
   const FLAG_COMMENT = 16;
   const FLAG_PARTIAL = 32;
+  const FLAG_INLINE_PARTIAL = 64;
   
   static public function parse($tokens)
   {
@@ -21,6 +22,8 @@ class MustacheNativeParser
     $tree->name = 'root';
     $tree->data = '';
     $tree->children = array();
+    
+    $canHaveChildren = self::FLAG_SECTION_START | self::FLAG_NEGATE | self::FLAG_INLINE_PARTIAL;
     
     $depth = 0;
     $stack = array();
@@ -51,8 +54,7 @@ class MustacheNativeParser
               $depth--;
             } else {
               $stack[$depth]->children[] = $node;
-              if( $flags & self::FLAG_SECTION_START ||
-                  $flags & self::FLAG_NEGATE ) {
+              if( $flags & $canHaveChildren ) {
                 $node->type = self::NODE_SECTION;
                 $depth++;
                 $stack[$depth] = $node;
@@ -85,6 +87,9 @@ class MustacheNativeParser
             break;
           case MustacheNativeTokenizer::TOKEN_PARTIAL:
             $flags |= self::FLAG_PARTIAL;
+            break;
+          case MustacheNativeTokenizer::TOKEN_INLINE_PARTIAL:
+            $flags |= self::FLAG_INLINE_PARTIAL;
             break;
           default:
             throw new Exception('Unknown token: ' . $token['name']);
