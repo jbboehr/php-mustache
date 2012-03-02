@@ -27,6 +27,7 @@ class MustacheNativeTokenizer
     $pos = 0;
     $char = null;
     $inTag = false;
+    $inTripleTag = false;
     $inComment = false;
     $startLine = null;
     $startChar = null;
@@ -72,6 +73,15 @@ class MustacheNativeTokenizer
                 if( !$data ) {
                   self::_errorWithLocation('Empty tag', $startLine, $startChar);
                 }
+                if( $inTripleTag ) {
+                  $tokens[] = array(
+                    'type' => self::TOKEN_ESCAPE,
+                    'name' => 'escape',
+                    'data' => '&',
+                    'lineNo' => $lineNo,
+                    'charNo' => $charNo,
+                  );
+                }
                 $tokens[] = array(
                   'type' => self::TOKEN_STRING,
                   'name' => 'string',
@@ -97,6 +107,21 @@ class MustacheNativeTokenizer
               $startLine = $lineNo;
               $startChar = $charNo;
               $skipUntil = $pos + $stopL - 1;
+              // Skip one more for triple tag
+              if( $stop == '}}' && $inTripleTag ) {
+                if( $tmpl[$pos+2] != '}' ) {
+                  self::_errorWithLocation('Missing closing triple mustache delimiter: ' . $char, $lineNo, $charNo);
+                }
+                $skipUntil++;
+              }
+            }
+            break;
+          case '{': // TRIPLE MUSTACHE - ESCAPE
+            if( $inTripleTag || $start != '{{' ) {
+              self::_errorWithLocation('Unexpected token MTWJTWE: ' . $char, $lineNo, $charNo);
+            } else {
+              $inTripleTag = true;
+              $skipUntil = $pos;
             }
             break;
           case '#': // START SECTION

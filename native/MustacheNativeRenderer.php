@@ -26,7 +26,11 @@ class MustacheNativeRenderer
       case MustacheNativeParser::NODE_SECTION:
         if( !empty($node->children) ) {
           if( empty($data[$node->data]) ) {
-            // Do nothing
+            if( $node->flags & MustacheNativeParser::FLAG_NEGATE ) {
+              foreach( $node->children as $child ) {
+                $output .= self::_renderNode($child, $data, $partials);
+              }
+            }
           } else if( is_scalar($data[$node->data]) ) {
             foreach( $node->children as $child ) {
               $output .= self::_renderNode($child, $data, $partials);
