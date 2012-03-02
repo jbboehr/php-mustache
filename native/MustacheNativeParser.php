@@ -18,7 +18,7 @@ class MustacheNativeParser
   static public function parse($tokens)
   {
     $tree = new stdClass;
-    $tree->type = MustacheNativeTokenizer::TOKEN_ROOT;
+    $tree->type = MustacheNativeParser::NODE_ROOT;
     $tree->name = 'root';
     $tree->data = '';
     $tree->children = array();

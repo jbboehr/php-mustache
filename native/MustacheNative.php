@@ -51,7 +51,7 @@ class MustacheNative
     return $this->_errors;
   }
   
-  public function render($tmpl, array $data)
+  public function render($tmpl, array $data, array $partials = array())
   {
     $tokens = MustacheNativeTokenizer::tokenize($tmpl, $this->_startSequence, $this->_stopSequence);
     if( !$tokens ) {
@@ -63,7 +63,25 @@ class MustacheNative
       return false;
     }
     
-    return MustacheNativeRenderer::render($tree, $data);
+    if( null !== $partials ) {
+      foreach( $partials as $name => &$partial ) {
+        $ptokens = MustacheNativeTokenizer::tokenize($partial, $this->_startSequence, $this->_stopSequence);
+        if( !$ptokens ) {
+          $partial = false;
+          continue;
+        }
+
+        $ptree = MustacheNativeParser::parse($ptokens);
+        if( !$ptree ) {
+          $partial = false;
+          continue;
+        }
+        
+        $partial = $ptree;
+      }
+    }
+    
+    return MustacheNativeRenderer::render($tree, $data, $partials);
   }
   
   public function compile($tmpl)

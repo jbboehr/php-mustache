@@ -49,14 +49,14 @@ foreach( $specData as $spec => $data ) {
     $error = null;
     try {
       if( !$debug ) {
-        $given = $mustache->render($test['template'], $test['data']);
+        $given = $mustache->render($test['template'], $test['data'], (array) @$test['partials']);
       } else {
         $tmpl = $test['template'];
         $data = $test['data'];
 
         $tokens = MustacheNativeTokenizer::tokenize($tmpl);
         $tree = MustacheNativeParser::parse($tokens);
-        $given = MustacheNativeRenderer::render($tree, $data);
+        $given = MustacheNativeRenderer::render($tree, $data, (array) @$test['partials']);
       }
     } catch( Exception $e ) {
       $given = null;
@@ -74,6 +74,11 @@ foreach( $specData as $spec => $data ) {
       $nFailed++;
       printf("[%s] %s %s" . PHP_EOL, $spec, $test['name'], 'FAILED');
       print("    Template: " . addcslashes($test['template'], "\n\r\t") . PHP_EOL);
+      if( !empty($test['partials']) ) {
+        foreach( $test['partials'] as $n => $p ) {
+          print("    Partial: " . $n . ': ' . addcslashes($p, "\n\r\t") . PHP_EOL);
+        }
+      }
       print("    Expected: " . addcslashes($test['expected'], "\n\r\t") . PHP_EOL);
       print("    Given: " . addcslashes($given, "\n\r\t") . PHP_EOL);
       if( $error ) {
@@ -93,4 +98,6 @@ foreach( $specData as $spec => $data ) {
   }
 }
 
-printf('Pass/Fail: %d/%d' . PHP_EOL, $nPassed, $nFailed);
+printf('Pass: %d' . PHP_EOL, $nPassed);
+printf('Fail: %d' . PHP_EOL, $nFailed);
+printf('Total: %d' . PHP_EOL, $nPassed + $nFailed);
