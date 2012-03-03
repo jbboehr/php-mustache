@@ -81,7 +81,7 @@ class MustacheNative
       }
     }
     
-    return MustacheNativeRenderer::render($tree, $data, $partials);
+    return MustacheNativeRenderer::render($tree, $data, $partials, $this->_escapeByDefault);
   }
   
   public function compile($tmpl)
@@ -109,8 +109,8 @@ class MustacheNative
     return MustacheNativeTokenizer::tokenize($tmpl, $this->_startSequence, $this->_stopSequence);
   }
   
-  public function renderTree($tree, array $data)
+  public function renderTree($tree, array $data, array $partials = array())
   {
-    return MustacheNativeRenderer::render($tree, $data);
+    return MustacheNativeRenderer::render($tree, $data, $partials, $this->_escapeByDefault);
   }
 }

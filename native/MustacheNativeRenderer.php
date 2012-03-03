@@ -7,7 +7,7 @@ class MustacheNativeRenderer
   static public function render($tree, array $data, array $partials = array(), $escapeByDefault = true)
   {
     self::$_escapeByDefault = $escapeByDefault;
-    
+
     $dataStack = array();
     $dataStackPos = 0;
     $dataStack[$dataStackPos] = &$data;
@@ -29,6 +29,8 @@ class MustacheNativeRenderer
         if( $nstr == '.' ) {
           $val = $data;
         }
+      } else if( isset($data[$nstr]) ) {
+        $val = $data[$nstr];
       } else {
         // Dot notation
         $initial = $nstr;
@@ -83,18 +85,18 @@ class MustacheNativeRenderer
           continue;
         }
         if( !empty($node->children) ) {
-          if( empty($data[$nstr]) ) {
+          if( empty($val) ) {
             foreach( $node->children as $child ) {
               $output .= self::_renderNode($child, $dataStack, $dataStackPos, $partials);
             }
-          } else if( is_scalar($data[$nstr]) ) {
+          } else if( is_scalar($val) ) {
             foreach( $node->children as $child ) {
               $output .= self::_renderNode($child, $dataStack, $dataStackPos, $partials);
             }
-          } else if( is_array($data[$nstr]) ) {
-            if( isset($data[$nstr][0]) ) {
+          } else if( is_array($val) ) {
+            if( isset($val[0]) ) {
               // Numeric array
-              foreach( $data[$nstr] as &$newData ) {
+              foreach( $val as &$newData ) {
                 $dataStack[$dataStackPos + 1] = &$newData;
                 foreach( $node->children as $child ) {
                   $output .= self::_renderNode($child, $dataStack, $dataStackPos + 1, $partials);
@@ -103,7 +105,7 @@ class MustacheNativeRenderer
               unset($dataStack[$dataStackPos + 1]);
             } else {
               // Associative array
-              $dataStack[$dataStackPos + 1] = &$data[$nstr];
+              $dataStack[$dataStackPos + 1] = &$val;
               foreach( $node->children as $child ) {
                 $output .= self::_renderNode($child, $dataStack, $dataStackPos + 1, $partials);
               }

@@ -21,6 +21,7 @@ class MustacheNativeParser
     $tree->type = MustacheNativeParser::NODE_ROOT;
     $tree->name = 'root';
     $tree->data = '';
+    $tree->flags = 0;
     $tree->children = array();
     
     $list = array();
@@ -47,13 +48,15 @@ class MustacheNativeParser
             $node = new stdClass;
             if( $flags & $canHaveChildren ) {
               $node->type = self::NODE_SECTION;
+              $node->children = array();
             } else {
               $node->type = self::NODE_TAG;
             }
             $node->data = $currentTagName;
             $node->flags = $flags;
-            $node->children = array();
-            $list[] = $node;
+            if( !($node->flags & self::FLAG_COMMENT) ) {
+              $list[] = $node;
+            }
             
             // Cleanup
             $inTag = false;
@@ -103,7 +106,7 @@ class MustacheNativeParser
             $list[] = $node = new stdClass;
             $node->type = self::NODE_OUTPUT;
             $node->data = $token['data'];
-            $node->whitespace = $token['whitespace'];
+            $node->flags = 0;
             break;
           default:
             throw new Exception('Unknown token: ' . $token['name']);

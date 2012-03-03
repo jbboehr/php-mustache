@@ -26,16 +26,13 @@ class MustacheNativeTokenizer
     
     $pos = 0;
     $char = null;
+    $skipUntil = null;
+    $lineNo = 0;
+    $charNo = 0;
+    
     $inTag = false;
     $inTripleTag = false;
     $inComment = false;
-    $startLine = null;
-    $startChar = null;
-    $skipUntil = null;
-    $isWhitespace = true;
-    
-    $lineNo = 0;
-    $charNo = 0;
     
     $buffer = '';
     $tokens = array();
@@ -68,11 +65,11 @@ class MustacheNativeTokenizer
               // Close previous buffer
               if( '' !== $buffer ) {
                 if( !$inComment && strlen($buffer) != strcspn($buffer, '{}#&!^/') ) {
-                  self::_errorWithLocation('Invalid char in tag', $startLine, $startChar);
+                  self::_errorWithLocation('Invalid char in tag', $lineNo, $charNo);
                 }
                 $data = trim($buffer); // TRIM THE VARIABLE BUFFER;
                 if( !$data ) {
-                  self::_errorWithLocation('Empty tag', $startLine, $startChar);
+                  self::_errorWithLocation('Empty tag', $lineNo, $charNo);
                 }
                 if( $inTripleTag ) {
                   $tokens[] = array(
@@ -87,8 +84,6 @@ class MustacheNativeTokenizer
                   'type' => self::TOKEN_STRING,
                   'name' => 'string',
                   'data' => $data,
-                  'startLineNo' => $startChar,
-                  'startCharNo' => $startChar,
                   'lineNo' => $lineNo,
                   'charNo' => $charNo,
                 );
@@ -105,10 +100,7 @@ class MustacheNativeTokenizer
               // Now outside tag
               $inTag = false;
               $inComment = false;
-              $startLine = $lineNo;
-              $startChar = $charNo;
               $skipUntil = $pos + $stopL - 1;
-              $isWhitespace = true;
               // Skip one more for triple tag
               if( $stop == '}}' && $inTripleTag ) {
                 if( $tmpl[$pos+2] != '}' ) {
@@ -121,7 +113,7 @@ class MustacheNativeTokenizer
             break;
           case '{': // TRIPLE MUSTACHE - ESCAPE
             if( $inTripleTag || $start != '{{' ) {
-              self::_errorWithLocation('Unexpected token MTWJTWE: ' . $char, $lineNo, $charNo);
+              self::_errorWithLocation('Unexpected token: ' . $char, $lineNo, $charNo);
             } else {
               $inTripleTag = true;
               $skipUntil = $pos;
@@ -221,7 +213,6 @@ class MustacheNativeTokenizer
                   'charNo' => $charNo,
                 );
                 $skipUntil = $pos;
-                $inComment = true;
               }
             }
             break;
@@ -238,7 +229,6 @@ class MustacheNativeTokenizer
                   'charNo' => $charNo,
                 );
                 $skipUntil = $pos;
-                $inComment = true;
               }
             }
             break;
@@ -253,14 +243,10 @@ class MustacheNativeTokenizer
                   'type' => self::TOKEN_OUTPUT,
                   'name' => 'output',
                   'data' => $buffer,
-                  'startLineNo' => $startLine,
-                  'startCharNo' => $startChar,
                   'lineNo' => $lineNo,
                   'charNo' => $charNo,
-                  'whitespace' => $isWhitespace,
                 );
                 $buffer = '';
-                $isWhitespace = true;
               }
               // Add token
               $tokens[] = array(
@@ -272,37 +258,8 @@ class MustacheNativeTokenizer
               );
               // Now inside tag
               $inTag = true;
-              $startLine = $lineNo;
-              $startChar = $charNo;
               $skipUntil = $pos + $startL - 1;
             }
-            break;
-          case "\r":
-          case "\n":
-            if( $char == "\r" && $tmpl[$pos+1] == "\n" ) {
-              $buffer .= "\n";
-              $skipUntil = $pos + 1;
-            }
-            // Close previous buffer
-            if( '' !== $buffer ) {
-              $tokens[] = array(
-                'type' => self::TOKEN_OUTPUT,
-                'name' => 'output',
-                'data' => $buffer,
-                'lineNo' => $lineNo,
-                'charNo' => $charNo,
-                'whitespace' => $isWhitespace,
-              );
-              $buffer = '';
-              $isWhitespace = true;
-            }
-            break;
-          case "\t":
-          case " ":
-            // Do nothing
-            break;
-          default:
-            $isWhitespace = false;
             break;
         }
       }
@@ -314,17 +271,14 @@ class MustacheNativeTokenizer
     }
     
     if( $inTag ) {
-      self::_errorWithLocation('Unclosed tag', $startLine, $startChar);
+      self::_errorWithLocation('Unclosed tag', $lineNo, $charNo);
     } else if( $buffer ) {
       $tokens[] = array(
         'type' => self::TOKEN_OUTPUT,
         'name' => 'output',
         'data' => $buffer,
-        'startLineNo' => $startLine,
-        'startCharNo' => $startChar,
         'lineNo' => $lineNo,
         'charNo' => $charNo,
-        'whitespace' => $isWhitespace,
       );
     }
     

@@ -2,14 +2,6 @@
 
 require 'MustacheNative.php';
 
-$tmpl = '{{^boolean}}This should not be rendered.{{/boolean}}';
-$mustache = new MustacheNative();
-$data = array(
-  'boolean' => true
-);
-var_dump($mustache->render($tmpl, $data));
-die();
-
 $data = array();
 $count = 1000;
 for( $i = 0; $i < $count; $i++ ) {
@@ -37,6 +29,7 @@ try {
   echo $output;
 
   var_dump($stop - $start);
+  var_dump(($stop - $start) / $count);
 } catch( Exception $e ) {
   echo $e;
 }
