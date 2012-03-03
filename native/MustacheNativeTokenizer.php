@@ -32,6 +32,7 @@ class MustacheNativeTokenizer
     $startLine = null;
     $startChar = null;
     $skipUntil = null;
+    $isWhitespace = true;
     
     $lineNo = 0;
     $charNo = 0;
@@ -107,6 +108,7 @@ class MustacheNativeTokenizer
               $startLine = $lineNo;
               $startChar = $charNo;
               $skipUntil = $pos + $stopL - 1;
+              $isWhitespace = true;
               // Skip one more for triple tag
               if( $stop == '}}' && $inTripleTag ) {
                 if( $tmpl[$pos+2] != '}' ) {
@@ -254,8 +256,10 @@ class MustacheNativeTokenizer
                   'startCharNo' => $startChar,
                   'lineNo' => $lineNo,
                   'charNo' => $charNo,
+                  'whitespace' => $isWhitespace,
                 );
                 $buffer = '';
+                $isWhitespace = true;
               }
               // Add token
               $tokens[] = array(
@@ -271,6 +275,33 @@ class MustacheNativeTokenizer
               $startChar = $charNo;
               $skipUntil = $pos + $startL - 1;
             }
+            break;
+          case "\r":
+          case "\n":
+            if( $char == "\r" && $tmpl[$pos+1] == "\n" ) {
+              $buffer .= "\n";
+              $skipUntil = $pos + 1;
+            }
+            // Close previous buffer
+            if( '' !== $buffer ) {
+              $tokens[] = array(
+                'type' => self::TOKEN_OUTPUT,
+                'name' => 'output',
+                'data' => $buffer,
+                'lineNo' => $lineNo,
+                'charNo' => $charNo,
+                'whitespace' => $isWhitespace,
+              );
+              $buffer = '';
+              $isWhitespace = true;
+            }
+            break;
+          case "\t":
+          case " ":
+            // Do nothing
+            break;
+          default:
+            $isWhitespace = false;
             break;
         }
       }
@@ -292,6 +323,7 @@ class MustacheNativeTokenizer
         'startCharNo' => $startChar,
         'lineNo' => $lineNo,
         'charNo' => $charNo,
+        'whitespace' => $isWhitespace,
       );
     }
     
