@@ -41,6 +41,7 @@ $mustache = new MustacheNative();
 $results = array();
 $nFailed = 0;
 $nPassed = 0;
+$nWarned = 0;
 $debug = false;
 
 foreach( $specData as $spec => $data ) {
@@ -63,7 +64,27 @@ foreach( $specData as $spec => $data ) {
       $error = $e;
     }
     
-    if( $given !== $test['expected'] ) {
+    if( $given === $test['expected'] ) { // PASS
+      $results[$spec][] = array(
+        'test' => $test,
+        'given' => $given,
+        'expected' => $test['expected'],
+        'result' => true,
+        'error' => $error,
+      );
+      $nPassed++;
+      printf("[%s] %s %s" . PHP_EOL, $spec, $test['name'], 'PASSED');
+    } else if( preg_replace('/\s/', '', $given) == preg_replace('/\s/', '', $test['expected']) ) { // WARN
+      $results[$spec][] = array(
+        'test' => $test,
+        'given' => $given,
+        'expected' => $test['expected'],
+        'result' => true,
+        'error' => $error,
+      );
+      $nWarned++;
+      printf("[%s] %s %s" . PHP_EOL, $spec, $test['name'], 'WARNING - whitespace mismatch');
+    } else { // FAIL
       $results[$spec][] = array(
         'test' => $test,
         'given' => $given,
@@ -84,20 +105,11 @@ foreach( $specData as $spec => $data ) {
       if( $error ) {
         print("    Error: " . $error->getMessage() . PHP_EOL);
       }
-    } else {
-      $results[$spec][] = array(
-        'test' => $test,
-        'given' => $given,
-        'expected' => $test['expected'],
-        'result' => true,
-        'error' => $error,
-      );
-      $nPassed++;
-      printf("[%s] %s %s" . PHP_EOL, $spec, $test['name'], 'PASSED');
     }
   }
 }
 
 printf('Pass: %d' . PHP_EOL, $nPassed);
 printf('Fail: %d' . PHP_EOL, $nFailed);
-printf('Total: %d' . PHP_EOL, $nPassed + $nFailed);
+printf('Warn: %d' . PHP_EOL, $nWarned);
+printf('Total: %d' . PHP_EOL, $nPassed + $nFailed + $nWarned);

@@ -116,6 +116,7 @@ class MustacheNativeTokenizer
                 }
                 $skipUntil++;
               }
+              $inTripleTag = false;
             }
             break;
           case '{': // TRIPLE MUSTACHE - ESCAPE
