@@ -11,6 +11,7 @@ extern "C" {
 #include <map>
 #include <list>
 #include <stack>
+#include <exception>
 
 using namespace std;
 
@@ -19,7 +20,7 @@ const int MUSTACHE_NODE_OUTPUT = 2;
 const int MUSTACHE_NODE_TAG = 3;
 
 const int MUSTACHE_FLAG_NONE = 0;
-const int MUSTACHE_FLAG_ESACPE = 1;
+const int MUSTACHE_FLAG_ESCAPE = 1;
 const int MUSTACHE_FLAG_NEGATE = 2;
 const int MUSTACHE_FLAG_SECTION = 4;
 const int MUSTACHE_FLAG_STOP = 8;

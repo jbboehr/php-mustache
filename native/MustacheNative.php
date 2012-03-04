@@ -175,7 +175,7 @@ class MustacheNative
             case '<':
               $flags = self::FLAG_INLINE_PARTIAL;
               break;
-            case '=';
+            case '=':
               if( $buffer[strlen($buffer)-1] != '=' ) {
                 throw new Exception('Missing closing delimiter (=)', $lineNo, $charNo);
               }
