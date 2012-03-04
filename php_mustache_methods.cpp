@@ -125,6 +125,41 @@ PHP_METHOD(Mustache, setStopSequence)
 }
 /* }}} setStartSequence */
 
+/* {{{ proto array tokenize(string template)
+   */
+PHP_METHOD(Mustache, tokenize)
+{
+  zend_class_entry * _this_ce;
+  zval * _this_zval;
+  php_obj_Mustache *payload;
+  
+  char * template_str;
+  long template_len;
+  string * template_str_obj;
+  
+  MustacheNode * root;
+
+  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &_this_zval, Mustache_ce_ptr, &template_str, &template_len) == FAILURE) {
+          return;
+  }
+
+  _this_zval = getThis();
+  _this_ce = Z_OBJCE_P(_this_zval);
+
+  payload = (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
+  
+  template_str_obj = new string(template_str);
+  
+  root = payload->mustache->tokenize(template_str_obj);
+  
+  // Convert to PHP array
+  mustache_node_to_zend_hash(root, return_value);
+  
+  //RETURN_STRING(return_str->c_str(), 0); // Do reallocate
+  //RETURN_STRINGL(return_str, return_len, 0); // Do not reallocate
+}
+/* }}} tokenize */
+
 /* {{{ proto string render(string template, array data)
    */
 PHP_METHOD(Mustache, render)
@@ -163,7 +198,7 @@ PHP_METHOD(Mustache, render)
   RETURN_STRING(return_str->c_str(), 0); // Do reallocate
   //RETURN_STRINGL(return_str, return_len, 0); // Do not reallocate
 }
-/* }}} setStartSequence */
+/* }}} render */
 
 void mustache_data_from_zend_hash(map<string,MustacheData> * mstruct, HashTable * data_hash)
 {
@@ -217,5 +252,34 @@ void mustache_data_from_zend_hash(map<string,MustacheData> * mstruct, HashTable 
             break;
     }
     zend_hash_move_forward_ex(data_hash, &data_pointer);
+  }
+}
+
+void mustache_node_to_zend_hash(MustacheNode * node, zval * current)
+{
+  array_init(current);
+  
+  // Basic data
+  add_assoc_long(current, "type", node->type);
+  add_assoc_long(current, "flags", node->flags);
+  if( NULL != node->data && node->data->length() > 0 ) {
+    add_assoc_stringl(current, "data", (char *) node->data->c_str(), node->data->length(), 1);
+  }
+  
+  // Children
+  if( node->children.size() > 0 ) {
+    zval * children;
+    ALLOC_INIT_ZVAL(children);
+    array_init(children);
+    
+    list<MustacheNode *>::iterator it;
+    for ( it = node->children.begin() ; it != node->children.end(); it++ ) {
+      zval * child;
+      ALLOC_INIT_ZVAL(child);
+      mustache_node_to_zend_hash(*it, child);
+      add_next_index_zval(children, child);
+    }
+    
+    add_assoc_zval(current, "children", children);
   }
 }

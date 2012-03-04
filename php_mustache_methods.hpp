@@ -35,6 +35,11 @@ ZEND_BEGIN_ARG_INFO_EX(Mustache__setStopSequence_args, ZEND_SEND_BY_VAL, ZEND_RE
 	ZEND_ARG_INFO(0, stopSequence)
 ZEND_END_ARG_INFO()
         
+PHP_METHOD(Mustache, tokenize);
+ZEND_BEGIN_ARG_INFO_EX(Mustache__tokenize_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, tmpl)
+ZEND_END_ARG_INFO()
+        
 PHP_METHOD(Mustache, render);
 ZEND_BEGIN_ARG_INFO_EX(Mustache__render_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 2)
 	ZEND_ARG_INFO(0, str)
@@ -42,5 +47,6 @@ ZEND_BEGIN_ARG_INFO_EX(Mustache__render_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALU
 ZEND_END_ARG_INFO()
 
 void mustache_data_from_zend_hash(map<string,MustacheData> * mstruct, HashTable * data_hash);
+void mustache_node_to_zend_hash(MustacheNode * node, zval * current);
 
 #endif
