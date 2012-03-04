@@ -21,10 +21,8 @@ try {
   $start = microtime(true);
   
   $tmpl = "{{! this is a comment}} {{#comments}} {{#list}} {{comment_id}}  {{body}} {{/list}} {{test}} \n{{/comments}}";
-  $tokens = MustacheNativeTokenizer::tokenize($tmpl);
-  $tree = MustacheNativeParser::parse($tokens);
-  $output = MustacheNativeRenderer::render($tree, $data);
-//  $output = MustacheNativeCompiler::compile($tree);
+  $mustache = new MustacheNative();
+  $output = $mustache->render($tmpl, $data);
   $stop = microtime(true);
   echo $output;
 

@@ -52,12 +52,8 @@ foreach( $specData as $spec => $data ) {
       if( !$debug ) {
         $given = $mustache->render($test['template'], $test['data'], (array) @$test['partials']);
       } else {
-        $tmpl = $test['template'];
-        $data = $test['data'];
-
-        $tokens = MustacheNativeTokenizer::tokenize($tmpl);
-        $tree = MustacheNativeParser::parse($tokens);
-        $given = MustacheNativeRenderer::render($tree, $data, (array) @$test['partials']);
+        $tree = $mustache->tokenize($test['template']);
+        $given = $mustache->renderTree($tree, $test['data'], (array) @$test['partials']);
       }
     } catch( Exception $e ) {
       $given = null;
