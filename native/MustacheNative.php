@@ -69,8 +69,8 @@ class MustacheNative
   
   public function tokenize($tmpl)
   {
-    $start = '{{';
-    $stop = '}}';
+    $start = $this->_startSequence;
+    $stop = $this->_stopSequence;
     
     $tmplL = strlen($tmpl);
     $startC = $start[0];
@@ -122,118 +122,113 @@ class MustacheNative
         }
       }
       
-      // Switch char
-      switch( $char ) {
-        case $startC:
-        case $stopC:
-          if( !$inTag ) { // START TAG
-            if( substr($tmpl, $pos, $startL) == $start ) {
-              // Close previous buffer
-              if( $buffer ) {
-                $node = new stdClass;
-                $node->type = self::NODE_OUTPUT;
-                $node->data = $buffer;
-                $stack[$depth]->children[] = $node;
-                $buffer = '';
+      // Main
+      if( !$inTag ) { // START TAG
+        if( $char == $startC &&
+            substr($tmpl, $pos, $startL) == $start ) {
+          // Close previous buffer
+          if( $buffer ) {
+            $node = new stdClass;
+            $node->type = self::NODE_OUTPUT;
+            $node->data = $buffer;
+            $stack[$depth]->children[] = $node;
+            $buffer = '';
+          }
+          // Open new buffer
+          $inTag = true;
+          $skipUntil = $pos + $startL - 1;
+          // Triple mustache
+          if( $start == '{{' && $tmpl[$pos+2] == '{' ) {
+            $inTripleTag = true;
+            $skipUntil++;
+          }
+        }
+      } else { // STOP TAG
+        if( $char == $stopC &&
+            substr($tmpl, $pos, $stopL) == $stop ) {
+          if( '' == ($buffer = trim($buffer)) ) {
+            self::_errorWithLocation('Empty buffer', $lineNo, $charNo);
+          }
+          $skip = false;
+          $tmpStopL = $stopL;
+          // Close and process previous buffer
+          $flags = 0;
+          switch( $buffer[0] ) {
+            case '&':
+              $flags = self::FLAG_ESCAPE;
+              break;
+            case '^':
+              $flags = self::FLAG_NEGATE;
+              break;
+            case '#':
+              $flags = self::FLAG_SECTION;
+              break;
+            case '/':
+              $flags = self::FLAG_STOP;
+              break;
+            case '!':
+              $flags = self::FLAG_COMMENT;
+              break;
+            case '>':
+              $flags = self::FLAG_PARTIAL;
+              break;
+            case '<':
+              $flags = self::FLAG_INLINE_PARTIAL;
+              break;
+            case '=';
+              if( $buffer[strlen($buffer)-1] != '=' ) {
+                throw new Exception('Missing closing delimiter (=)', $lineNo, $charNo);
               }
-              // Open new buffer
-              $inTag = true;
-              $skipUntil = $pos + $startL - 1;
-              // Triple mustache
-              if( $start == '{{' && $tmpl[$pos+2] == '{' ) {
-                $inTripleTag = true;
-                $skipUntil++;
+              $buffer = trim($buffer, "=\r\n\t ");
+              list($newStart, $newStop) = preg_split('/\s+/', $buffer);
+              if( !$newStart || !$newStop ) {
+                throw new Exception('Whoops: ' . $buffer);
               }
+              $start = $newStart;
+              $startC = $start[0];
+              $startL = strlen($start);
+              $stop = $newStop;
+              $stopC = $stop[0];
+              $stopL = strlen($stop);
+              $skip = true;
+              break;
+          }
+          if( !$skip ) {
+            if( $flags ) {
+              $buffer = trim(substr($buffer, 1));
             }
-          } else { // STOP TAG
-            if( substr($tmpl, $pos, $stopL) == $stop ) {
-              if( '' == ($buffer = trim($buffer)) ) {
-                self::_errorWithLocation('Empty buffer', $lineNo, $charNo);
-              }
-              $skip = false;
-              $tmpStopL = $stopL;
-              // Close and process previous buffer
-              $flags = 0;
-              switch( $buffer[0] ) {
-                case '&':
-                  $flags = self::FLAG_ESCAPE;
-                  break;
-                case '^':
-                  $flags = self::FLAG_NEGATE;
-                  break;
-                case '#':
-                  $flags = self::FLAG_SECTION;
-                  break;
-                case '/':
-                  $flags = self::FLAG_STOP;
-                  break;
-                case '!':
-                  $flags = self::FLAG_COMMENT;
-                  break;
-                case '>':
-                  $flags = self::FLAG_PARTIAL;
-                  break;
-                case '<':
-                  $flags = self::FLAG_INLINE_PARTIAL;
-                  break;
-                case '=';
-                  if( $buffer[strlen($buffer)-1] != '=' ) {
-                    throw new Exception('Missing closing delimiter (=)', $lineNo, $charNo);
-                  }
-                  $buffer = trim($buffer, "=\r\n\t ");
-                  list($newStart, $newStop) = preg_split('/\s+/', $buffer);
-                  if( !$newStart || !$newStop ) {
-                    throw new Exception('Whoops: ' . $buffer);
-                  }
-                  $start = $newStart;
-                  $startC = $start[0];
-                  $startL = strlen($start);
-                  $stop = $newStop;
-                  $stopC = $stop[0];
-                  $stopL = strlen($stop);
-                  $skip = true;
-                  break;
-              }
-              if( !$skip ) {
-                if( $flags ) {
-                  $buffer = trim(substr($buffer, 1));
-                }
-                if( $inTripleTag ) {
-                  $flags |= self::FLAG_ESCAPE;
-                }
-                // Create node
-                $node = new stdClass;
-                $node->type = self::NODE_TAG;
-                $node->data = $buffer;
-                $node->flags = $flags;
-                $stack[$depth]->children[] = $node;
-                // Push/pop stack
-                if( $flags & $canHaveChildren ) {
-                  $depth++;
-                  $stack[$depth] = $node;
-                } else if( $flags & self::FLAG_STOP ) {
-                  unset($stack[$depth]);
-                  $depth--;
-                }
-              }
-              // Clear buffer
-              $buffer = '';
-              // Open new buffer
-              $inTag = false;
-              $skipUntil = $pos + $tmpStopL - 1;
-              // Triple mustache
-              if( !$skip && $stop == '}}' && $inTripleTag ) {
-                if( $tmpl[$pos+2] != '}' ) {
-                  self::_errorWithLocation('Missing closing triple mustache delimiter: ' . $char, $lineNo, $charNo);
-                }
-                $skipUntil++;
-              }
-              $inTripleTag = false;
+            if( $inTripleTag ) {
+              $flags |= self::FLAG_ESCAPE;
+            }
+            // Create node
+            $node = new stdClass;
+            $node->type = self::NODE_TAG;
+            $node->data = $buffer;
+            $node->flags = $flags;
+            $stack[$depth]->children[] = $node;
+            // Push/pop stack
+            if( $flags & $canHaveChildren ) {
+              $depth++;
+              $stack[$depth] = $node;
+            } else if( $flags & self::FLAG_STOP ) {
+              unset($stack[$depth]);
+              $depth--;
             }
           }
-          break;
-        default:
-          break;
+          // Clear buffer
+          $buffer = '';
+          // Open new buffer
+          $inTag = false;
+          $skipUntil = $pos + $tmpStopL - 1;
+          // Triple mustache
+          if( !$skip && $stop == '}}' && $inTripleTag ) {
+            if( $tmpl[$pos+2] != '}' ) {
+              self::_errorWithLocation('Missing closing triple mustache delimiter: ' . $char, $lineNo, $charNo);
+            }
+            $skipUntil++;
+          }
+          $inTripleTag = false;
+        }
       }
       
       // Append to buffer
