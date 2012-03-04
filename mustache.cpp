@@ -118,7 +118,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
       
     // Skip until position
     if( skipUntil > -1 ) {
-      if( pos < skipUntil ) {
+      if( pos <= skipUntil ) {
         chr++;
         continue;
       } else {
@@ -223,7 +223,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
     }
     
     // Append to buffer
-    if( skipUntil != -1 ) {
+    if( skipUntil == -1 ) {
       buffer.append(1, *chr);
     }
     
