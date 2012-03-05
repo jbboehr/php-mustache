@@ -54,7 +54,11 @@ foreach( $specData as $spec => $data ) {
 //    $output .= '--EXPECT--' . PHP_EOL;
 //    $output .= $test['expected'];
     $output .= '--EXPECTREGEX--' . PHP_EOL;
-    $output .= preg_replace('/\s+/', '\s+', preg_quote($test['expected']));
+    $tmp = array();
+    foreach( preg_split('/\s+/', $test['expected']) as $chunk ) {
+      $tmp[] = preg_quote($chunk, '/');
+    }
+    $output .= join("\s+", $tmp);
     
     file_put_contents('./tests/mustachespec_' . $spec . '_' . $test['name'] . '.phpt', $output);
   }

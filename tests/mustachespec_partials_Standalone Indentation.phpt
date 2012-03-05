@@ -37,4 +37,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-\\\s+\|\s+\<\s+\-\>\s+\|\s+/\s+
+\\\s+\|\s+\<\s+\-\>\s+\|\s+\/\s+
