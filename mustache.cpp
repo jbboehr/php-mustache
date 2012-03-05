@@ -27,6 +27,37 @@ void trim( std::string& str, const std::string& trimChars = whiteSpaces )
    trimLeft( str, trimChars );
 }
 
+vector<string> * explode(const string &delimiter, const string &str)
+{
+  // http://www.zedwood.com/article/106/cpp-explode-function
+  vector<string> * arr = new vector<string>;
+
+  int strleng = str.length();
+  int delleng = delimiter.length();
+  if( delleng==0 ) {
+    // no change
+    return arr;
+  }
+
+  int i=0;
+  int k=0;
+  while( i < strleng ) {
+      int j=0;
+      while( i + j < strleng && j < delleng && str[i+j] == delimiter[j] ) {
+        j++;
+      }
+      if(j == delleng ) {
+        // found delimiter
+        arr->push_back(str.substr(k, i-k));
+        i+=delleng;
+        k=i;
+      } else {
+        i++;
+      }
+  }
+  arr->push_back(str.substr(k, i-k));
+  return arr;
+}
 
 
 // DATA
@@ -105,12 +136,13 @@ string Mustache::getStopSequence() {
 
 string * Mustache::render(string * tmpl, MustacheData * data) {
   MustacheNode * tree;
-  string * return_val = new string();
+  string * return_val;
   
   // Tokenize template
   tree = tokenize(tmpl);
   
   // Render template
+  return_val = renderTree(tree, data);
   
   return return_val;
 }
@@ -292,4 +324,104 @@ MustacheNode * Mustache::tokenize(string * tmpl)
   }
   
   return root;
+}
+
+string * Mustache::renderTree(MustacheNode * root, MustacheData * data)
+{
+  string * output = new string();
+  output->reserve(1000);
+  
+  list<MustacheData*> * dataStack = new list<MustacheData*>();
+  dataStack->push_back(data);
+  
+  _renderNode(root, dataStack, output);
+  
+  return output;
+}
+
+void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack, string * output)
+{
+  MustacheData * data = dataStack->back();
+  string * nstr = node->data;
+  
+    // Handle simple cases
+  if( node->type == MUSTACHE_NODE_ROOT ) {
+    if( node->children.size() > 0 ) {
+      list<MustacheNode *>::iterator it;
+      for ( it = node->children.begin() ; it != node->children.end(); it++ ) {
+        _renderNode(*it, dataStack, output);
+      }
+    }
+    return;
+  } else if( node->type == MUSTACHE_NODE_OUTPUT ) {
+    if( node->data != NULL && node->data->length() > 0 ) {
+      output->append(*node->data);
+    }
+    return;
+  }
+  
+  // Resolve data
+  MustacheData * val = NULL;
+  if( data->type == MUSTACHE_DATA_STRING ) {
+    // Simple
+    if( nstr->compare(".") ) {
+      val = data;
+    }
+  } else if( data->type == MUSTACHE_DATA_MAP ) {
+    // Check top level
+    map<string,MustacheData *>::iterator it = data->data.find(*nstr);
+    if( it != data->data.end() ) {
+      val = it->second;
+    }
+  } else {
+    // Search whole stack
+    
+    // Dot notataion
+    string initial(*nstr);
+    vector<string> * parts = NULL;
+    size_t found = initial.find(".");
+    if( found != string::npos ) {
+      parts = explode(".", initial);
+      if( parts->size() > 0 ) {
+        initial.assign(parts->front());
+      }
+    }
+    
+    // Resolve up the data stack
+    MustacheData * ref = NULL;
+    list<MustacheData*>::reverse_iterator ds_it;
+    map<string,MustacheData *>::iterator d_it;
+    for( ds_it = dataStack->rbegin() ; ds_it != dataStack->rend(); ds_it++ ) {
+      if( (*ds_it)->type == MUSTACHE_DATA_MAP ) {
+        d_it = (*ds_it)->data.find(initial);
+        if( d_it != (*ds_it)->data.end() ) {
+          ref = d_it->second;
+        }
+      }
+    }
+    
+    // Resolve or dot notation
+    if( ref != NULL && parts->size() > 0 ) {
+      // Dot notation
+      vector<string>::iterator vs_it;
+      for( vs_it = parts->begin(); vs_it != parts->end(); vs_it++ ) {
+        if( ref->type != MUSTACHE_DATA_MAP ) {
+          ref = NULL; // Not sure about this
+          break;
+        } else {
+          d_it = ref->data.find(*vs_it);
+          if( d_it == ref->data.end() ) {
+            ref = NULL;
+            break; // Not sure about this
+          }
+          ref = d_it->second;
+        }
+      }
+      if( ref != NULL ) {
+        val = ref;
+      }
+    }
+  }
+  
+  
 }

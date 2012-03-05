@@ -12,6 +12,7 @@ extern "C" {
 #include <list>
 #include <stack>
 #include <exception>
+#include <vector>
 
 using namespace std;
 
@@ -57,6 +58,7 @@ class Mustache {
   private:
     string startSequence;
     string stopSequence;
+    void _renderNode(MustacheNode * node, list<MustacheData*> * dataStack, string * output);
   public:
     Mustache();
     ~Mustache();
@@ -66,6 +68,7 @@ class Mustache {
     string getStopSequence();
     string * render(string * tmpl, MustacheData * data);
     MustacheNode * tokenize(string * tmpl);
+    string * renderTree(MustacheNode * root, MustacheData * data);
 };
 
 
