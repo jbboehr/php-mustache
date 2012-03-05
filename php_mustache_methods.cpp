@@ -153,7 +153,7 @@ PHP_METHOD(Mustache, tokenize)
   root = payload->mustache->tokenize(template_str_obj);
   
   // Convert to PHP array
-  mustache_node_to_zend_hash(root, return_value);
+  mustache_node_to_zval(root, return_value);
   
   // Free internal tokens
   delete root;
@@ -175,7 +175,7 @@ PHP_METHOD(Mustache, render)
   HashTable * data_hash = NULL;
   
   string * template_str_obj;
-  map<string,MustacheData> template_data;
+  MustacheData * template_data;
   string * return_str;
 
   if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Osa/", &_this_zval, Mustache_ce_ptr, &template_str, &template_len, &data) == FAILURE) {
@@ -187,21 +187,27 @@ PHP_METHOD(Mustache, render)
 
   payload = (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
   
+  // Prepare template string
   template_str_obj = new string(template_str);
-//  template_str_obj = new string(template_str, (size_t) template_len);
   
-  data_hash = HASH_OF(data);
-  mustache_data_from_zend_hash(&template_data, data_hash);
+  // Prepare template data
+  template_data = new MustacheData();
+  mustache_data_from_zval(template_data, data);
   
-  return_str = payload->mustache->render(template_str_obj, &template_data);
+  // Render template
+  return_str = payload->mustache->render(template_str_obj, template_data);
+  
+  // Free template data
+  delete template_data;
   
   RETURN_STRING(return_str->c_str(), 0); // Do reallocate
   //RETURN_STRINGL(return_str, return_len, 0); // Do not reallocate
 }
 /* }}} render */
 
-void mustache_data_from_zend_hash(map<string,MustacheData> * mstruct, HashTable * data_hash)
+void mustache_data_from_zval(MustacheData * node, zval * current)
 {
+  HashTable * data_hash = NULL;
   HashPosition data_pointer = NULL;
   zval **data_entry = NULL;
   long data_count;
@@ -210,52 +216,73 @@ void mustache_data_from_zend_hash(map<string,MustacheData> * mstruct, HashTable 
   char * key_str;
   uint key_len;
   ulong key_nindex;
-  char * val_str;
-  uint val_len;
+  string * ckey;
   
-  string * ckey = NULL;
-  MustacheData * cdata = NULL;
+  MustacheData * child = NULL;
   
-  HashTable * sub_data_hash;
-  
-  data_count = zend_hash_num_elements(data_hash);
-  zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
-  while( zend_hash_get_current_data_ex(data_hash, (void**) &data_entry, &data_pointer) == SUCCESS ) {
-    // Get current key
-    key_type = zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, &key_nindex, true, &data_pointer);
-    // Convert integer keys to string
-    if( key_type == HASH_KEY_IS_LONG ) {
-      key_len = sprintf(key_str, "%ld", key_nindex);
-    }
-    // Check value type
-    switch( Z_TYPE_PP(data_entry) ) {
+  switch( Z_TYPE_P(current) ) {
       case IS_LONG:
       case IS_DOUBLE:
       case IS_STRING:
-            convert_to_string(*data_entry);
-            val_str = Z_STRVAL_PP(data_entry);
-            val_len = Z_STRLEN_PP(data_entry);
+        convert_to_string(current);
+        node->type = MUSTACHE_DATA_STRING;
+        node->val = new string(Z_STRVAL_P(current)); // Z_STRLEN_P(current)
+        //cout << *node->val << endl;
+        break;
+      case IS_ARRAY: // START IS_ARRAY -----------------------------------------
+        node->type = MUSTACHE_DATA_NONE;
+        
+        data_hash = HASH_OF(current);
+        data_count = zend_hash_num_elements(data_hash);
+        zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
+        while( zend_hash_get_current_data_ex(data_hash, (void**) &data_entry, &data_pointer) == SUCCESS ) {
+          // Get current key
+          key_type = zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, &key_nindex, true, &data_pointer);
+          // Check key type
+          if( key_type == HASH_KEY_IS_LONG ) {
+            //cout << key_nindex << endl;
+            if( node->type == MUSTACHE_DATA_NONE ) {
+              node->type = MUSTACHE_DATA_LIST;
+            } else if( node->type != MUSTACHE_DATA_LIST ) {
+              php_error(E_WARNING, "Mixed numeric and associative arrays are not supported");
+              return; // EXIT
+            }
+          } else {
+            //cout << key_str << endl;
+            if( node->type == MUSTACHE_DATA_NONE ) {
+              node->type = MUSTACHE_DATA_MAP;
+            } else if( node->type != MUSTACHE_DATA_MAP ) {
+              php_error(E_WARNING, "Mixed numeric and associative arrays are not supported");
+              return; // EXIT
+            }
+          }
+          
+          // Process value
+          child = new MustacheData();
+          mustache_data_from_zval(child, *data_entry);
+          
+          // Store value
+          if( node->type == MUSTACHE_DATA_LIST ) {
+            node->children.push_back(child);
+          } else if( node->type == MUSTACHE_DATA_MAP ) {
             ckey = new string(key_str);
-            cdata = new MustacheData();
-            cdata->val.assign(val_str);
-            mstruct->insert(pair<string,MustacheData>(*ckey,*cdata));
-            break;
-      case IS_ARRAY:
-            sub_data_hash = Z_ARRVAL_PP(data_entry);
-            ckey = new string(key_str);
-            cdata = new MustacheData();
-            // @todo
-            break;
-      default:
-            php_error(E_WARNING, "Invalid data type");
-            //RETURN_FALSE;
-            break;
-    }
-    zend_hash_move_forward_ex(data_hash, &data_pointer);
+            node->data.insert(pair<string,MustacheData*>(*ckey,child));
+          } else {
+            // Whoops
+            delete child;
+            child = NULL;
+          }
+          zend_hash_move_forward_ex(data_hash, &data_pointer);
+        }
+  
+        break; // END IS_ARRAY -------------------------------------------------
+    default:
+      php_error(E_WARNING, "Invalid data type");
+      break;
   }
 }
 
-void mustache_node_to_zend_hash(MustacheNode * node, zval * current)
+void mustache_node_to_zval(MustacheNode * node, zval * current)
 {
   array_init(current);
   
@@ -276,7 +303,7 @@ void mustache_node_to_zend_hash(MustacheNode * node, zval * current)
     for ( it = node->children.begin() ; it != node->children.end(); it++ ) {
       zval * child;
       ALLOC_INIT_ZVAL(child);
-      mustache_node_to_zend_hash(*it, child);
+      mustache_node_to_zval(*it, child);
       add_next_index_zval(children, child);
     }
     

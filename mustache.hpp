@@ -15,6 +15,11 @@ extern "C" {
 
 using namespace std;
 
+const int MUSTACHE_DATA_NONE = 0;
+const int MUSTACHE_DATA_STRING = 1;
+const int MUSTACHE_DATA_LIST = 2;
+const int MUSTACHE_DATA_MAP = 3;
+
 const int MUSTACHE_NODE_ROOT = 1;
 const int MUSTACHE_NODE_OUTPUT = 2;
 const int MUSTACHE_NODE_TAG = 3;
@@ -32,8 +37,11 @@ const int MUSTACHE_CAN_HAVE_CHILDREN = MUSTACHE_FLAG_SECTION | MUSTACHE_FLAG_NEG
 
 class MustacheData {
   public:
-    string val;
-    list< map<string,MustacheData> > dat;
+    ~MustacheData();
+    int type;
+    string * val;
+    map<string,MustacheData *> data;
+    list<MustacheData *> children;
 };
 
 class MustacheNode {
@@ -56,7 +64,7 @@ class Mustache {
     void setStopSequence(string stop);
     string getStartSequence();
     string getStopSequence();
-    string * render(string * tmpl, map<string,MustacheData> * data);
+    string * render(string * tmpl, MustacheData * data);
     MustacheNode * tokenize(string * tmpl);
 };
 

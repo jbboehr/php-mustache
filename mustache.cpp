@@ -29,6 +29,34 @@ void trim( std::string& str, const std::string& trimChars = whiteSpaces )
 
 
 
+// DATA
+
+MustacheData::~MustacheData()
+{
+  // Val
+  delete val;
+  
+  // Data
+  if( data.size() > 0 ) {
+    map<string,MustacheData*>::iterator dataIt;
+    for ( dataIt = data.begin() ; dataIt != data.end(); dataIt++ ) {
+      // (*dataIt).first; // Not a ref
+      delete (*dataIt).second;
+    }
+  }
+  data.clear();
+  
+  // Children
+  if( children.size() > 0 ) {
+    list<MustacheData *>::iterator childrenIt;
+    for ( childrenIt = children.begin() ; childrenIt != children.end(); childrenIt++ ) {
+      delete *childrenIt;
+    }
+  }
+  children.clear();
+}
+
+
 // NODE
 
 MustacheNode::~MustacheNode()
@@ -75,13 +103,14 @@ string Mustache::getStopSequence() {
   return stopSequence;
 }
 
-string * Mustache::render(string * tmpl, map<string,MustacheData> * data) {
+string * Mustache::render(string * tmpl, MustacheData * data) {
   MustacheNode * tree;
   string * return_val = new string();
   
   // Tokenize template
   tree = tokenize(tmpl);
   
+  // Render template
   
   return return_val;
 }

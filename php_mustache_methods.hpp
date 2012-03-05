@@ -46,7 +46,7 @@ ZEND_BEGIN_ARG_INFO_EX(Mustache__render_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALU
         ZEND_ARG_INFO(0, vars)
 ZEND_END_ARG_INFO()
 
-void mustache_data_from_zend_hash(map<string,MustacheData> * mstruct, HashTable * data_hash);
-void mustache_node_to_zend_hash(MustacheNode * node, zval * current);
+void mustache_data_from_zval(MustacheData * node, zval * current);
+void mustache_node_to_zval(MustacheNode * node, zval * current);
 
 #endif
