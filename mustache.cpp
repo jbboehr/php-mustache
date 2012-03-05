@@ -46,11 +46,11 @@ vector<string> * explode(const string &delimiter, const string &str)
       while( i + j < strleng && j < delleng && str[i+j] == delimiter[j] ) {
         j++;
       }
-      if(j == delleng ) {
+      if( j == delleng ) {
         // found delimiter
         arr->push_back(str.substr(k, i-k));
-        i+=delleng;
-        k=i;
+        i += delleng;
+        k = i;
       } else {
         i++;
       }
@@ -417,11 +417,73 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
           ref = d_it->second;
         }
       }
-      if( ref != NULL ) {
-        val = ref;
-      }
+    }
+    if( ref != NULL ) {
+      val = ref;
     }
   }
   
-  
+  switch( node->flags ) {
+    case MUSTACHE_FLAG_COMMENT:
+    case MUSTACHE_FLAG_STOP:
+    case MUSTACHE_FLAG_INLINE_PARTIAL:
+      // Do nothing
+      break;
+    case MUSTACHE_FLAG_NEGATE:
+    case MUSTACHE_FLAG_SECTION:
+      // Negate/Empty list
+      if( (node->flags & MUSTACHE_FLAG_NEGATE) && val != NULL ) {
+        // Not-empty negation
+        break;
+      } else if( !(node->flags & MUSTACHE_FLAG_NEGATE) && val == NULL ) {
+        // Empty section
+        break;
+      } else if( node->children.size() <= 0 ) {
+        // No children
+        break;
+      }
+      
+      if( val == NULL || val->type == MUSTACHE_DATA_STRING ) {
+        list<MustacheNode *>::iterator it;
+        for( it = node->children.begin() ; it != node->children.end(); it++ ) {
+          _renderNode(*it, dataStack, output);
+        }
+      } else if( val->type == MUSTACHE_DATA_LIST ) {
+        // Numeric array/list
+        list<MustacheData *>::iterator childrenIt;
+        list<MustacheNode *>::iterator it;
+        for ( childrenIt = val->children.begin() ; childrenIt != val->children.end(); childrenIt++ ) {
+          dataStack->push_back(*childrenIt);
+          for( it = node->children.begin() ; it != node->children.end(); it++ ) {
+            _renderNode(*it, dataStack, output);
+          }
+          dataStack->pop_back();
+        }
+      } else if( val->type == MUSTACHE_DATA_MAP ) {
+        // Associate array/map
+        list<MustacheNode *>::iterator it;
+        dataStack->push_back(val);
+        for( it = node->children.begin() ; it != node->children.end(); it++ ) {
+          _renderNode(*it, dataStack, output);
+        }
+        dataStack->pop_back();
+      }
+      break;
+    case MUSTACHE_FLAG_PARTIAL:
+      // Not yet implemented
+      break;
+    case MUSTACHE_FLAG_ESCAPE:
+    case MUSTACHE_FLAG_NONE:
+      if( val->type == MUSTACHE_DATA_STRING ) {
+        if( node->flags & MUSTACHE_FLAG_ESCAPE ) { // @todo escape by default
+          output->append(*val->val);
+        } else {
+          output->append(*val->val);
+        }
+      }
+      break;
+    default:
+      //php_error("Unknown node flags");
+      break;
+  }
 }
