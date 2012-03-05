@@ -155,8 +155,8 @@ PHP_METHOD(Mustache, tokenize)
   // Convert to PHP array
   mustache_node_to_zend_hash(root, return_value);
   
-  //RETURN_STRING(return_str->c_str(), 0); // Do reallocate
-  //RETURN_STRINGL(return_str, return_len, 0); // Do not reallocate
+  // Free internal tokens
+  delete root;
 }
 /* }}} tokenize */
 

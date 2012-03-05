@@ -28,6 +28,26 @@ void trim( std::string& str, const std::string& trimChars = whiteSpaces )
 }
 
 
+
+// NODE
+
+MustacheNode::~MustacheNode()
+{
+  // Data
+  delete data;
+  
+  // Children
+  if( children.size() > 0 ) {
+    list<MustacheNode *>::iterator it;
+    for ( it = children.begin() ; it != children.end(); it++ ) {
+      delete *it;
+    }
+  }
+  children.clear();
+}
+
+
+
 // MAIN
 
 Mustache::Mustache() {
@@ -90,6 +110,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
   int skip = 0;
   int currentFlags = 0;
   string buffer;
+  buffer.reserve(100); // Reserver 100 chars
   
   int depth = 0;
   stack<MustacheNode *> nodeStack;

@@ -38,6 +38,7 @@ class MustacheData {
 
 class MustacheNode {
   public:
+    ~MustacheNode();
     int type;
     int flags;
     string * data;
