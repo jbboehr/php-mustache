@@ -13,6 +13,8 @@ extern "C" {
 #include <stack>
 #include <exception>
 #include <vector>
+#include <stdexcept>
+#include <memory>
 
 using namespace std;
 
@@ -36,8 +38,14 @@ const int MUSTACHE_FLAG_INLINE_PARTIAL = 64;
 
 const int MUSTACHE_CAN_HAVE_CHILDREN = MUSTACHE_FLAG_SECTION | MUSTACHE_FLAG_NEGATE | MUSTACHE_FLAG_INLINE_PARTIAL;
 
+class MustacheException : public runtime_error {
+  public:
+      MustacheException(const string& desc) : runtime_error(desc) { }
+};
+
 class MustacheData {
   public:
+    typedef auto_ptr<MustacheData> Ptr;
     ~MustacheData();
     int type;
     string * val;
@@ -47,6 +55,7 @@ class MustacheData {
 
 class MustacheNode {
   public:
+    typedef auto_ptr<MustacheNode> Ptr;
     ~MustacheNode();
     int type;
     int flags;
@@ -60,6 +69,7 @@ class Mustache {
     string stopSequence;
     void _renderNode(MustacheNode * node, list<MustacheData*> * dataStack, string * output);
   public:
+    typedef auto_ptr<Mustache> Ptr;
     Mustache();
     ~Mustache();
     void setStartSequence(string start);

@@ -150,10 +150,20 @@ PHP_METHOD(Mustache, tokenize)
   
   template_str_obj = new string(template_str);
   
-  root = payload->mustache->tokenize(template_str_obj);
-  
-  // Convert to PHP array
-  mustache_node_to_zval(root, return_value);
+  // Tokenize template
+  try {
+    
+    root = payload->mustache->tokenize(template_str_obj);
+    
+    // Convert to PHP array
+    mustache_node_to_zval(root, return_value);
+    
+  } catch( MustacheException& e ) {
+    
+    php_error(E_WARNING, (char *) e.what());
+    RETURN_FALSE;
+    
+  }
   
   // Free internal tokens
   delete root;
@@ -195,13 +205,20 @@ PHP_METHOD(Mustache, render)
   mustache_data_from_zval(template_data, data);
   
   // Render template
-  return_str = payload->mustache->render(template_str_obj, template_data);
+  try {
+    
+    return_str = payload->mustache->render(template_str_obj, template_data);
+    RETURN_STRING(return_str->c_str(), 0); // Do reallocate
+    
+  } catch( MustacheException& e ) {
+    
+    php_error(E_WARNING, (char *) e.what());
+    RETURN_FALSE;
+    
+  }
   
   // Free template data
   delete template_data;
-  
-  RETURN_STRING(return_str->c_str(), 0); // Do reallocate
-  //RETURN_STRINGL(return_str, return_len, 0); // Do not reallocate
 }
 /* }}} render */
 

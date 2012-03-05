@@ -233,7 +233,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
         // Trim buffer
         trim(buffer);
         if( buffer.length() <= 0 ) {
-          throw new exception(); // @todo fix this
+          throw MustacheException("Empty tag");
         }
         // Close and process previous buffer
         skip = false;
@@ -262,7 +262,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
             currentFlags = MUSTACHE_FLAG_INLINE_PARTIAL;
             break;
           case '=':
-            throw new exception(); // @todo fix this
+            throw MustacheException("Delimeters not yet supported");
             break;
         }
         if( !skip ) {
@@ -285,7 +285,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
             nodeStack.pop();
             depth--;
             if( depth < 0 ) {
-              throw new exception(); // @todo fix this
+              throw MustacheException("Extra closing section or missing opening section");
             }
           }
         }
@@ -297,7 +297,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
         // Triple mustache
         if( !skip && inTripleTag && stop.compare("}}") == 0 ) {
           if( tmpl->compare(pos+2, 1, "}") != 0 ) {
-            throw new exception(); // @todo fix this
+            throw MustacheException("Missing closing triple mustache delimeter");
           }
           skipUntil++;
         }
@@ -314,7 +314,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
   }
   
   if( inTag ) {
-    throw new exception(); // @todo fix this
+    throw MustacheException("Unclosed tag");
   } else if( buffer.length() > 0 ) {
     node = new MustacheNode();
     node->type = MUSTACHE_NODE_OUTPUT;
