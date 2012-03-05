@@ -45,8 +45,14 @@ ZEND_BEGIN_ARG_INFO_EX(Mustache__render_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALU
 	ZEND_ARG_INFO(0, str)
         ZEND_ARG_INFO(0, vars)
 ZEND_END_ARG_INFO()
+        
+PHP_METHOD(Mustache, debugDataStructure);
+ZEND_BEGIN_ARG_INFO_EX(Mustache__debugDataStructure_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+        ZEND_ARG_INFO(0, vars)
+ZEND_END_ARG_INFO()
 
-void mustache_data_from_zval(MustacheData * node, zval * current);
 void mustache_node_to_zval(MustacheNode * node, zval * current);
+void mustache_data_from_zval(MustacheData * node, zval * current);
+zval * mustache_data_to_zval(MustacheData * node);
 
 #endif

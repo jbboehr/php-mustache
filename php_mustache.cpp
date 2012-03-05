@@ -11,6 +11,7 @@ static zend_function_entry Mustache_methods[] = {
 	PHP_ME(Mustache, setStopSequence, Mustache__setStopSequence_args, ZEND_ACC_PUBLIC)
 	PHP_ME(Mustache, tokenize, Mustache__tokenize_args, ZEND_ACC_PUBLIC)
 	PHP_ME(Mustache, render, Mustache__render_args, ZEND_ACC_PUBLIC)
+	PHP_ME(Mustache, debugDataStructure, Mustache__debugDataStructure_args, ZEND_ACC_PUBLIC)
 	{ NULL, NULL, NULL }
 };
 
