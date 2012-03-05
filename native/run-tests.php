@@ -7,6 +7,8 @@ error_reporting(E_ALL | E_STRICT);
 ini_set('memory_limit', '256M');
 ini_set('display_errors', true);
 
+$class = 'MustacheNative';
+
 // Argv
 if( !empty($argv[1]) && is_dir($argv[1]) ) {
   $specDir = $argv[1];
@@ -37,7 +39,7 @@ foreach( $specs as $spec ) {
 
 
 // Run tests
-$mustache = new MustacheNative();
+$mustache = new $class();
 $results = array();
 $nFailed = 0;
 $nPassed = 0;
@@ -51,9 +53,11 @@ foreach( $specData as $spec => $data ) {
     try {
       if( !$debug ) {
         $given = $mustache->render($test['template'], $test['data'], (array) @$test['partials']);
-      } else {
+      } else if( $class == 'MustacheNative' ) {
         $tree = $mustache->tokenize($test['template']);
         $given = $mustache->renderTree($tree, $test['data'], (array) @$test['partials']);
+      } else {
+        throw new Exception('Whoops');
       }
     } catch( Exception $e ) {
       $given = null;

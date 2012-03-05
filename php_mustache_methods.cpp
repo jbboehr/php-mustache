@@ -184,11 +184,13 @@ PHP_METHOD(Mustache, render)
   zval * data = NULL;
   HashTable * data_hash = NULL;
   
+  zval * partials = NULL;
+  
   string * template_str_obj;
   MustacheData * template_data;
   string * return_str;
 
-  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Osa/", &_this_zval, Mustache_ce_ptr, &template_str, &template_len, &data) == FAILURE) {
+  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Osa/|a/", &_this_zval, Mustache_ce_ptr, &template_str, &template_len, &data, &partials) == FAILURE) {
           return;
   }
 
@@ -309,8 +311,7 @@ void mustache_data_from_zval(MustacheData * node, zval * current)
       case IS_STRING:
         convert_to_string(current);
         node->type = MUSTACHE_DATA_STRING;
-        node->val = new string(Z_STRVAL_P(current)); // Z_STRLEN_P(current)
-        //cout << *node->val << endl << endl;
+        node->val = new string(Z_STRVAL_P(current));
         break;
       case IS_ARRAY: // START IS_ARRAY -----------------------------------------
         node->type = MUSTACHE_DATA_NONE;
@@ -323,7 +324,6 @@ void mustache_data_from_zval(MustacheData * node, zval * current)
           key_type = zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, &key_nindex, true, &data_pointer);
           // Check key type
           if( key_type == HASH_KEY_IS_LONG ) {
-            //cout << key_nindex << endl;
             if( node->type == MUSTACHE_DATA_NONE ) {
               node->type = MUSTACHE_DATA_LIST;
             } else if( node->type != MUSTACHE_DATA_LIST ) {
@@ -331,7 +331,6 @@ void mustache_data_from_zval(MustacheData * node, zval * current)
               return; // EXIT
             }
           } else {
-            //cout << key_str << endl;
             if( node->type == MUSTACHE_DATA_NONE ) {
               node->type = MUSTACHE_DATA_MAP;
             } else if( node->type != MUSTACHE_DATA_MAP ) {
@@ -345,7 +344,6 @@ void mustache_data_from_zval(MustacheData * node, zval * current)
           mustache_data_from_zval(child, *data_entry);
           
           // Store value
-          //cout << node->type << endl << endl;
           if( node->type == MUSTACHE_DATA_LIST ) {
             node->children.push_back(child);
           } else if( node->type == MUSTACHE_DATA_MAP ) {

@@ -41,9 +41,10 @@ ZEND_BEGIN_ARG_INFO_EX(Mustache__tokenize_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VA
 ZEND_END_ARG_INFO()
         
 PHP_METHOD(Mustache, render);
-ZEND_BEGIN_ARG_INFO_EX(Mustache__render_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 2)
+ZEND_BEGIN_ARG_INFO_EX(Mustache__render_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 3)
 	ZEND_ARG_INFO(0, str)
         ZEND_ARG_INFO(0, vars)
+        ZEND_ARG_INFO(0, partials)
 ZEND_END_ARG_INFO()
         
 PHP_METHOD(Mustache, debugDataStructure);

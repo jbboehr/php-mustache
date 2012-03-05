@@ -276,6 +276,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
           node = new MustacheNode();
           node->type = MUSTACHE_NODE_TAG;
           node->data = new string(buffer);
+          node->flags = currentFlags;
           nodeStack.top()->children.push_back(node);
           // Push/pop stack
           if( currentFlags & MUSTACHE_CAN_HAVE_CHILDREN ) {
@@ -411,8 +412,8 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
         } else {
           d_it = ref->data.find(*vs_it);
           if( d_it == ref->data.end() ) {
-            ref = NULL;
-            break; // Not sure about this
+            ref = NULL; // Not sure about this
+            break; 
           }
           ref = d_it->second;
         }
