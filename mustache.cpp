@@ -394,7 +394,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
 string * Mustache::renderTree(MustacheNode * root, MustacheData * data)
 {
   string * output = new string();
-  output->reserve(1000);
+  output->reserve(MUSTACHE_OUTPUT_BUFFER_LENGTH);
   
   list<MustacheData*> * dataStack = new list<MustacheData*>();
   dataStack->push_back(data);

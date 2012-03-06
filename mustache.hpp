@@ -38,6 +38,8 @@ const int MUSTACHE_FLAG_INLINE_PARTIAL = 64;
 
 const int MUSTACHE_CAN_HAVE_CHILDREN = MUSTACHE_FLAG_SECTION | MUSTACHE_FLAG_NEGATE | MUSTACHE_FLAG_INLINE_PARTIAL;
 
+const int MUSTACHE_OUTPUT_BUFFER_LENGTH = 100000;
+
 class MustacheException : public runtime_error {
   public:
       MustacheException(const string& desc) : runtime_error(desc) { }
