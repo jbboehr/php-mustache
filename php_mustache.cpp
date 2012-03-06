@@ -90,7 +90,6 @@ PHP_MINIT_FUNCTION(mustache)
   
 PHP_MINFO_FUNCTION(mustache)
 {
-	php_printf("Mustache\n");
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Version", PHP_MUSTACHE_VERSION);
 	php_info_print_table_row(2, "Released", "2012-02-25");
