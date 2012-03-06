@@ -282,10 +282,8 @@ class MustacheNative
     
     // Resolve data
     $val = null;
-    if( is_scalar($data) ) {
-      if( $nstr == '.' ) {
-        $val = $data;
-      }
+    if( is_scalar($data) && $nstr == '.' ) {
+      $val = $data;
     } else if( isset($data[$nstr]) ) {
       $val = $data[$nstr];
     } else {

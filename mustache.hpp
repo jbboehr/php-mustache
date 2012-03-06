@@ -51,6 +51,7 @@ class MustacheData {
     string * val;
     map<string,MustacheData *> data;
     list<MustacheData *> children;
+    int isEmpty();
 };
 
 class MustacheNode {
@@ -67,6 +68,7 @@ class Mustache {
   private:
     string startSequence;
     string stopSequence;
+    bool escapeByDefault;
     void _renderNode(MustacheNode * node, list<MustacheData*> * dataStack, string * output);
   public:
     typedef auto_ptr<Mustache> Ptr;

@@ -27,6 +27,41 @@ void trim( std::string& str, const std::string& trimChars = whiteSpaces )
    trimLeft( str, trimChars );
 }
 
+void htmlspecialchars(string * str)
+{
+  // @todo switch this to php's version
+  // this version is not utf-8 compatible
+  string tmp;
+  int pos = 0;
+  int len = str->length();
+  char * chr = (char *) str->c_str();
+  tmp.reserve(len);
+  for( pos = 0; pos < len; pos++ ) {
+    switch( *chr ) {
+      case '&':
+        tmp.append("&amp;");
+        break;
+      case '"':
+        tmp.append("&quot;");
+        break;
+      case '\'':
+        tmp.append("&#039;");
+        break;
+      case '<':
+        tmp.append("&lt;");
+        break;
+      case '>':
+        tmp.append("&gt;");
+        break;
+      default:
+        tmp.append(1, *chr);
+        break;
+    }
+    chr++;
+  }
+  str->swap(tmp);
+}
+
 vector<string> * explode(const string &delimiter, const string &str)
 {
   // http://www.zedwood.com/article/106/cpp-explode-function
@@ -87,6 +122,34 @@ MustacheData::~MustacheData()
   children.clear();
 }
 
+int MustacheData::isEmpty()
+{
+  int ret = 0;
+  switch( type ) {
+    default:
+    case MUSTACHE_DATA_NONE:
+      ret = 1;
+      break;
+    case MUSTACHE_DATA_STRING:
+      if( val == NULL || val->length() <= 0 ) {
+        ret = 1;
+      }
+      break;
+    case MUSTACHE_DATA_LIST:
+      if( children.size() <= 0 ) {
+        ret = 1;
+      }
+      break;
+    case MUSTACHE_DATA_MAP:
+      if( data.size() <= 0 ) {
+        ret = 1;
+      }
+      break;
+  }
+  return ret;
+}
+
+
 
 // NODE
 
@@ -112,6 +175,7 @@ MustacheNode::~MustacheNode()
 Mustache::Mustache() {
   startSequence = "{{";
   stopSequence = "}}";
+  escapeByDefault = true;
 }
 
 Mustache::~Mustache () {
@@ -191,7 +255,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
   for( pos = 0; pos < tmplL; pos++ ) {
     
     // Track line numbers
-    if( chr == "\n" ) {
+    if( *chr == '\n' ) {
       lineNo++;
       charNo = 0;
     } else {
@@ -345,6 +409,10 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
   MustacheData * data = dataStack->back();
   string * nstr = node->data;
   
+  if( data == NULL ) {
+    throw MustacheException("Whoops, empty data");
+  }
+  
     // Handle simple cases
   if( node->type == MUSTACHE_NODE_ROOT ) {
     if( node->children.size() > 0 ) {
@@ -361,11 +429,15 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
     return;
   }
   
+  if( nstr == NULL ) {
+    throw MustacheException("Whoops, empty tag");
+  }
+  
   // Resolve data
   MustacheData * val = NULL;
   if( data->type == MUSTACHE_DATA_STRING ) {
     // Simple
-    if( nstr->compare(".") ) {
+    if( nstr->compare(".") == 0 ) {
       val = data;
     }
   } else if( data->type == MUSTACHE_DATA_MAP ) {
@@ -374,7 +446,10 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
     if( it != data->data.end() ) {
       val = it->second;
     }
-  } else {
+  }
+  
+  // Data was not resolved quickly
+  if( val == NULL ) {
     // Search whole stack
     
     // Dot notataion
@@ -397,16 +472,21 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
         d_it = (*ds_it)->data.find(initial);
         if( d_it != (*ds_it)->data.end() ) {
           ref = d_it->second;
+          if( ref != NULL ) {
+            break;
+          }
         }
       }
     }
     
     // Resolve or dot notation
-    if( ref != NULL && parts->size() > 0 ) {
+    if( ref != NULL && parts != NULL && parts->size() > 1 ) {
       // Dot notation
       vector<string>::iterator vs_it;
-      for( vs_it = parts->begin(); vs_it != parts->end(); vs_it++ ) {
-        if( ref->type != MUSTACHE_DATA_MAP ) {
+      for( vs_it = parts->begin(), vs_it++; vs_it != parts->end(); vs_it++ ) {
+        if( ref == NULL ) {
+          break;
+        } else if( ref->type != MUSTACHE_DATA_MAP ) {
           ref = NULL; // Not sure about this
           break;
         } else {
@@ -419,11 +499,19 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
         }
       }
     }
+    
     if( ref != NULL ) {
       val = ref;
     }
   }
   
+  // Calculate if value is empty
+  bool valIsEmpty = true;
+  if( val != NULL && !val->isEmpty() ) {
+    valIsEmpty = false;
+  }
+  
+  // Switch on node flags
   switch( node->flags ) {
     case MUSTACHE_FLAG_COMMENT:
     case MUSTACHE_FLAG_STOP:
@@ -433,10 +521,10 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
     case MUSTACHE_FLAG_NEGATE:
     case MUSTACHE_FLAG_SECTION:
       // Negate/Empty list
-      if( (node->flags & MUSTACHE_FLAG_NEGATE) && val != NULL ) {
+      if( (node->flags & MUSTACHE_FLAG_NEGATE) && !valIsEmpty ) {
         // Not-empty negation
         break;
-      } else if( !(node->flags & MUSTACHE_FLAG_NEGATE) && val == NULL ) {
+      } else if( !(node->flags & MUSTACHE_FLAG_NEGATE) && valIsEmpty ) {
         // Empty section
         break;
       } else if( node->children.size() <= 0 ) {
@@ -444,7 +532,7 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
         break;
       }
       
-      if( val == NULL || val->type == MUSTACHE_DATA_STRING ) {
+      if( valIsEmpty || val->type == MUSTACHE_DATA_STRING ) {
         list<MustacheNode *>::iterator it;
         for( it = node->children.begin() ; it != node->children.end(); it++ ) {
           _renderNode(*it, dataStack, output);
@@ -475,8 +563,10 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
       break;
     case MUSTACHE_FLAG_ESCAPE:
     case MUSTACHE_FLAG_NONE:
-      if( val->type == MUSTACHE_DATA_STRING ) {
-        if( node->flags & MUSTACHE_FLAG_ESCAPE ) { // @todo escape by default
+      if( !valIsEmpty && val->type == MUSTACHE_DATA_STRING ) {
+        if( (bool) (node->flags & MUSTACHE_FLAG_ESCAPE) != escapeByDefault ) { // @todo escape by default
+          // Probably shouldn't modify the value
+          htmlspecialchars(val->val);
           output->append(*val->val);
         } else {
           output->append(*val->val);

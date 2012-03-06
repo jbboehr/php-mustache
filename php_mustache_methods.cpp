@@ -306,7 +306,9 @@ void mustache_data_from_zval(MustacheData * node, zval * current)
   MustacheData * child = NULL;
   
   switch( Z_TYPE_P(current) ) {
+      case IS_NULL:
       case IS_LONG:
+      case IS_BOOL:
       case IS_DOUBLE:
       case IS_STRING:
         convert_to_string(current);
@@ -358,8 +360,22 @@ void mustache_data_from_zval(MustacheData * node, zval * current)
         }
   
         break; // END IS_ARRAY -------------------------------------------------
+    case IS_OBJECT:
+      // @todo
     default:
-      php_error(E_WARNING, "Invalid data type");
+      php_error(E_WARNING, "Invalid data type: %d", Z_TYPE_P(current));
+/*
+IS_NULL		0
+IS_LONG		1
+IS_DOUBLE	2
+IS_BOOL		3
+IS_ARRAY	4
+IS_OBJECT	5
+IS_STRING	6
+IS_RESOURCE	7
+IS_CONSTANT	8
+IS_CONSTANT_ARRAY	9
+*/
       break;
   }
 }
