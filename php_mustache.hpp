@@ -46,10 +46,23 @@ PHP_MINFO_FUNCTION(mustache);
 } // extern "C" 
 
 
+
+// Profiler
+// https://github.com/wadey/node-microtime/blob/master/src/microtime.cc
+#if HAVE_MUSTACHE_PROFILER
+#include <errno.h>
+#include <sys/time.h>
+#endif
+
+
+
+// Class object structure
+
 typedef struct _php_obj_Mustache {
     zend_object obj;
     Mustache *mustache;
 } php_obj_Mustache;
+
 
 
 #endif /* PHP_MUSTACHE_HPP */
