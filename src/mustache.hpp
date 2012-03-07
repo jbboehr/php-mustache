@@ -2,10 +2,6 @@
 #ifndef MUSTACHE_HPP
 #define MUSTACHE_HPP
 
-extern "C" {
-#include "php.h"
-}
-
 #include <iostream>
 #include <string>
 #include <map>

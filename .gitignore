@@ -1,3 +1,4 @@
+/cli/.deps/
 /nbproject/private/
 /php/.libs/
 /php/autom4te.cache
@@ -34,3 +35,6 @@
 /php/php_mustache_methods.lo
 /php/run-tests.php
 /specs
+/src/.deps/
+/src/.dirstamp
+/src/mustache.o

@@ -213,7 +213,7 @@ string * Mustache::render(string * tmpl, MustacheData * data) {
 
 MustacheNode * Mustache::tokenize(string * tmpl)
 {
-  uint tmplL = tmpl->length();
+  unsigned int tmplL = tmpl->length();
   
   string start(startSequence);
   char startC = start.at(0);
