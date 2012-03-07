@@ -1,4 +1,19 @@
 /cli/.deps/
+/cli/autom4te.cache/
+/cli/Makefile
+/cli/Makefile.in
+/cli/aclocal.m4
+/cli/config.h
+/cli/config.h.in
+/cli/config.log
+/cli/config.status
+/cli/configure
+/cli/depcomp
+/cli/install-sh
+/cli/missing
+/cli/mustachec
+/cli/mustachec-mustachec.o
+/cli/stamp-h1
 /nbproject/private/
 /php/.libs/
 /php/autom4te.cache
@@ -38,3 +53,4 @@
 /src/.deps/
 /src/.dirstamp
 /src/mustache.o
+/src/mustachec-mustache.o
