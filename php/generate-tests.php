@@ -8,10 +8,8 @@ ini_set('display_errors', true);
 // Argv
 if( !empty($argv[1]) && is_dir($argv[1]) ) {
   $specDir = $argv[1];
-} else if( is_dir('./specs') ) {
-  $specDir = './specs';
-} else if( is_dir('./spec/specs') ) {
-  $specDir = './spec/specs';
+} else if( is_dir('../specs') ) {
+  $specDir = '../specs';
 } else {
   echo 'Unable to find specs' . PHP_EOL;
   exit(1);
@@ -60,6 +58,7 @@ foreach( $specData as $spec => $data ) {
     }
     $output .= join("\s+", $tmp);
     
-    file_put_contents('./tests/mustachespec_' . $spec . '_' . $test['name'] . '.phpt', $output);
+    $cleanName = strtolower(trim(preg_replace('/[^a-zA-Z0-9]+/', '-', $test['name']), '-'));
+    file_put_contents('./tests/mustache-spec-' . $spec . '-' . $cleanName . '.phpt', $output);
   }
 }
