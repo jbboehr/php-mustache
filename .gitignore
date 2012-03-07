@@ -12,6 +12,7 @@
 /cli/install-sh
 /cli/missing
 /cli/mustachec
+/cli/mustachec-jsonlint.o
 /cli/mustachec-mustachec.o
 /cli/stamp-h1
 /nbproject/private/

@@ -1,9 +1,22 @@
 
-#include <stdio.h>
+#ifndef MUSTACHEC_HPP
+#define MUSTACHEC_HPP
+
 #include <iostream>
+#include <string>
+
+extern "C" {
+  #include <ctype.h>
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <unistd.h>
+
+  #include "json.h"
+  #include "jsonlint.h"
+}
 
 #include "mustache.hpp"
 
-extern "C" {
-  #include "json.h"
-}
+using namespace std;
+
+#endif
