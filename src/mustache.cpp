@@ -262,7 +262,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
   int inTag = 0;
   int inTripleTag = 0;
   int skip = 0;
-  int currentFlags = 0;
+  int currentFlags = MustacheNode::FlagNone;
   string buffer;
   buffer.reserve(100); // Reserver 100 chars
   
@@ -273,8 +273,8 @@ MustacheNode * Mustache::tokenize(string * tmpl)
   
   // Initialize root node and stack[0]
   root = new MustacheNode;
-  root->type = MUSTACHE_NODE_ROOT;
-  root->flags = 0;
+  root->type = MustacheNode::TypeRoot;
+  root->flags = MustacheNode::FlagNone;
   root->data = NULL;
   
   nodeStack.push(root);
@@ -307,7 +307,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
         // Close previous buffer
         if( buffer.length() > 0 ) {
           node = new MustacheNode();
-          node->type = MUSTACHE_NODE_OUTPUT;
+          node->type = MustacheNode::TypeOutput;
           node->data = new string(buffer);
           nodeStack.top()->children.push_back(node);
           buffer.clear();
@@ -331,28 +331,28 @@ MustacheNode * Mustache::tokenize(string * tmpl)
         // Close and process previous buffer
         skip = false;
         tmpStopL = stopL;
-        currentFlags = 0;
+        currentFlags = MustacheNode::FlagNone;
         switch( buffer.at(0) ) {
           case '&':
-            currentFlags = MUSTACHE_FLAG_ESCAPE;
+            currentFlags = MustacheNode::FlagEscape;
             break;
           case '^':
-            currentFlags = MUSTACHE_FLAG_NEGATE;
+            currentFlags = MustacheNode::FlagNegate;
             break;
           case '#':
-            currentFlags = MUSTACHE_FLAG_SECTION;
+            currentFlags = MustacheNode::FlagSection;
             break;
           case '/':
-            currentFlags = MUSTACHE_FLAG_STOP;
+            currentFlags = MustacheNode::FlagStop;
             break;
           case '!':
-            currentFlags = MUSTACHE_FLAG_COMMENT;
+            currentFlags = MustacheNode::FlagComment;
             break;
           case '>':
-            currentFlags = MUSTACHE_FLAG_PARTIAL;
+            currentFlags = MustacheNode::FlagPartial;
             break;
           case '<':
-            currentFlags = MUSTACHE_FLAG_INLINE_PARTIAL;
+            currentFlags = MustacheNode::FlagInlinePartial;
             break;
           case '=':
             throw MustacheException("Delimeters not yet supported");
@@ -363,19 +363,19 @@ MustacheNode * Mustache::tokenize(string * tmpl)
             buffer.erase(0, 1);
           }
           if( inTripleTag ) {
-            currentFlags = currentFlags | MUSTACHE_FLAG_ESCAPE;
+            currentFlags = currentFlags | MustacheNode::FlagEscape;
           }
           // Create node
           node = new MustacheNode();
-          node->type = MUSTACHE_NODE_TAG;
+          node->type = MustacheNode::TypeTag;
           node->data = new string(buffer);
           node->flags = currentFlags;
           nodeStack.top()->children.push_back(node);
           // Push/pop stack
-          if( currentFlags & MUSTACHE_CAN_HAVE_CHILDREN ) {
+          if( currentFlags & MustacheNode::FlagHasChildren ) {
             depth++;
             nodeStack.push(node);
-          } else if( currentFlags & MUSTACHE_FLAG_STOP ) {
+          } else if( currentFlags & MustacheNode::FlagStop ) {
             nodeStack.pop();
             depth--;
             if( depth < 0 ) {
@@ -411,7 +411,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
     throw MustacheException("Unclosed tag");
   } else if( buffer.length() > 0 ) {
     node = new MustacheNode();
-    node->type = MUSTACHE_NODE_OUTPUT;
+    node->type = MustacheNode::TypeOutput;
     node->data = new string(buffer);
     nodeStack.top()->children.push_back(node);
     buffer.clear();
@@ -443,7 +443,7 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
   }
   
     // Handle simple cases
-  if( node->type == MUSTACHE_NODE_ROOT ) {
+  if( node->type == MustacheNode::TypeRoot ) {
     if( node->children.size() > 0 ) {
       list<MustacheNode *>::iterator it;
       for ( it = node->children.begin() ; it != node->children.end(); it++ ) {
@@ -451,7 +451,7 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
       }
     }
     return;
-  } else if( node->type == MUSTACHE_NODE_OUTPUT ) {
+  } else if( node->type == MustacheNode::TypeOutput ) {
     if( node->data != NULL && node->data->length() > 0 ) {
       output->append(*node->data);
     }
@@ -542,18 +542,18 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
   
   // Switch on node flags
   switch( node->flags ) {
-    case MUSTACHE_FLAG_COMMENT:
-    case MUSTACHE_FLAG_STOP:
-    case MUSTACHE_FLAG_INLINE_PARTIAL:
+    case MustacheNode::FlagComment:
+    case MustacheNode::FlagStop:
+    case MustacheNode::FlagInlinePartial:
       // Do nothing
       break;
-    case MUSTACHE_FLAG_NEGATE:
-    case MUSTACHE_FLAG_SECTION:
+    case MustacheNode::FlagNegate:
+    case MustacheNode::FlagSection:
       // Negate/Empty list
-      if( (node->flags & MUSTACHE_FLAG_NEGATE) && !valIsEmpty ) {
+      if( (node->flags & MustacheNode::FlagNegate) && !valIsEmpty ) {
         // Not-empty negation
         break;
-      } else if( !(node->flags & MUSTACHE_FLAG_NEGATE) && valIsEmpty ) {
+      } else if( !(node->flags & MustacheNode::FlagNegate) && valIsEmpty ) {
         // Empty section
         break;
       } else if( node->children.size() <= 0 ) {
@@ -598,13 +598,13 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
         dataStack->pop_back();
       }
       break;
-    case MUSTACHE_FLAG_PARTIAL:
+    case MustacheNode::FlagPartial:
       // Not yet implemented
       break;
-    case MUSTACHE_FLAG_ESCAPE:
-    case MUSTACHE_FLAG_NONE:
+    case MustacheNode::FlagEscape:
+    case MustacheNode::FlagNone:
       if( !valIsEmpty && val->type == MustacheData::TypeString ) {
-        if( (bool) (node->flags & MUSTACHE_FLAG_ESCAPE) != escapeByDefault ) { // @todo escape by default
+        if( (bool) (node->flags & MustacheNode::FlagEscape) != escapeByDefault ) { // @todo escape by default
           // Probably shouldn't modify the value
           htmlspecialchars(val->val);
           output->append(*val->val);

@@ -14,21 +14,6 @@
 
 using namespace std;
 
-const int MUSTACHE_NODE_ROOT = 1;
-const int MUSTACHE_NODE_OUTPUT = 2;
-const int MUSTACHE_NODE_TAG = 3;
-
-const int MUSTACHE_FLAG_NONE = 0;
-const int MUSTACHE_FLAG_ESCAPE = 1;
-const int MUSTACHE_FLAG_NEGATE = 2;
-const int MUSTACHE_FLAG_SECTION = 4;
-const int MUSTACHE_FLAG_STOP = 8;
-const int MUSTACHE_FLAG_COMMENT = 16;
-const int MUSTACHE_FLAG_PARTIAL = 32;
-const int MUSTACHE_FLAG_INLINE_PARTIAL = 64;
-
-const int MUSTACHE_CAN_HAVE_CHILDREN = MUSTACHE_FLAG_SECTION | MUSTACHE_FLAG_NEGATE | MUSTACHE_FLAG_INLINE_PARTIAL;
-
 const int MUSTACHE_OUTPUT_BUFFER_LENGTH = 100000;
 
 class MustacheException : public runtime_error {
@@ -61,8 +46,21 @@ class MustacheNode {
   public:
     typedef auto_ptr<MustacheNode> Ptr;
     typedef list<MustacheNode *> Children;
+    enum Type { TypeNone = 0, TypeRoot = 1, TypeOutput = 2, TypeTag = 3 };
+    enum Flag { 
+      FlagNone = 0,
+      FlagEscape = 1,
+      FlagNegate = 2,
+      FlagSection = 4,
+      FlagStop = 8,
+      FlagComment = 16,
+      FlagPartial = 32,
+      FlagInlinePartial = 64,
+      
+      FlagHasChildren = MustacheNode::FlagNegate | MustacheNode::FlagSection | MustacheNode::FlagPartial
+    };
     
-    int type;
+    MustacheNode::Type type;
     int flags;
     string * data;
     MustacheNode::Children children;
