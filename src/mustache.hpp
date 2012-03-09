@@ -45,7 +45,7 @@ class MustacheData {
 class MustacheNode {
   public:
     typedef auto_ptr<MustacheNode> Ptr;
-    typedef list<MustacheNode *> Children;
+    typedef vector<MustacheNode *> Children;
     enum Type { TypeNone = 0, TypeRoot = 1, TypeOutput = 2, TypeTag = 3 };
     enum Flag { 
       FlagNone = 0,

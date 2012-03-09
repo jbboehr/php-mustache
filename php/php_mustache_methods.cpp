@@ -278,7 +278,7 @@ void mustache_node_to_zval(MustacheNode * node, zval * current)
     ALLOC_INIT_ZVAL(children);
     array_init(children);
     
-    list<MustacheNode *>::iterator it;
+    MustacheNode::Children::iterator it;
     for ( it = node->children.begin() ; it != node->children.end(); it++ ) {
       zval * child;
       ALLOC_INIT_ZVAL(child);
@@ -381,13 +381,12 @@ IS_CONSTANT_ARRAY	9
 
 zval * mustache_data_to_zval(MustacheData * node)
 {
-  list<MustacheData *>::iterator l_it;
-  map<string,MustacheData*>::iterator m_it;
+  MustacheData::List::iterator l_it;
+  MustacheData::Map::iterator m_it;
+  MustacheData::Array childNode;
+  int pos;
   zval * current;
   zval * child;
-  
-  int pos;
-  MustacheData::Array childNode;
   
   ALLOC_INIT_ZVAL(current);
   

@@ -189,7 +189,7 @@ MustacheNode::~MustacheNode()
   
   // Children
   if( children.size() > 0 ) {
-    list<MustacheNode *>::iterator it;
+    MustacheNode::Children::iterator it;
     for ( it = children.begin() ; it != children.end(); it++ ) {
       delete *it;
     }
@@ -445,7 +445,7 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
     // Handle simple cases
   if( node->type == MustacheNode::TypeRoot ) {
     if( node->children.size() > 0 ) {
-      list<MustacheNode *>::iterator it;
+      MustacheNode::Children::iterator it;
       for ( it = node->children.begin() ; it != node->children.end(); it++ ) {
         _renderNode(*it, dataStack, output);
       }
@@ -562,14 +562,14 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
       }
       
       if( valIsEmpty || val->type == MustacheData::TypeString ) {
-        list<MustacheNode *>::iterator it;
+        MustacheNode::Children::iterator it;
         for( it = node->children.begin() ; it != node->children.end(); it++ ) {
           _renderNode(*it, dataStack, output);
         }
       } else if( val->type == MustacheData::TypeList ) {
         // Numeric array/list
-        list<MustacheData *>::iterator childrenIt;
-        list<MustacheNode *>::iterator it;
+        MustacheData::List::iterator childrenIt;
+        MustacheNode::Children::iterator it;
         for ( childrenIt = val->children.begin() ; childrenIt != val->children.end(); childrenIt++ ) {
           dataStack->push_back(*childrenIt);
           for( it = node->children.begin() ; it != node->children.end(); it++ ) {
@@ -580,7 +580,7 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
       } else if( val->type == MustacheData::TypeArray ) {
         MustacheData::Array ArrayPtr = val->array;
         int ArrayPos;
-        list<MustacheNode *>::iterator it;
+        MustacheNode::Children::iterator it;
         for ( ArrayPos = 0; ArrayPos < val->length; ArrayPos++, ArrayPtr++ ) {
           dataStack->push_back(ArrayPtr);
           for( it = node->children.begin() ; it != node->children.end(); it++ ) {
@@ -590,7 +590,7 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
         }
       } else if( val->type == MustacheData::TypeMap ) {
         // Associate array/map
-        list<MustacheNode *>::iterator it;
+        MustacheNode::Children::iterator it;
         dataStack->push_back(val);
         for( it = node->children.begin() ; it != node->children.end(); it++ ) {
           _renderNode(*it, dataStack, output);
