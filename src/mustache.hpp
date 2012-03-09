@@ -14,11 +14,6 @@
 
 using namespace std;
 
-const int MUSTACHE_DATA_NONE = 0;
-const int MUSTACHE_DATA_STRING = 1;
-const int MUSTACHE_DATA_LIST = 2;
-const int MUSTACHE_DATA_MAP = 3;
-
 const int MUSTACHE_NODE_ROOT = 1;
 const int MUSTACHE_NODE_OUTPUT = 2;
 const int MUSTACHE_NODE_TAG = 3;
@@ -44,23 +39,35 @@ class MustacheException : public runtime_error {
 class MustacheData {
   public:
     typedef auto_ptr<MustacheData> Ptr;
-    MustacheData();
+    typedef string String;
+    typedef map<string,MustacheData *> Map;
+    typedef list<MustacheData *> List;
+    typedef MustacheData * Array;
+    enum Type { TypeNone = 0, TypeString = 1, TypeList = 2, TypeMap = 3, TypeArray = 4 };
+    
+    MustacheData::Type type;
+    int length;
+    MustacheData::String * val;
+    MustacheData::Map data;
+    MustacheData::List children;
+    MustacheData::Array array;
+    
     ~MustacheData();
-    int type;
-    string * val;
-    map<string,MustacheData *> data;
-    list<MustacheData *> children;
     int isEmpty();
+    void init(MustacheData::Type type, int size);
 };
 
 class MustacheNode {
   public:
     typedef auto_ptr<MustacheNode> Ptr;
-    ~MustacheNode();
+    typedef list<MustacheNode *> Children;
+    
     int type;
     int flags;
     string * data;
-    list<MustacheNode *> children;
+    MustacheNode::Children children;
+    
+    ~MustacheNode();
 };
 
 class Mustache {

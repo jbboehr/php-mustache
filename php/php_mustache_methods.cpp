@@ -303,6 +303,7 @@ void mustache_data_from_zval(MustacheData * node, zval * current)
   ulong key_nindex;
   string * ckey;
   
+  int ArrayPos = 0;
   MustacheData * child = NULL;
   
   switch( Z_TYPE_P(current) ) {
@@ -312,11 +313,11 @@ void mustache_data_from_zval(MustacheData * node, zval * current)
       case IS_DOUBLE:
       case IS_STRING:
         convert_to_string(current);
-        node->type = MUSTACHE_DATA_STRING;
+        node->type = MustacheData::TypeString;
         node->val = new string(Z_STRVAL_P(current));
         break;
       case IS_ARRAY: // START IS_ARRAY -----------------------------------------
-        node->type = MUSTACHE_DATA_NONE;
+        node->type = MustacheData::TypeNone;
         
         data_hash = HASH_OF(current);
         data_count = zend_hash_num_elements(data_hash);
@@ -326,35 +327,33 @@ void mustache_data_from_zval(MustacheData * node, zval * current)
           key_type = zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, &key_nindex, true, &data_pointer);
           // Check key type
           if( key_type == HASH_KEY_IS_LONG ) {
-            if( node->type == MUSTACHE_DATA_NONE ) {
-              node->type = MUSTACHE_DATA_LIST;
-            } else if( node->type != MUSTACHE_DATA_LIST ) {
+            if( node->type == MustacheData::TypeNone ) {
+              node->init(MustacheData::TypeArray, data_count);
+              child = node->array;
+            } else if( node->type != MustacheData::TypeArray ) {
               php_error(E_WARNING, "Mixed numeric and associative arrays are not supported");
               return; // EXIT
             }
           } else {
-            if( node->type == MUSTACHE_DATA_NONE ) {
-              node->type = MUSTACHE_DATA_MAP;
-            } else if( node->type != MUSTACHE_DATA_MAP ) {
+            if( node->type == MustacheData::TypeNone ) {
+              node->type = MustacheData::TypeMap;
+            } else if( node->type != MustacheData::TypeMap ) {
               php_error(E_WARNING, "Mixed numeric and associative arrays are not supported");
               return; // EXIT
             }
           }
           
-          // Process value
-          child = new MustacheData();
-          mustache_data_from_zval(child, *data_entry);
-          
           // Store value
-          if( node->type == MUSTACHE_DATA_LIST ) {
-            node->children.push_back(child);
-          } else if( node->type == MUSTACHE_DATA_MAP ) {
+          if( node->type == MustacheData::TypeArray ) {
+            mustache_data_from_zval(child, *data_entry);
+            child++;
+          } else if( node->type == MustacheData::TypeMap ) {
+            child = new MustacheData();
+            mustache_data_from_zval(child, *data_entry);
             ckey = new string(key_str);
             node->data.insert(pair<string,MustacheData*>(*ckey,child));
           } else {
             // Whoops
-            delete child;
-            child = NULL;
           }
           zend_hash_move_forward_ex(data_hash, &data_pointer);
         }
@@ -387,22 +386,33 @@ zval * mustache_data_to_zval(MustacheData * node)
   zval * current;
   zval * child;
   
+  int pos;
+  MustacheData::Array childNode;
+  
   ALLOC_INIT_ZVAL(current);
   
   switch( node->type ) {
-    case MUSTACHE_DATA_STRING:
+    case MustacheData::TypeString:
       Z_TYPE_P(current) = IS_STRING;
       Z_STRVAL_P(current) = (char *) estrdup(node->val->c_str());
       Z_STRLEN_P(current) = node->val->length();
       break;
-    case MUSTACHE_DATA_LIST:
+    case MustacheData::TypeArray:
+      array_init(current);
+      childNode = node->array;
+      for( pos = 0; pos < node->length; pos++, childNode++ ) {
+        child = mustache_data_to_zval(childNode);
+        add_next_index_zval(current, child);
+      }
+      break;
+    case MustacheData::TypeList:
       array_init(current);
       for ( l_it = node->children.begin() ; l_it != node->children.end(); l_it++ ) {
         child = mustache_data_to_zval(*l_it);
         add_next_index_zval(current, child);
       }
       break;
-    case MUSTACHE_DATA_MAP:
+    case MustacheData::TypeMap:
       array_init(current);
       for ( m_it = node->data.begin() ; m_it != node->data.end(); m_it++ ) {
         child = mustache_data_to_zval((*m_it).second);

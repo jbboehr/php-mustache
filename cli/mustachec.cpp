@@ -16,21 +16,21 @@ int mustache_data_from_json(MustacheData * node, json_val_t * element)
   switch( element->type ) {
     case JSON_FALSE:
     case JSON_NULL:
-      node->type = MUSTACHE_DATA_STRING;
+      node->type = MustacheData::TypeString;
       node->val = new string("");
       break;
     case JSON_TRUE:
-      node->type = MUSTACHE_DATA_STRING;
+      node->type = MustacheData::TypeString;
       node->val = new string("true"); // Meh
       break;
     case JSON_INT:
     case JSON_STRING:
     case JSON_FLOAT:
-      node->type = MUSTACHE_DATA_STRING;
+      node->type = MustacheData::TypeString;
       node->val = new string(element->u.data);
       break;
     case JSON_OBJECT_BEGIN:
-      node->type = MUSTACHE_DATA_MAP;
+      node->type = MustacheData::TypeMap;
       for (i = 0; i < element->length; i++) {
         ckey = new string(element->u.object[i]->key, element->u.object[i]->key_length);
         child = new MustacheData();
@@ -39,11 +39,10 @@ int mustache_data_from_json(MustacheData * node, json_val_t * element)
       }
       break;
     case JSON_ARRAY_BEGIN:
-      node->type = MUSTACHE_DATA_LIST;
-      for (i = 0; i < element->length; i++) {
-        child = new MustacheData();
+      node->init(MustacheData::TypeArray, element->length);
+      child = node->array;
+      for (i = 0; i < element->length; i++, child++) {
         mustache_data_from_json(child, element->u.array[i]);
-        node->children.push_back(child);
       }
       break;
     default:

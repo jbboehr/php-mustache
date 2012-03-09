@@ -97,56 +97,80 @@ vector<string> * explode(const string &delimiter, const string &str)
 
 // DATA
 
-MustacheData::MustacheData()
-{
-  type = MUSTACHE_DATA_NONE;
-}
-
 MustacheData::~MustacheData()
 {
-  // Val
-  delete val;
-  
-  // Data
-  if( data.size() > 0 ) {
-    map<string,MustacheData*>::iterator dataIt;
-    for ( dataIt = data.begin() ; dataIt != data.end(); dataIt++ ) {
-      // (*dataIt).first; // Not a ref
-      delete (*dataIt).second;
-    }
+  switch( this->type ) {
+    case MustacheData::TypeString:
+      delete val;
+      break;
+    case MustacheData::TypeMap:
+      if( data.size() > 0 ) {
+        MustacheData::Map::iterator dataIt;
+        for ( dataIt = data.begin() ; dataIt != data.end(); dataIt++ ) {
+          delete (*dataIt).second;
+        }
+        data.clear();
+      }
+      break;
+    case MustacheData::TypeList:
+      if( children.size() > 0 ) {
+        MustacheData::List::iterator childrenIt;
+        for ( childrenIt = children.begin() ; childrenIt != children.end(); childrenIt++ ) {
+          delete *childrenIt;
+        }
+        children.clear();
+      }
+    case MustacheData::TypeArray:
+      delete[] array;
+      break;
   }
-  data.clear();
-  
-  // Children
-  if( children.size() > 0 ) {
-    list<MustacheData *>::iterator childrenIt;
-    for ( childrenIt = children.begin() ; childrenIt != children.end(); childrenIt++ ) {
-      delete *childrenIt;
-    }
-  }
-  children.clear();
 }
+
+void MustacheData::init(MustacheData::Type type, int size) {
+  this->type = type;
+  this->length = size;
+  switch( type ) {
+    case MustacheData::TypeString:
+      val = new string();
+      val->reserve(size);
+      break;
+    case MustacheData::TypeList:
+      // Do nothing
+      break;
+    case MustacheData::TypeMap:
+      // Do nothing
+      break;
+    case MustacheData::TypeArray:
+      this->array = new MustacheData[size];
+      break;
+  }
+};
 
 int MustacheData::isEmpty()
 {
   int ret = 0;
   switch( type ) {
     default:
-    case MUSTACHE_DATA_NONE:
+    case MustacheData::TypeNone:
       ret = 1;
       break;
-    case MUSTACHE_DATA_STRING:
+    case MustacheData::TypeString:
       if( val == NULL || val->length() <= 0 ) {
         ret = 1;
       }
       break;
-    case MUSTACHE_DATA_LIST:
+    case MustacheData::TypeList:
       if( children.size() <= 0 ) {
         ret = 1;
       }
       break;
-    case MUSTACHE_DATA_MAP:
+    case MustacheData::TypeMap:
       if( data.size() <= 0 ) {
+        ret = 1;
+      }
+      break;
+    case MustacheData::TypeArray:
+      if( length <= 0 ) {
         ret = 1;
       }
       break;
@@ -440,12 +464,12 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
   
   // Resolve data
   MustacheData * val = NULL;
-  if( data->type == MUSTACHE_DATA_STRING ) {
+  if( data->type == MustacheData::TypeString ) {
     // Simple
     if( nstr->compare(".") == 0 ) {
       val = data;
     }
-  } else if( data->type == MUSTACHE_DATA_MAP ) {
+  } else if( data->type == MustacheData::TypeMap ) {
     // Check top level
     map<string,MustacheData *>::iterator it = data->data.find(*nstr);
     if( it != data->data.end() ) {
@@ -473,7 +497,7 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
     list<MustacheData*>::reverse_iterator ds_it;
     map<string,MustacheData *>::iterator d_it;
     for( ds_it = dataStack->rbegin() ; ds_it != dataStack->rend(); ds_it++ ) {
-      if( (*ds_it)->type == MUSTACHE_DATA_MAP ) {
+      if( (*ds_it)->type == MustacheData::TypeMap ) {
         d_it = (*ds_it)->data.find(initial);
         if( d_it != (*ds_it)->data.end() ) {
           ref = d_it->second;
@@ -491,7 +515,7 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
       for( vs_it = parts->begin(), vs_it++; vs_it != parts->end(); vs_it++ ) {
         if( ref == NULL ) {
           break;
-        } else if( ref->type != MUSTACHE_DATA_MAP ) {
+        } else if( ref->type != MustacheData::TypeMap ) {
           ref = NULL; // Not sure about this
           break;
         } else {
@@ -537,12 +561,12 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
         break;
       }
       
-      if( valIsEmpty || val->type == MUSTACHE_DATA_STRING ) {
+      if( valIsEmpty || val->type == MustacheData::TypeString ) {
         list<MustacheNode *>::iterator it;
         for( it = node->children.begin() ; it != node->children.end(); it++ ) {
           _renderNode(*it, dataStack, output);
         }
-      } else if( val->type == MUSTACHE_DATA_LIST ) {
+      } else if( val->type == MustacheData::TypeList ) {
         // Numeric array/list
         list<MustacheData *>::iterator childrenIt;
         list<MustacheNode *>::iterator it;
@@ -553,7 +577,18 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
           }
           dataStack->pop_back();
         }
-      } else if( val->type == MUSTACHE_DATA_MAP ) {
+      } else if( val->type == MustacheData::TypeArray ) {
+        MustacheData::Array ArrayPtr = val->array;
+        int ArrayPos;
+        list<MustacheNode *>::iterator it;
+        for ( ArrayPos = 0; ArrayPos < val->length; ArrayPos++, ArrayPtr++ ) {
+          dataStack->push_back(ArrayPtr);
+          for( it = node->children.begin() ; it != node->children.end(); it++ ) {
+            _renderNode(*it, dataStack, output);
+          }
+          dataStack->pop_back();
+        }
+      } else if( val->type == MustacheData::TypeMap ) {
         // Associate array/map
         list<MustacheNode *>::iterator it;
         dataStack->push_back(val);
@@ -568,7 +603,7 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
       break;
     case MUSTACHE_FLAG_ESCAPE:
     case MUSTACHE_FLAG_NONE:
-      if( !valIsEmpty && val->type == MUSTACHE_DATA_STRING ) {
+      if( !valIsEmpty && val->type == MustacheData::TypeString ) {
         if( (bool) (node->flags & MUSTACHE_FLAG_ESCAPE) != escapeByDefault ) { // @todo escape by default
           // Probably shouldn't modify the value
           htmlspecialchars(val->val);
