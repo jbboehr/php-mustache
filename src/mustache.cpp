@@ -97,6 +97,11 @@ vector<string> * explode(const string &delimiter, const string &str)
 
 // DATA
 
+MustacheData::MustacheData()
+{
+  type = MUSTACHE_DATA_NONE;
+}
+
 MustacheData::~MustacheData()
 {
   // Val

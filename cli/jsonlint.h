@@ -36,9 +36,9 @@ typedef struct json_val {
 
 
 
-static int printchannel(void *userdata, const char *data, uint32_t length);
+int printchannel(void *userdata, const char *data, uint32_t length);
 
-static int prettyprint(void *userdata, int type, const char *data, uint32_t length);
+int prettyprint(void *userdata, int type, const char *data, uint32_t length);
 
 FILE *open_filename(const char *filename, const char *opt, int is_input);
 
@@ -46,25 +46,25 @@ void close_filename(const char *filename, FILE *file);
 
 int process_file(json_parser *parser, FILE *input, int *retlines, int *retcols);
 
-static int do_verify(json_config *config, const char *filename);
+int do_verify(json_config *config, const char *filename);
 
-static int do_parse(json_config *config, const char *filename);
+int do_parse(json_config *config, const char *filename);
 
-static int do_format(json_config *config, const char *filename, const char *outputfile);
+int do_format(json_config *config, const char *filename, const char *outputfile);
 
-static void *tree_create_structure(int nesting, int is_object);
+void *tree_create_structure(int nesting, int is_object);
 
-static char *memalloc_copy_length(const char *src, uint32_t n);
+char *memalloc_copy_length(const char *src, uint32_t n);
 
-static void *tree_create_data(int type, const char *data, uint32_t length);
+void *tree_create_data(int type, const char *data, uint32_t length);
 
-static int tree_append(void *structure, char *key, uint32_t key_length, void *obj);
+int tree_append(void *structure, char *key, uint32_t key_length, void *obj);
 
-static int do_tree(json_config *config, const char *filename, json_val_t **root_structure);
+int do_tree(json_config *config, const char *filename, json_val_t **root_structure);
 
-static int print_tree_iter(json_val_t *element, FILE *output);
+int print_tree_iter(json_val_t *element, FILE *output);
 
-static int print_tree(json_val_t *root_structure, char *outputfile);
+int print_tree(json_val_t *root_structure, char *outputfile);
 
 int usage(const char *argv0);
 

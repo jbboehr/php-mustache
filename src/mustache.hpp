@@ -44,6 +44,7 @@ class MustacheException : public runtime_error {
 class MustacheData {
   public:
     typedef auto_ptr<MustacheData> Ptr;
+    MustacheData();
     ~MustacheData();
     int type;
     string * val;

@@ -36,7 +36,7 @@ char *string_of_errors[] =
 	[JSON_ERROR_UTF8]     = "utf8 validation error"
 };
 
-static int printchannel(void *userdata, const char *data, uint32_t length)
+int printchannel(void *userdata, const char *data, uint32_t length)
 {
 	FILE *channel = userdata;
 	int ret;
@@ -45,7 +45,7 @@ static int printchannel(void *userdata, const char *data, uint32_t length)
 	return 0;
 }
 
-static int prettyprint(void *userdata, int type, const char *data, uint32_t length)
+int prettyprint(void *userdata, int type, const char *data, uint32_t length)
 {
 	json_printer *printer = userdata;
 	
@@ -99,7 +99,7 @@ int process_file(json_parser *parser, FILE *input, int *retlines, int *retcols)
 	return ret;
 }
 
-static int do_verify(json_config *config, const char *filename)
+int do_verify(json_config *config, const char *filename)
 {
 	FILE *input;
 	json_parser parser;
@@ -128,7 +128,7 @@ static int do_verify(json_config *config, const char *filename)
 	return 0;
 }
 
-static int do_parse(json_config *config, const char *filename)
+int do_parse(json_config *config, const char *filename)
 {
 	FILE *input;
 	json_parser parser;
@@ -163,7 +163,7 @@ static int do_parse(json_config *config, const char *filename)
 	return 0;
 }
 
-static int do_format(json_config *config, const char *filename, const char *outputfile)
+int do_format(json_config *config, const char *filename, const char *outputfile)
 {
 	FILE *input, *output;
 	json_parser parser;
@@ -215,7 +215,7 @@ static int do_format(json_config *config, const char *filename, const char *outp
 	return 0;
 }
 
-static void *tree_create_structure(int nesting, int is_object)
+void *tree_create_structure(int nesting, int is_object)
 {
 	json_val_t *v = malloc(sizeof(json_val_t));
 	if (v) {
@@ -233,7 +233,7 @@ static void *tree_create_structure(int nesting, int is_object)
 	return v;
 }
 
-static char *memalloc_copy_length(const char *src, uint32_t n)
+char *memalloc_copy_length(const char *src, uint32_t n)
 {
 	char *dest;
 
@@ -243,7 +243,7 @@ static char *memalloc_copy_length(const char *src, uint32_t n)
 	return dest;
 }
 
-static void *tree_create_data(int type, const char *data, uint32_t length)
+void *tree_create_data(int type, const char *data, uint32_t length)
 {
 	json_val_t *v;
 
@@ -260,7 +260,7 @@ static void *tree_create_data(int type, const char *data, uint32_t length)
 	return v;
 }
 
-static int tree_append(void *structure, char *key, uint32_t key_length, void *obj)
+int tree_append(void *structure, char *key, uint32_t key_length, void *obj)
 {
 	json_val_t *parent = structure;
 	if (key) {
@@ -309,7 +309,7 @@ static int tree_append(void *structure, char *key, uint32_t key_length, void *ob
 	return 0;
 }
 
-static int do_tree(json_config *config, const char *filename, json_val_t **root_structure)
+int do_tree(json_config *config, const char *filename, json_val_t **root_structure)
 {
 	FILE *input;
 	json_parser parser;
@@ -356,7 +356,7 @@ static int do_tree(json_config *config, const char *filename, json_val_t **root_
 	return 0;
 }
 
-static int print_tree_iter(json_val_t *element, FILE *output)
+int print_tree_iter(json_val_t *element, FILE *output)
 {
 	int i;
 	if (!element) {
@@ -400,7 +400,7 @@ static int print_tree_iter(json_val_t *element, FILE *output)
 	return 0;
 }
 
-static int print_tree(json_val_t *root_structure, char *outputfile)
+int print_tree(json_val_t *root_structure, char *outputfile)
 {
 	FILE *output;
 
