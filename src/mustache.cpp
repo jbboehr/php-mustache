@@ -2,8 +2,8 @@
 #include "mustache.hpp"
 
 // TRIM
-const std::string whiteSpaces( " \f\n\r\t\v" );
-
+const std::string whiteSpaces(" \f\n\r\t\v");
+const std::string specialChars("&\"'<>");
 
 void trimRight( std::string& str,
       const std::string& trimChars = whiteSpaces )
@@ -12,14 +12,12 @@ void trimRight( std::string& str,
    str.erase( pos + 1 );    
 }
 
-
 void trimLeft( std::string& str,
       const std::string& trimChars = whiteSpaces )
 {
    std::string::size_type pos = str.find_first_not_of( trimChars );
    str.erase( 0, pos );
 }
-
 
 void trim( std::string& str, const std::string& trimChars = whiteSpaces )
 {
@@ -35,7 +33,7 @@ void htmlspecialchars(string * str)
   int pos = 0;
   int len = str->length();
   char * chr = (char *) str->c_str();
-  tmp.reserve(len);
+  tmp.reserve(len * 2);
   for( pos = 0; pos < len; pos++ ) {
     switch( *chr ) {
       case '&':
