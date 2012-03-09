@@ -14,6 +14,7 @@
 
 using namespace std;
 
+const int MUSTACHE_DATA_STACK_SIZE = 100;
 const int MUSTACHE_OUTPUT_BUFFER_LENGTH = 100000;
 
 class MustacheException : public runtime_error {
@@ -40,6 +41,16 @@ class MustacheData {
     ~MustacheData();
     int isEmpty();
     void init(MustacheData::Type type, int size);
+};
+
+class MustacheDataStack {
+  public:
+    MustacheDataStack() : size(0) {};
+    int size;
+    MustacheData ** stack;
+    void push(MustacheData * data);
+    void pop();
+    MustacheData * top();
 };
 
 class MustacheNode {
@@ -73,7 +84,7 @@ class Mustache {
     string startSequence;
     string stopSequence;
     bool escapeByDefault;
-    void _renderNode(MustacheNode * node, list<MustacheData*> * dataStack, string * output);
+    void _renderNode(MustacheNode * node, MustacheDataStack * dataStack, string * output);
   public:
     typedef auto_ptr<Mustache> Ptr;
     Mustache();

@@ -178,6 +178,35 @@ int MustacheData::isEmpty()
 
 
 
+// DATA STACK
+void MustacheDataStack::push(MustacheData * data)
+{
+  if( size >= MUSTACHE_DATA_STACK_SIZE ) {
+    throw MustacheException("Reached max stack size");
+  }
+  stack[size] = data;
+  size++;
+}
+
+void MustacheDataStack::pop()
+{
+  if( size > 0 ) {
+    size--;
+  }
+}
+
+MustacheData * MustacheDataStack::top()
+{
+  if( size <= 0 ) {
+    //return NULL;
+    throw MustacheException("Reached bottom of stack");
+  } else {
+    return stack[size-1];
+  }
+}
+
+
+
 // NODE
 
 MustacheNode::~MustacheNode()
@@ -423,17 +452,19 @@ string * Mustache::renderTree(MustacheNode * root, MustacheData * data)
   string * output = new string();
   output->reserve(MUSTACHE_OUTPUT_BUFFER_LENGTH);
   
-  list<MustacheData*> * dataStack = new list<MustacheData*>();
-  dataStack->push_back(data);
+//  list<MustacheData*> * dataStack = new list<MustacheData*>();
+//  dataStack->push_back(data);
+  MustacheDataStack * dataStack = new MustacheDataStack();
+  dataStack->push(data);
   
   _renderNode(root, dataStack, output);
   
   return output;
 }
 
-void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack, string * output)
+void Mustache::_renderNode(MustacheNode * node, MustacheDataStack * dataStack, string * output)
 {
-  MustacheData * data = dataStack->back();
+  MustacheData * data = dataStack->top();
   string * nstr = node->data;
   
   if( data == NULL ) {
@@ -492,12 +523,13 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
     
     // Resolve up the data stack
     MustacheData * ref = NULL;
-    list<MustacheData*>::reverse_iterator ds_it;
     map<string,MustacheData *>::iterator d_it;
-    for( ds_it = dataStack->rbegin() ; ds_it != dataStack->rend(); ds_it++ ) {
-      if( (*ds_it)->type == MustacheData::TypeMap ) {
-        d_it = (*ds_it)->data.find(initial);
-        if( d_it != (*ds_it)->data.end() ) {
+    int i;
+    MustacheData ** dataStackPos = dataStack->stack + dataStack->size;
+    for( i = 0; i < dataStack->size; i++, dataStackPos-- ) {
+      if( (*dataStackPos)->type == MustacheData::TypeMap ) {
+        d_it = (*dataStackPos)->data.find(initial);
+        if( d_it != (*dataStackPos)->data.end() ) {
           ref = d_it->second;
           if( ref != NULL ) {
             break;
@@ -569,31 +601,31 @@ void Mustache::_renderNode(MustacheNode * node, list<MustacheData*> * dataStack,
         MustacheData::List::iterator childrenIt;
         MustacheNode::Children::iterator it;
         for ( childrenIt = val->children.begin() ; childrenIt != val->children.end(); childrenIt++ ) {
-          dataStack->push_back(*childrenIt);
+          dataStack->push(*childrenIt);
           for( it = node->children.begin() ; it != node->children.end(); it++ ) {
             _renderNode(*it, dataStack, output);
           }
-          dataStack->pop_back();
+          dataStack->pop();
         }
       } else if( val->type == MustacheData::TypeArray ) {
         MustacheData::Array ArrayPtr = val->array;
         int ArrayPos;
         MustacheNode::Children::iterator it;
         for ( ArrayPos = 0; ArrayPos < val->length; ArrayPos++, ArrayPtr++ ) {
-          dataStack->push_back(ArrayPtr);
+          dataStack->push(ArrayPtr);
           for( it = node->children.begin() ; it != node->children.end(); it++ ) {
             _renderNode(*it, dataStack, output);
           }
-          dataStack->pop_back();
+          dataStack->pop();
         }
       } else if( val->type == MustacheData::TypeMap ) {
         // Associate array/map
         MustacheNode::Children::iterator it;
-        dataStack->push_back(val);
+        dataStack->push(val);
         for( it = node->children.begin() ; it != node->children.end(); it++ ) {
           _renderNode(*it, dataStack, output);
         }
-        dataStack->pop_back();
+        dataStack->pop();
       }
       break;
     case MustacheNode::FlagPartial:
