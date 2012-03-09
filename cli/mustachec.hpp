@@ -1,4 +1,7 @@
 
+// Profiling:
+// ./configure CPPFLAGS="-pg -g" CFLAGS="-pg -g" CXXFLAGS="-pg -g"
+
 #ifndef MUSTACHEC_HPP
 #define MUSTACHEC_HPP
 
