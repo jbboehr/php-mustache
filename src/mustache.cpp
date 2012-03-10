@@ -91,6 +91,29 @@ vector<string> * explode(const string &delimiter, const string &str)
   return arr;
 }
 
+vector<string> * stringTok(const string &str, const string &delimiters)
+{
+  // http://oopweb.com/CPP/Documents/CPPHOWTO/Volume/C++Programming-HOWTO-7.html
+  vector<string> * tokens = new vector<string>;
+  
+  // Skip delimiters at beginning.
+  string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+  
+  // Find first "non-delimiter".
+  string::size_type pos = str.find_first_of(delimiters, lastPos);
+
+  while( string::npos != pos || string::npos != lastPos ) {
+    // Found a token, add it to the vector.
+    tokens->push_back(str.substr(lastPos, pos - lastPos));
+    // Skip delimiters.  Note the "not_of"
+    lastPos = str.find_first_not_of(delimiters, pos);
+    // Find next "non-delimiter"
+    pos = str.find_first_of(delimiters, lastPos);
+  }
+  
+  return tokens;
+}
+
 
 // DATA
 
@@ -381,31 +404,25 @@ MustacheNode * Mustache::tokenize(string * tmpl)
             currentFlags = MustacheNode::FlagInlinePartial;
             break;
           case '=':
-            throw MustacheException("Delimiters not yet supported");
-            /*
             if( buffer.at(buffer.length()-1) != '=' ) {
               throw MustacheException("Missing closing delimiter (=)");
             }
-            buffer.erase(0, 1);
-            trim(buffer);
+            trim(buffer, " \f\n\r\t\v=");
             
-            // Copy buffer to a c_str
-            char * cstr = new char[buffer.size()+1];
-            strcpy (cstr, buffer.c_str());
-            
-            char * newStart;
-            char * newStop;
-            char * trail;
-            newStart = strtok(cstr, whiteSpaces.c_str());
-            newStop = strtok(NULL, whiteSpaces.c_str());
-            trail = strtok(NULL, whiteSpaces.c_str());
-            if( newStart == NULL || newStop == NULL || trail != NULL ) {
-              delete newStart;
-              delete newStop;
-              delete trail;
+            vector<string> * delims = stringTok(buffer, whiteSpaces);
+            if( delims->size() != 2 || delims[0].size() < 1 || delims[1].size() < 1 ) {
+              delete delims;
               throw MustacheException("Invalid delimiter format");
             }
-            */
+            
+            // Assign new start/stop
+            start.assign(delims->at(0));
+            startC = start.at(0);
+            startL = start.length();
+            stop.assign(delims->at(1));
+            stopC = stop.at(0);
+            stopL = stop.length();
+            skip = 1;
             break;
         }
         if( !skip ) {
@@ -441,7 +458,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
         // Triple mustache
         if( !skip && inTripleTag && stop.compare("}}") == 0 ) {
           if( tmpl->compare(pos+2, 1, "}") != 0 ) {
-            throw MustacheException("Missing closing triple mustache delimeter");
+            throw MustacheException("Missing closing triple mustache delimiter");
           }
           skipUntil++;
         }
