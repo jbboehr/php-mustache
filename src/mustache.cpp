@@ -180,27 +180,27 @@ int MustacheData::isEmpty()
 // DATA STACK
 void MustacheDataStack::push(MustacheData * data)
 {
-  if( size >= MUSTACHE_DATA_STACK_SIZE ) {
+  if( this->size < 0 || this->size >= MUSTACHE_DATA_STACK_SIZE ) {
     throw MustacheException("Reached max stack size");
   }
-  stack[size] = data;
-  size++;
+  this->stack[this->size] = data;
+  this->size++;
 }
 
 void MustacheDataStack::pop()
 {
-  if( size > 0 ) {
-    size--;
+  if( this->size > 0 ) {
+    this->size--;
+    this->stack[this->size] = NULL;
   }
 }
 
 MustacheData * MustacheDataStack::top()
 {
-  if( size <= 0 ) {
-    //return NULL;
+  if( this->size <= 0 ) {
     throw MustacheException("Reached bottom of stack");
   } else {
-    return stack[size-1];
+    return this->stack[this->size - 1];
   }
 }
 
@@ -382,7 +382,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
             break;
           case '=':
             throw MustacheException("Delimiters not yet supported");
-            
+            /*
             if( buffer.at(buffer.length()-1) != '=' ) {
               throw MustacheException("Missing closing delimiter (=)");
             }
@@ -405,7 +405,7 @@ MustacheNode * Mustache::tokenize(string * tmpl)
               delete trail;
               throw MustacheException("Invalid delimiter format");
             }
-            
+            */
             break;
         }
         if( !skip ) {
@@ -475,8 +475,6 @@ string * Mustache::renderTree(MustacheNode * root, MustacheData * data)
   string * output = new string();
   output->reserve(MUSTACHE_OUTPUT_BUFFER_LENGTH);
   
-//  list<MustacheData*> * dataStack = new list<MustacheData*>();
-//  dataStack->push_back(data);
   MustacheDataStack * dataStack = new MustacheDataStack();
   dataStack->push(data);
   
@@ -548,7 +546,7 @@ void Mustache::_renderNode(MustacheNode * node, MustacheDataStack * dataStack, s
     MustacheData * ref = NULL;
     map<string,MustacheData *>::iterator d_it;
     int i;
-    MustacheData ** dataStackPos = dataStack->stack + dataStack->size;
+    MustacheData ** dataStackPos = dataStack->stack + dataStack->size - 1;
     for( i = 0; i < dataStack->size; i++, dataStackPos-- ) {
       if( (*dataStackPos)->type == MustacheData::TypeMap ) {
         d_it = (*dataStackPos)->data.find(initial);

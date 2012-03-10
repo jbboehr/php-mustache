@@ -3,6 +3,7 @@
 #define MUSTACHE_HPP
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <iostream>
@@ -50,7 +51,8 @@ class MustacheDataStack {
   public:
     MustacheDataStack() : size(0) {};
     int size;
-    MustacheData ** stack;
+    //MustacheData ** stack;
+    MustacheData * stack[MUSTACHE_DATA_STACK_SIZE];
     void push(MustacheData * data);
     void pop();
     MustacheData * top();
