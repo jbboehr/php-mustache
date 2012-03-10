@@ -34,7 +34,7 @@ void htmlspecialchars(string * str)
   int len = str->length();
   char * chr = (char *) str->c_str();
   tmp.reserve(len * 2);
-  for( pos = 0; pos < len; pos++ ) {
+  for( pos = 0; pos < len; pos++, chr++ ) {
     switch( *chr ) {
       case '&':
         tmp.append("&amp;");
@@ -55,7 +55,6 @@ void htmlspecialchars(string * str)
         tmp.append(1, *chr);
         break;
     }
-    chr++;
   }
   str->swap(tmp);
 }
@@ -382,7 +381,31 @@ MustacheNode * Mustache::tokenize(string * tmpl)
             currentFlags = MustacheNode::FlagInlinePartial;
             break;
           case '=':
-            throw MustacheException("Delimeters not yet supported");
+            throw MustacheException("Delimiters not yet supported");
+            
+            if( buffer.at(buffer.length()-1) != '=' ) {
+              throw MustacheException("Missing closing delimiter (=)");
+            }
+            buffer.erase(0, 1);
+            trim(buffer);
+            
+            // Copy buffer to a c_str
+            char * cstr = new char[buffer.size()+1];
+            strcpy (cstr, buffer.c_str());
+            
+            char * newStart;
+            char * newStop;
+            char * trail;
+            newStart = strtok(cstr, whiteSpaces.c_str());
+            newStop = strtok(NULL, whiteSpaces.c_str());
+            trail = strtok(NULL, whiteSpaces.c_str());
+            if( newStart == NULL || newStop == NULL || trail != NULL ) {
+              delete newStart;
+              delete newStop;
+              delete trail;
+              throw MustacheException("Invalid delimiter format");
+            }
+            
             break;
         }
         if( !skip ) {
@@ -510,7 +533,7 @@ void Mustache::_renderNode(MustacheNode * node, MustacheDataStack * dataStack, s
   if( val == NULL ) {
     // Search whole stack
     
-    // Dot notataion
+    // Dot notation
     string initial(*nstr);
     vector<string> * parts = NULL;
     size_t found = initial.find(".");

@@ -210,7 +210,7 @@ PHP_METHOD(Mustache, render)
   try {
     
     return_str = payload->mustache->render(template_str_obj, template_data);
-    RETURN_STRING(return_str->c_str(), 0); // Do reallocate
+    RETURN_STRING(return_str->c_str(), 1); // Yes reallocate
     
   } catch( MustacheException& e ) {
     

@@ -2,6 +2,9 @@
 #ifndef MUSTACHE_HPP
 #define MUSTACHE_HPP
 
+#include <stdio.h>
+#include <string.h>
+
 #include <iostream>
 #include <string>
 #include <map>

@@ -7,7 +7,24 @@ error_reporting(E_ALL | E_STRICT);
 ini_set('memory_limit', '256M');
 ini_set('display_errors', true);
 
+// Detect class
 $class = 'MustacheNative';
+for( $i = 1; $i < $argc; $i++ ) {
+  switch( strtolower($argv[$i]) ) {
+    case 'php': case 'native':
+      $class = 'MustacheNative';
+      break;
+    case 'c': case 'c++': case 'cpp':
+      $class = 'Mustache';
+      break;
+    case 'echo': case 'output': case 'verbose':
+      $silent = false;
+      break;
+  }
+  if( is_numeric($argv[$i]) ) {
+    $count = (int) $argv[$i];
+  }
+}
 
 // Argv
 if( !empty($argv[1]) && is_dir($argv[1]) ) {
@@ -49,6 +66,10 @@ $debug = false;
 foreach( $specData as $spec => $data ) {
   $tests = $data['tests'];
   foreach( $tests as $test ) {
+    // Header
+    printf("[%s] %s ", $spec, $test['name']);
+    
+    // Run
     $error = null;
     try {
       if( !$debug ) {
@@ -64,6 +85,7 @@ foreach( $specData as $spec => $data ) {
       $error = $e;
     }
     
+    // Output
     if( $given === $test['expected'] ) { // PASS
       $results[$spec][] = array(
         'test' => $test,
@@ -73,7 +95,7 @@ foreach( $specData as $spec => $data ) {
         'error' => $error,
       );
       $nPassed++;
-      printf("[%s] %s %s" . PHP_EOL, $spec, $test['name'], 'PASSED');
+      printf("%s" . PHP_EOL, 'PASSED');
     } else if( preg_replace('/\s/', '', $given) == preg_replace('/\s/', '', $test['expected']) ) { // WARN
       $results[$spec][] = array(
         'test' => $test,
@@ -83,7 +105,7 @@ foreach( $specData as $spec => $data ) {
         'error' => $error,
       );
       $nWarned++;
-      printf("[%s] %s %s" . PHP_EOL, $spec, $test['name'], 'WARNING - whitespace mismatch');
+      printf("%s" . PHP_EOL, 'WARNING - whitespace mismatch');
     } else { // FAIL
       $results[$spec][] = array(
         'test' => $test,
@@ -93,7 +115,7 @@ foreach( $specData as $spec => $data ) {
         'error' => $error,
       );
       $nFailed++;
-      printf("[%s] %s %s" . PHP_EOL, $spec, $test['name'], 'FAILED');
+      printf("%s" . PHP_EOL, 'FAILED');
       print("    Template: " . addcslashes($test['template'], "\n\r\t") . PHP_EOL);
       if( !empty($test['partials']) ) {
         foreach( $test['partials'] as $n => $p ) {
