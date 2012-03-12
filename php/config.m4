@@ -9,7 +9,7 @@ AC_DEFUN([PHP_MUSTACHE_ADD_SOURCES], [
 
 if test "$PHP_MUSTACHE" != "no"; then
 
-  for i in $PHP_MUSTACHE ../src; do
+  for i in $PHP_MUSTACHE `readlink -f ..`; do
     if test -r $i/mustache.hpp; then
       MUSTACHE_DIR=$i
       AC_MSG_RESULT([found in $i])
@@ -21,21 +21,24 @@ if test "$PHP_MUSTACHE" != "no"; then
      AC_MSG_RESULT([not found])
   fi
 
-  PHP_REQUIRE_CXX()
-
-  PHP_ADD_INCLUDE($MUSTACHE_DIR)
   PHP_MUSTACHE_ADD_SOURCES([
-      php_mustache.cpp
-      php_mustache_methods.cpp
-      $MUSTACHE_DIR/mustache.cpp
-      $MUSTACHE_DIR/data.cpp
-      $MUSTACHE_DIR/node.cpp
-      $MUSTACHE_DIR/renderer.cpp
-      $MUSTACHE_DIR/tokenizer.cpp
-      $MUSTACHE_DIR/utils.cpp
+    php_mustache.cpp
+    php_mustache_methods.cpp
+    src/mustache.cpp
+    src/data.cpp
+    src/node.cpp
+    src/renderer.cpp
+    src/tokenizer.cpp
+    src/utils.cpp
   ])
+  
+  AC_DEFINE(HAVE_MUSTACHE, 1, [Whether you have mustache support]) 
+  PHP_REQUIRE_CXX()
+  
+  PHP_ADD_INCLUDE($MUSTACHE_DIR)
+  PHP_ADD_BUILD_DIR($MUSTACHE_DIR)
 
-  PHP_SUBST(MUSTACHE_SHARED_LIBADD)
   PHP_ADD_LIBRARY(stdc++, 1, MUSTACHE_SHARED_LIBADD)
+  PHP_SUBST(MUSTACHE_SHARED_LIBADD)
   PHP_NEW_EXTENSION(mustache, $PHP_MUSTACHE_SOURCES, $ext_shared)
 fi

@@ -33,6 +33,13 @@ extern "C" {
 #include <string>
 
 #include "mustache.hpp"
+//#include "data.hpp"
+//#include "exception.hpp"
+//#include "node.hpp"
+//#include "renderer.hpp"
+//#include "tokenizer.hpp"
+//#include "utils.hpp"
+
 #include "php_mustache_methods.hpp"
 
 static zend_class_entry * Mustache_ce_ptr = NULL;
@@ -41,19 +48,6 @@ extern zend_module_entry mustache_module_entry;
 
 PHP_MINIT_FUNCTION(mustache);
 PHP_MINFO_FUNCTION(mustache);
-
-
-
-// Profiler
-// https://github.com/wadey/node-microtime/blob/master/src/microtime.cc
-//#if HAVE_MUSTACHE_PROFILER
-//#include <errno.h>
-//#include <sys/time.h>
-//#endif
-
-
-
-// Class object structure
 
 typedef struct _php_obj_Mustache {
     zend_object obj;

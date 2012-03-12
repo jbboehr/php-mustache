@@ -38,7 +38,7 @@ PHP_METHOD(Mustache, getStartSequence)
 
   payload = (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
   
-  const std::string & str = payload->mustache->tokenizer.getStartSequence();
+  const std::string & str = payload->mustache->getStartSequence();
   
   RETURN_STRING(str.c_str(), 1);
 }
@@ -61,7 +61,7 @@ PHP_METHOD(Mustache, getStopSequence)
 
   payload = (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
   
-  const std::string & str = payload->mustache->tokenizer.getStopSequence();
+  const std::string & str = payload->mustache->getStopSequence();
   
   RETURN_STRING(str.c_str(), 1);
 }
@@ -87,7 +87,7 @@ PHP_METHOD(Mustache, setStartSequence)
 
   payload = (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
   
-  payload->mustache->tokenizer.setStartSequence(str);
+  payload->mustache->setStartSequence(str);
   
   RETURN_TRUE;
 }
@@ -113,7 +113,7 @@ PHP_METHOD(Mustache, setStopSequence)
 
   payload = (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
   
-  payload->mustache->tokenizer.setStopSequence(str);
+  payload->mustache->setStopSequence(str);
   
   RETURN_TRUE;
 }
@@ -147,7 +147,7 @@ PHP_METHOD(Mustache, tokenize)
   // Tokenize template
   try {
     
-    payload->mustache->tokenizer.tokenize(&templateStr, &root);
+    payload->mustache->tokenize(&templateStr, &root);
     
     // Convert to PHP array
     mustache_node_to_zval(&root, return_value);
