@@ -32,7 +32,7 @@ extern "C" {
 
 #include <string>
 
-#include "mustache.hpp"
+#include "mustache/mustache.hpp"
 //#include "data.hpp"
 //#include "exception.hpp"
 //#include "node.hpp"
