@@ -230,8 +230,6 @@ void Tokenizer::tokenize(std::string * tmpl, Node * root)
     nodeStack.top()->children.push_back(node);
     buffer.clear();
   }
-  
-  return root;
 }
 
 

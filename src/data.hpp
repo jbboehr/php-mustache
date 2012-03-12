@@ -1,12 +1,14 @@
 
-#ifndef MUSTACHE_DATA_HPP
-#define MUSTACHE_DATA_HPP
-
 #include <list>
 #include <memory>
 #include <map>
 #include <string>
 #include <vector>
+
+#include "exception.hpp"
+
+#ifndef MUSTACHE_DATA_HPP
+#define MUSTACHE_DATA_HPP
 
 namespace mustache {
 
@@ -45,7 +47,6 @@ class Stack {
     
     Stack() : size(0) {};
     int size;
-    //MustacheData ** stack;
     Data * stack[Stack::MAXSIZE];
     void push(Data * data);
     void pop();

@@ -8,12 +8,10 @@ void Renderer::render(Node * root, Data * data, std::string * output)
 {
   output->reserve(Renderer::outputBufferLength);
   
-  Stack dataStack();
+  Stack dataStack;
   dataStack.push(data);
   
   _renderNode(root, &dataStack, output);
-  
-  return output;
 }
 
 void Renderer::_renderNode(Node * node, Stack * dataStack, std::string * output)

@@ -21,5 +21,6 @@ extern "C" {
 #include "mustache.hpp"
 
 using namespace std;
+using namespace mustache;
 
 #endif

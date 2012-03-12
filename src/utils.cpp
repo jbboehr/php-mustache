@@ -8,19 +8,19 @@ namespace mustache {
 // trim
 // http://stackoverflow.com/a/479091
 
-void trimRight(std::string& str, const std::string& trimChars = whiteSpaces)
+void trimRight(std::string& str, const std::string& trimChars)
 {
   std::string::size_type pos = str.find_last_not_of( trimChars );
   str.erase( pos + 1 );    
 }
 
-void trimLeft(std::string& str, const std::string& trimChars = whiteSpaces)
+void trimLeft(std::string& str, const std::string& trimChars)
 {
   std::string::size_type pos = str.find_first_not_of( trimChars );
   str.erase( 0, pos );
 }
 
-void trim(std::string& str, const std::string& trimChars = whiteSpaces)
+void trim(std::string& str, const std::string& trimChars)
 {
   trimRight( str, trimChars );
   trimLeft( str, trimChars );
@@ -130,5 +130,3 @@ std::vector<std::string> * stringTok(const std::string &str, const std::string &
 
 
 } // namespace Mustache
-
-#endif

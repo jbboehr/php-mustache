@@ -1,7 +1,4 @@
 
-#ifndef MUSTACHE_HPP
-#define MUSTACHE_HPP
-
 #include <iostream>
 #include <memory>
 #include <string>
@@ -12,6 +9,10 @@
 #include "renderer.hpp"
 #include "tokenizer.hpp"
 #include "utils.hpp"
+
+
+#ifndef MUSTACHE_HPP
+#define MUSTACHE_HPP
 
 namespace mustache {
 

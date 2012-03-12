@@ -1,11 +1,11 @@
 
 #include "mustachec.hpp"
 
-int mustache_data_from_json(MustacheData * node, json_val_t * element)
+int mustache_data_from_json(Data * node, json_val_t * element)
 {
   int i;
   char buff[100];
-  MustacheData * child = NULL;
+  Data * child = NULL;
   string * ckey;
   
   if( !element ) {
@@ -16,30 +16,30 @@ int mustache_data_from_json(MustacheData * node, json_val_t * element)
   switch( element->type ) {
     case JSON_FALSE:
     case JSON_NULL:
-      node->type = MustacheData::TypeString;
+      node->type = Data::TypeString;
       node->val = new string("");
       break;
     case JSON_TRUE:
-      node->type = MustacheData::TypeString;
+      node->type = Data::TypeString;
       node->val = new string("true"); // Meh
       break;
     case JSON_INT:
     case JSON_STRING:
     case JSON_FLOAT:
-      node->type = MustacheData::TypeString;
+      node->type = Data::TypeString;
       node->val = new string(element->u.data);
       break;
     case JSON_OBJECT_BEGIN:
-      node->type = MustacheData::TypeMap;
+      node->type = Data::TypeMap;
       for (i = 0; i < element->length; i++) {
         ckey = new string(element->u.object[i]->key, element->u.object[i]->key_length);
-        child = new MustacheData();
+        child = new Data();
         mustache_data_from_json(child, element->u.object[i]->val);
-        node->data.insert(pair<string,MustacheData*>(*ckey,child));
+        node->data.insert(pair<string,Data *>(*ckey,child));
       }
       break;
     case JSON_ARRAY_BEGIN:
-      node->init(MustacheData::TypeArray, element->length);
+      node->init(Data::TypeArray, element->length);
       child = node->array;
       for (i = 0; i < element->length; i++, child++) {
         mustache_data_from_json(child, element->u.array[i]);
@@ -144,7 +144,6 @@ int main( int argc, char * argv[] )
   // Get json data
   int ret = 0;
   json_config config;
-  char *output = "-";
 
   memset(&config, 0, sizeof(json_config));
   config.max_nesting = 0;
@@ -156,26 +155,25 @@ int main( int argc, char * argv[] )
   ret = do_tree(&config, inFile, &root_structure);
   
   // Init mustache
-  string templateStr(templateFileData);
-  MustacheData * templateData;
-  string * templateOutput;
   Mustache mustache;
+  string templateStr(templateFileData);
+  Data templateData;
+  string templateOutput;
   
   // Load mustache data
-  templateData = new MustacheData();
-  mustache_data_from_json(templateData, root_structure);
+  mustache_data_from_json(&templateData, root_structure);
   
   // Render
   try {
-    templateOutput = mustache.render(&templateStr, templateData);
-  } catch( MustacheException& e ) {
+    mustache.render(&templateStr, &templateData, &templateOutput);
+  } catch( Exception& e ) {
     fprintf(stderr, "%s\n", e.what());
     return 1;
   }
   
   // Output
   if( !silent ) {
-    fprintf(stdout, templateOutput->c_str());
+    fprintf(stdout, templateOutput.c_str());
   }
   return 0;
 }
