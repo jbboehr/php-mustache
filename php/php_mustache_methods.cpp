@@ -28,7 +28,6 @@ PHP_METHOD(Mustache, getStartSequence)
   zend_class_entry * _this_ce;
   zval * _this_zval;
   php_obj_Mustache *payload;
-  std::string str;
 
   if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &_this_zval, Mustache_ce_ptr) == FAILURE) {
           return;
@@ -39,7 +38,7 @@ PHP_METHOD(Mustache, getStartSequence)
 
   payload = (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
   
-  str = payload->mustache->tokenizer.getStartSequence();
+  const std::string & str = payload->mustache->tokenizer.getStartSequence();
   
   RETURN_STRING(str.c_str(), 1);
 }
@@ -52,7 +51,6 @@ PHP_METHOD(Mustache, getStopSequence)
   zend_class_entry * _this_ce;
   zval * _this_zval;
   php_obj_Mustache *payload;
-  std::string str;
 
   if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &_this_zval, Mustache_ce_ptr) == FAILURE) {
           return;
@@ -63,7 +61,7 @@ PHP_METHOD(Mustache, getStopSequence)
 
   payload = (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
   
-  str = payload->mustache->tokenizer.getStopSequence();
+  const std::string & str = payload->mustache->tokenizer.getStopSequence();
   
   RETURN_STRING(str.c_str(), 1);
 }

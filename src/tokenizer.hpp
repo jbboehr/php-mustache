@@ -29,8 +29,8 @@ class Tokenizer {
     void setStopSequence(const std::string& stop);
     void setStopSequence(const char * stop);
     void setEscapeByDefault(bool flag);
-    const std::string& getStartSequence();
-    const std::string& getStopSequence();
+    const std::string & getStartSequence();
+    const std::string & getStopSequence();
     bool getEscapeByDefault();
     
     void tokenize(std::string * tmpl, Node * root);

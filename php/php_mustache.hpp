@@ -21,8 +21,9 @@ extern "C" {
 } // extern "C" 
 
 #include <string>
-#include "php_mustache_methods.hpp"
+
 #include "mustache.hpp"
+#include "php_mustache_methods.hpp"
 
 extern "C" {
 
@@ -60,7 +61,7 @@ PHP_MINFO_FUNCTION(mustache);
 
 typedef struct _php_obj_Mustache {
     zend_object obj;
-    mustache::Mustache *mustache;
+    mustache::Mustache * mustache;
 } php_obj_Mustache;
 
 
