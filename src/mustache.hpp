@@ -2,106 +2,33 @@
 #ifndef MUSTACHE_HPP
 #define MUSTACHE_HPP
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include <iostream>
-#include <string>
-#include <map>
-#include <list>
-#include <stack>
-#include <exception>
-#include <vector>
-#include <stdexcept>
 #include <memory>
+#include <string>
 
-using namespace std;
+#include "data.hpp"
+#include "exception.hpp"
+#include "node.hpp"
+#include "renderer.hpp"
+#include "tokenizer.hpp"
+#include "utils.hpp"
 
-const int MUSTACHE_DATA_STACK_SIZE = 100;
-const int MUSTACHE_OUTPUT_BUFFER_LENGTH = 100000;
+namespace Mustache {
 
-class MustacheException : public runtime_error {
-  public:
-      MustacheException(const string& desc) : runtime_error(desc) { }
-};
-
-class MustacheData {
-  public:
-    typedef auto_ptr<MustacheData> Ptr;
-    typedef string String;
-    typedef map<string,MustacheData *> Map;
-    typedef list<MustacheData *> List;
-    typedef MustacheData * Array;
-    enum Type { TypeNone = 0, TypeString = 1, TypeList = 2, TypeMap = 3, TypeArray = 4 };
-    
-    MustacheData::Type type;
-    int length;
-    MustacheData::String * val;
-    MustacheData::Map data;
-    MustacheData::List children;
-    MustacheData::Array array;
-    
-    ~MustacheData();
-    int isEmpty();
-    void init(MustacheData::Type type, int size);
-};
-
-class MustacheDataStack {
-  public:
-    MustacheDataStack() : size(0) {};
-    int size;
-    //MustacheData ** stack;
-    MustacheData * stack[MUSTACHE_DATA_STACK_SIZE];
-    void push(MustacheData * data);
-    void pop();
-    MustacheData * top();
-};
-
-class MustacheNode {
-  public:
-    typedef auto_ptr<MustacheNode> Ptr;
-    typedef vector<MustacheNode *> Children;
-    enum Type { TypeNone = 0, TypeRoot = 1, TypeOutput = 2, TypeTag = 3 };
-    enum Flag { 
-      FlagNone = 0,
-      FlagEscape = 1,
-      FlagNegate = 2,
-      FlagSection = 4,
-      FlagStop = 8,
-      FlagComment = 16,
-      FlagPartial = 32,
-      FlagInlinePartial = 64,
-      
-      FlagHasChildren = MustacheNode::FlagNegate | MustacheNode::FlagSection | MustacheNode::FlagPartial
-    };
-    
-    MustacheNode::Type type;
-    int flags;
-    string * data;
-    MustacheNode::Children children;
-    
-    ~MustacheNode();
-};
 
 class Mustache {
   private:
-    string startSequence;
-    string stopSequence;
-    bool escapeByDefault;
-    void _renderNode(MustacheNode * node, MustacheDataStack * dataStack, string * output);
   public:
-    typedef auto_ptr<Mustache> Ptr;
-    Mustache();
-    ~Mustache();
-    void setStartSequence(string start);
-    void setStopSequence(string stop);
-    string getStartSequence();
-    string getStopSequence();
-    string * render(string * tmpl, MustacheData * data);
-    MustacheNode * tokenize(string * tmpl);
-    string * renderTree(MustacheNode * root, MustacheData * data);
+    typedef std::auto_ptr<Mustache> Ptr;
+    
+    Tokenizer tokenizer;
+    Renderer renderer;
+    
+    void tokenize(std::string * tmpl, Node * root);
+    void render(std::string * tmpl, Data * data, std::string * output);
 };
 
+
+} // namespace Mustache
 
 #endif
