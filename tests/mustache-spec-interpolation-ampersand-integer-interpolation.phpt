@@ -20,4 +20,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-"85\s+miles\s+an\s+hour\!"
+"85\s*miles\s*an\s*hour\!"

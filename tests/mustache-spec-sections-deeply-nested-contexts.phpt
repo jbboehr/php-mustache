@@ -67,4 +67,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-1\s+121\s+12321\s+1234321\s+123454321\s+1234321\s+12321\s+121\s+1\s+
+1\s*121\s*12321\s*1234321\s*123454321\s*1234321\s*12321\s*121\s*1\s*

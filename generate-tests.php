@@ -56,7 +56,7 @@ foreach( $specData as $spec => $data ) {
     foreach( preg_split('/\s+/', $test['expected']) as $chunk ) {
       $tmp[] = preg_quote($chunk, '/');
     }
-    $output .= join("\s+", $tmp);
+    $output .= join("\s*", $tmp);
     
     $cleanName = strtolower(trim(preg_replace('/[^a-zA-Z0-9]+/', '-', $test['name']), '-'));
     file_put_contents('./tests/mustache-spec-' . $spec . '-' . $cleanName . '.phpt', $output);

@@ -19,4 +19,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-I\s+\(\)\s+be\s+seen\!
+I\s*\(\)\s*be\s*seen\!

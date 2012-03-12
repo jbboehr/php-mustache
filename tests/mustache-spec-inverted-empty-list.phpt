@@ -22,4 +22,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-"Yay\s+lists\!"
+"Yay\s*lists\!"

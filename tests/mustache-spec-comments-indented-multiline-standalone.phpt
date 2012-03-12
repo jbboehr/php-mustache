@@ -26,4 +26,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-Begin\.\s+End\.\s+
+Begin\.\s*End\.\s*

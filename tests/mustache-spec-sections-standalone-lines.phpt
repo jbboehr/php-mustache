@@ -28,4 +28,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-\|\s+This\s+Is\s+\|\s+\|\s+A\s+Line\s+
+\|\s*This\s*Is\s*\|\s*\|\s*A\s*Line\s*

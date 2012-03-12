@@ -31,4 +31,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-\*\s+first\s+\*\s+second\s+\*\s+third\s+
+\*\s*first\s*\*\s*second\s*\*\s*third\s*

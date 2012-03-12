@@ -24,4 +24,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-\s+NO\s+WAY\s+
+\s*NO\s*WAY\s*

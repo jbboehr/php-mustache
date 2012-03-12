@@ -20,4 +20,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-\(It\s+worked\!\)
+\(It\s*worked\!\)

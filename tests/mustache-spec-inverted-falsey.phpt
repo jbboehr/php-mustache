@@ -20,4 +20,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-"This\s+should\s+be\s+rendered\."
+"This\s*should\s*be\s*rendered\."

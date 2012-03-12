@@ -23,4 +23,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-"from\s+partial"
+"from\s*partial"

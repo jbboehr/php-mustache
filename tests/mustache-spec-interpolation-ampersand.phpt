@@ -22,4 +22,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-These\s+characters\s+should\s+not\s+be\s+HTML\s+escaped\:\s+&\s+"\s+\<\s+\>\s+
+These\s*characters\s*should\s*not\s*be\s*HTML\s*escaped\:\s*&\s*"\s*\<\s*\>\s*

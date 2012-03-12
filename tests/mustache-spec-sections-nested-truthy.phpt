@@ -20,4 +20,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-\|\s+A\s+B\s+C\s+D\s+E\s+\|
+\|\s*A\s*B\s*C\s*D\s*E\s*\|

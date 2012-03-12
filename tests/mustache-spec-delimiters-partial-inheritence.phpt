@@ -29,4 +29,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-\[\s+\.yes\.\s+\]\s+\[\s+\.yes\.\s+\]\s+
+\[\s*\.yes\.\s*\]\s*\[\s*\.yes\.\s*\]\s*

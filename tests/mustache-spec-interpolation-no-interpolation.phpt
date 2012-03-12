@@ -21,4 +21,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-Hello\s+from\s+\{Mustache\}\!\s+
+Hello\s*from\s*\{Mustache\}\!\s*

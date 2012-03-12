@@ -48,4 +48,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-"Phil"\s+\=\=\s+"Phil"
+"Phil"\s*\=\=\s*"Phil"

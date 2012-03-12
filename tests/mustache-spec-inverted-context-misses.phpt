@@ -19,4 +19,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-\[Cannot\s+find\s+key\s+'missing'\!\]
+\[Cannot\s*find\s*key\s*'missing'\!\]

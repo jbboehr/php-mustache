@@ -20,4 +20,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-"1\.21\s+jiggawatts\!"
+"1\.21\s*jiggawatts\!"

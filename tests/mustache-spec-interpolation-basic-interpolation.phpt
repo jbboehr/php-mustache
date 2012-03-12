@@ -22,4 +22,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-Hello,\s+world\!\s+
+Hello,\s*world\!\s*

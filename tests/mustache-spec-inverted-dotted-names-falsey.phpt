@@ -26,4 +26,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-"Not\s+Here"\s+\=\=\s+"Not\s+Here"
+"Not\s*Here"\s*\=\=\s*"Not\s*Here"

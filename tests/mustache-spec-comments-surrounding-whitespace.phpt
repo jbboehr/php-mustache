@@ -19,4 +19,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-12345\s+67890
+12345\s*67890

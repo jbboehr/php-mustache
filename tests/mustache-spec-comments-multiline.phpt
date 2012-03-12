@@ -24,4 +24,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-1234567890\s+
+1234567890\s*

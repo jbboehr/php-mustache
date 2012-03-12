@@ -40,4 +40,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-\[\s+I\s+got\s+interpolated\.\s+\|data\|\s+\{\{data\}\}\s+I\s+got\s+interpolated\.\s+\]\s+
+\[\s*I\s*got\s*interpolated\.\s*\|data\|\s*\{\{data\}\}\s*I\s*got\s*interpolated\.\s*\]\s*
