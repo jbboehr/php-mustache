@@ -21,6 +21,31 @@ PHP_METHOD(Mustache, __construct)
 }
 /* }}} __construct */
 
+/* {{{ proto bool getEscapeByDefault()
+   */
+PHP_METHOD(Mustache, getEscapeByDefault)
+{
+  zend_class_entry * _this_ce;
+  zval * _this_zval;
+  php_obj_Mustache *payload;
+
+  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &_this_zval, Mustache_ce_ptr) == FAILURE) {
+          return;
+  }
+
+  _this_zval = getThis();
+  _this_ce = Z_OBJCE_P(_this_zval);
+
+  payload = (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
+  
+  if( payload->mustache->getEscapeByDefault() ) {
+    RETURN_TRUE;
+  } else {
+    RETURN_FALSE;
+  }
+}
+/* }}} getEscapeByDefault */
+
 /* {{{ proto string getStartSequence()
    */
 PHP_METHOD(Mustache, getStartSequence)
@@ -66,6 +91,31 @@ PHP_METHOD(Mustache, getStopSequence)
   RETURN_STRING(str.c_str(), 1);
 }
 /* }}} getStopSequence */
+
+/* {{{ proto boolean setStartSequence(bool flag)
+   */
+PHP_METHOD(Mustache, setEscapeByDefault)
+{
+  zend_class_entry * _this_ce;
+  zval * _this_zval;
+  php_obj_Mustache *payload;
+  
+  long flag;
+
+  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &_this_zval, Mustache_ce_ptr, &flag) == FAILURE) {
+          return;
+  }
+
+  _this_zval = getThis();
+  _this_ce = Z_OBJCE_P(_this_zval);
+  
+  payload = (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
+  
+  payload->mustache->setEscapeByDefault((bool) flag != 0);
+  
+  RETURN_TRUE;
+}
+/* }}} setEscapeByDefault */
 
 /* {{{ proto boolean setStartSequence(string str)
    */
