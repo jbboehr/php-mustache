@@ -10,7 +10,7 @@
 #include "node.hpp"
 #include "utils.hpp"
 
-namespace Mustache {
+namespace mustache {
 
 
 class Renderer {

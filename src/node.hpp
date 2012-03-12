@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace Mustache {
+namespace mustache {
 
 
 class Node {

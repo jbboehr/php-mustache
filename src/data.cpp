@@ -1,7 +1,7 @@
 
 #include "data.hpp"
 
-namespace Mustache {
+namespace mustache {
 
 
 Data::~Data()

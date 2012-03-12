@@ -13,7 +13,7 @@
 #include "tokenizer.hpp"
 #include "utils.hpp"
 
-namespace Mustache {
+namespace mustache {
 
 
 class Mustache {

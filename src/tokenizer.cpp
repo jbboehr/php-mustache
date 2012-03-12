@@ -1,7 +1,7 @@
 
 #include "tokenizer.hpp"
 
-namespace Mustache {
+namespace mustache {
 
 
 void Tokenizer::setStartSequence(const std::string& start) {

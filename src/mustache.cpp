@@ -1,7 +1,7 @@
 
 #include "mustache.hpp"
 
-namespace Mustache {
+namespace mustache {
 
 
 void Mustache::tokenize(std::string * tmpl, Node * root)

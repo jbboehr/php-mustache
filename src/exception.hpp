@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace Mustache {
+namespace mustache {
 
 
 class Exception : public std::runtime_error {

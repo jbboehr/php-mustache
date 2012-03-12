@@ -1,7 +1,7 @@
 
 #include "utils.hpp"
 
-namespace Mustache {
+namespace mustache {
 
 
 

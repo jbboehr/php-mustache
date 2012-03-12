@@ -1,7 +1,7 @@
 
 #include "node.hpp"
 
-namespace Mustache {
+namespace mustache {
 
 
 Node::~Node()

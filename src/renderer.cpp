@@ -1,7 +1,7 @@
 
 #include "renderer.hpp"
 
-namespace Mustache {
+namespace mustache {
 
 
 void Renderer::render(Node * root, Data * data, std::string * output)
