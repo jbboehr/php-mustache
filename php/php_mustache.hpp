@@ -60,7 +60,7 @@ PHP_MINFO_FUNCTION(mustache);
 
 typedef struct _php_obj_Mustache {
     zend_object obj;
-    Mustache *mustache;
+    mustache::Mustache *mustache;
 } php_obj_Mustache;
 
 

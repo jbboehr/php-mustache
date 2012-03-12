@@ -21,7 +21,7 @@ static void Mustache_obj_free(void *object TSRMLS_DC)
 {
 	php_obj_Mustache *payload = (php_obj_Mustache *)object;
 	
-	Mustache *mustache = payload->mustache;
+	mustache::Mustache *mustache = payload->mustache;
         
         delete mustache;
         
@@ -38,7 +38,7 @@ static zend_object_value Mustache_obj_create(zend_class_entry *class_type TSRMLS
 	memset(payload, 0, sizeof(php_obj_Mustache));
 	payload->obj.ce = class_type;
         
-        payload->mustache = new Mustache();
+        payload->mustache = new mustache::Mustache();
         
 	retval.handle = zend_objects_store_put(payload, NULL, (zend_objects_free_object_storage_t) Mustache_obj_free, NULL TSRMLS_CC);
 	retval.handlers = &Mustache_obj_handlers;
