@@ -1,9 +1,9 @@
 
-#include <string>
-#include <vector>
-
 #ifndef MUSTACHE_UTILS_HPP
 #define MUSTACHE_UTILS_HPP
+
+#include <string>
+#include <vector>
 
 namespace mustache {
 

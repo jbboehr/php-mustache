@@ -1,4 +1,7 @@
 
+#ifndef MUSTACHE_TOKENIZER_HPP
+#define MUSTACHE_TOKENIZER_HPP
+
 #include <memory>
 #include <stack>
 #include <string>
@@ -6,9 +9,6 @@
 #include "exception.hpp"
 #include "node.hpp"
 #include "utils.hpp"
-
-#ifndef MUSTACHE_TOKENIZER_HPP
-#define MUSTACHE_TOKENIZER_HPP
 
 namespace mustache {
 

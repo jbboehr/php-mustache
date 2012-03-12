@@ -1,4 +1,7 @@
 
+#ifndef MUSTACHE_RENDERER_HPP
+#define MUSTACHE_RENDERER_HPP
+
 #include <map>
 #include <string>
 
@@ -6,9 +9,6 @@
 #include "exception.hpp"
 #include "node.hpp"
 #include "utils.hpp"
-
-#ifndef MUSTACHE_RENDERER_HPP
-#define MUSTACHE_RENDERER_HPP
 
 namespace mustache {
 

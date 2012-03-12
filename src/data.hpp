@@ -1,4 +1,7 @@
 
+#ifndef MUSTACHE_DATA_HPP
+#define MUSTACHE_DATA_HPP
+
 #include <list>
 #include <memory>
 #include <map>
@@ -6,9 +9,6 @@
 #include <vector>
 
 #include "exception.hpp"
-
-#ifndef MUSTACHE_DATA_HPP
-#define MUSTACHE_DATA_HPP
 
 namespace mustache {
 

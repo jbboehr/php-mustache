@@ -1,10 +1,10 @@
 
+#ifndef MUSTACHE_NODE_HPP
+#define MUSTACHE_NODE_HPP
+
 #include <memory>
 #include <string>
 #include <vector>
-
-#ifndef MUSTACHE_NODE_HPP
-#define MUSTACHE_NODE_HPP
 
 namespace mustache {
 

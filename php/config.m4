@@ -1,25 +1,41 @@
 
-PHP_ARG_ENABLE(mustache,
-    [Whether to enable the "mustache" extension]
-    [  --enable-mustache         Enable mustache support])
+PHP_ARG_ENABLE(mustache, whether to enable mustache support,
+dnl Make sure that the comment is aligned:
+[ --enable-mustache Enable mustache support])
 
-PHP_ARG_ENABLE(mustache_profiler,
-    [Whether to enable the "mustache" extension profiler]
-    [  --enable-mustache-profiler         Enable mustache profiler support])
+AC_DEFUN([PHP_MUSTACHE_ADD_SOURCES], [
+  PHP_MUSTACHE_SOURCES="$PHP_MUSTACHE_SOURCES $1"
+])
 
 if test "$PHP_MUSTACHE" != "no"; then
-    PHP_REQUIRE_CXX()
-    dnl export CC=g++
 
-    PHP_ADD_INCLUDE(../src)
+  for i in $PHP_MUSTACHE ../src; do
+    if test -r $i/mustache.hpp; then
+      MUSTACHE_DIR=$i
+      AC_MSG_RESULT([found in $i])
+      break
+    fi
+  done
 
-    PHP_SUBST(MUSTACHE_SHARED_LIBADD)
-    PHP_ADD_LIBRARY(stdc++, 1, MUSTACHE_SHARED_LIBADD)
-    PHP_NEW_EXTENSION(mustache,
-        php_mustache.cpp php_mustache_methods.cpp ../src/mustache.cpp,
-        $ext_shared)
-fi
+  if test -z "$MUSTACHE_DIR" -o -z "$MUSTACHE_DIR"; then
+     AC_MSG_RESULT([not found])
+  fi
 
-if test "$PHP_MUSTACHE_PROFILER" != "no"; then
-    AC_DEFINE(HAVE_MUSTACHE_PROFILER, 1, [Whether you want profiler])
+  PHP_REQUIRE_CXX()
+
+  PHP_ADD_INCLUDE($MUSTACHE_DIR)
+  PHP_MUSTACHE_ADD_SOURCES([
+      php_mustache.cpp
+      php_mustache_methods.cpp
+      $MUSTACHE_DIR/mustache.cpp
+      $MUSTACHE_DIR/data.cpp
+      $MUSTACHE_DIR/node.cpp
+      $MUSTACHE_DIR/renderer.cpp
+      $MUSTACHE_DIR/tokenizer.cpp
+      $MUSTACHE_DIR/utils.cpp
+  ])
+
+  PHP_SUBST(MUSTACHE_SHARED_LIBADD)
+  PHP_ADD_LIBRARY(stdc++, 1, MUSTACHE_SHARED_LIBADD)
+  PHP_NEW_EXTENSION(mustache, $PHP_MUSTACHE_SOURCES, $ext_shared)
 fi

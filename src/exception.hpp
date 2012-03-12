@@ -1,10 +1,10 @@
 
+#ifndef MUSTACHE_EXCEPTION_HPP
+#define MUSTACHE_EXCEPTION_HPP
+
 #include <exception>
 #include <stdexcept>
 #include <string>
-
-#ifndef MUSTACHE_EXCEPTION_HPP
-#define MUSTACHE_EXCEPTION_HPP
 
 namespace mustache {
 

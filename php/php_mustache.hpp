@@ -18,27 +18,11 @@ extern "C" {
 #include <ext/standard/info.h>
 #include <Zend/zend_extensions.h>
   
-} // extern "C" 
-
-#include <string>
-
-#include "mustache.hpp"
-#include "php_mustache_methods.hpp"
-
-extern "C" {
-
-static zend_class_entry * Mustache_ce_ptr = NULL;
-extern zend_module_entry mustache_module_entry;  
-#define phpext_mustache_ptr &mustache_module_entry  
-
 #ifdef PHP_WIN32
 #define PHP_FFTW_API __declspec(dllexport)
 #else
 #define PHP_FFTW_API
 #endif
-
-PHP_MINIT_FUNCTION(mustache);
-PHP_MINFO_FUNCTION(mustache);
 
 #ifdef ZTS
 #include "TSRM.h"
@@ -46,14 +30,26 @@ PHP_MINFO_FUNCTION(mustache);
 
 } // extern "C" 
 
+#include <string>
+
+#include "mustache.hpp"
+#include "php_mustache_methods.hpp"
+
+static zend_class_entry * Mustache_ce_ptr = NULL;
+extern zend_module_entry mustache_module_entry;  
+#define phpext_mustache_ptr &mustache_module_entry  
+
+PHP_MINIT_FUNCTION(mustache);
+PHP_MINFO_FUNCTION(mustache);
+
 
 
 // Profiler
 // https://github.com/wadey/node-microtime/blob/master/src/microtime.cc
-#if HAVE_MUSTACHE_PROFILER
-#include <errno.h>
-#include <sys/time.h>
-#endif
+//#if HAVE_MUSTACHE_PROFILER
+//#include <errno.h>
+//#include <sys/time.h>
+//#endif
 
 
 
