@@ -25,7 +25,7 @@ $test = array (
   ),
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo $mustache->render($test["template"], $test["data"], $test["partials"]);
 ?>
 --EXPECTREGEX--
 \[\s*\.yes\.\s*\.yes\.\s*\]\s*\[\s*\.yes\.\s*\.\|value\|\.\s*\]\s*

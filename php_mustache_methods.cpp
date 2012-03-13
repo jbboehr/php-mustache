@@ -211,7 +211,7 @@ PHP_METHOD(Mustache, tokenize)
 }
 /* }}} tokenize */
 
-/* {{{ proto string render(string template, array data)
+/* {{{ proto string render(string template, array data, array partials)
    */
 PHP_METHOD(Mustache, render)
 {
@@ -463,6 +463,13 @@ zval * mustache_data_to_zval(mustache::Data * node)
 void mustache_partials_from_zval(mustache::Mustache * mustache, 
         mustache::Node::Partials * partials, zval * current)
 {
+  return;
+  
+  // Ignore if not an array
+  if( current == NULL || Z_TYPE_P(current) != IS_ARRAY ) {
+    return;
+  }
+  
   HashTable * data_hash = NULL;
   HashPosition data_pointer = NULL;
   zval **data_entry = NULL;
@@ -476,11 +483,6 @@ void mustache_partials_from_zval(mustache::Mustache * mustache,
   
   string tmpl;
   mustache::Node node;
-  
-  // Ignore if not an array
-  if( Z_TYPE_P(current) != IS_ARRAY ) {
-    return;
-  }
   
   data_hash = HASH_OF(current);
   data_count = zend_hash_num_elements(data_hash);
@@ -504,4 +506,3 @@ void mustache_partials_from_zval(mustache::Mustache * mustache,
     zend_hash_move_forward_ex(data_hash, &data_pointer);
   }
 }
-;

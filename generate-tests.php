@@ -46,7 +46,11 @@ foreach( $specData as $spec => $data ) {
     // MAIN
     $output .= '$test = ' . var_export($test, true) . ';' . PHP_EOL;
     $output .= '$mustache = new Mustache();' . PHP_EOL;
-    $output .= 'echo $mustache->render($test["template"], $test["data"]);' . PHP_EOL;
+    if( !empty($test['partials']) && is_array($test['partials']) ) {
+      $output .= 'echo $mustache->render($test["template"], $test["data"], $test["partials"]);' . PHP_EOL;
+    } else {
+      $output .= 'echo $mustache->render($test["template"], $test["data"]);' . PHP_EOL;
+    }
     // END MAIN
     $output .= '?>' . PHP_EOL;
 //    $output .= '--EXPECT--' . PHP_EOL;
