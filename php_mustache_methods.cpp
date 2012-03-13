@@ -249,7 +249,7 @@ PHP_METHOD(Mustache, render)
   // Render template
   try {
     
-    payload->mustache->render(&templateStr, &templateData, &output);
+    payload->mustache->render(&templateStr, &templateData, NULL, &output);
     RETURN_STRING(output.c_str(), 1); // Yes reallocate
     
   } catch( mustache::Exception& e ) {
