@@ -346,7 +346,7 @@ void mustache_data_from_zval(mustache::Data * node, zval * current)
   char * key_str;
   uint key_len;
   ulong key_nindex;
-  string * ckey;
+  string ckey;
   
   int ArrayPos = 0;
   mustache::Data * child = NULL;
@@ -395,8 +395,8 @@ void mustache_data_from_zval(mustache::Data * node, zval * current)
           } else if( node->type == mustache::Data::TypeMap ) {
             child = new mustache::Data();
             mustache_data_from_zval(child, *data_entry);
-            ckey = new string(key_str);
-            node->data.insert(pair<string,mustache::Data*>(*ckey,child));
+            ckey.assign(key_str);
+            node->data.insert(pair<string,mustache::Data*>(ckey,child));
           } else {
             // Whoops
           }
