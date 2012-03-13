@@ -463,5 +463,45 @@ zval * mustache_data_to_zval(mustache::Data * node)
 void mustache_partials_from_zval(mustache::Mustache * mustache, 
         mustache::Node::Partials * partials, zval * current)
 {
-  ;
+  HashTable * data_hash = NULL;
+  HashPosition data_pointer = NULL;
+  zval **data_entry = NULL;
+  long data_count;
+  
+  int key_type;
+  char * key_str;
+  uint key_len;
+  ulong key_nindex;
+  string ckey;
+  
+  string tmpl;
+  mustache::Node node;
+  
+  // Ignore if not an array
+  if( Z_TYPE_P(current) != IS_ARRAY ) {
+    return;
+  }
+  
+  data_hash = HASH_OF(current);
+  data_count = zend_hash_num_elements(data_hash);
+  zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
+  while( zend_hash_get_current_data_ex(data_hash, (void**) &data_entry, &data_pointer) == SUCCESS ) {
+    // Get current key
+    key_type = zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, &key_nindex, true, &data_pointer);
+    // Check key type
+    if( key_type != HASH_KEY_IS_STRING ) {
+      // Non-string key
+      php_error(E_WARNING, "Partial array contains a non-string key");
+    } else if( Z_TYPE_PP(data_entry) != IS_STRING ) {
+      // Non-string value
+      php_error(E_WARNING, "Partial array contains a non-string value");
+    } else {
+      // String key, string value
+      ckey.assign(key_str);
+      (*partials)[ckey] = node;
+      mustache->tokenize(&tmpl, &(*partials)[ckey]);
+    }
+    zend_hash_move_forward_ex(data_hash, &data_pointer);
+  }
 }
+;

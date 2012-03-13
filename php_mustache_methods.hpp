@@ -9,6 +9,7 @@ extern "C" {
 #include <iostream>
 #include <string>
 #include <map>
+#include <memory>
 
 #include "mustache.hpp"
 
