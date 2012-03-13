@@ -463,8 +463,6 @@ zval * mustache_data_to_zval(mustache::Data * node)
 void mustache_partials_from_zval(mustache::Mustache * mustache, 
         mustache::Node::Partials * partials, zval * current)
 {
-  return;
-  
   // Ignore if not an array
   if( current == NULL || Z_TYPE_P(current) != IS_ARRAY ) {
     return;
@@ -500,7 +498,7 @@ void mustache_partials_from_zval(mustache::Mustache * mustache,
     } else {
       // String key, string value
       ckey.assign(key_str);
-      (*partials)[ckey] = node;
+      partials->insert(make_pair(ckey, node));
       mustache->tokenize(&tmpl, &(*partials)[ckey]);
     }
     zend_hash_move_forward_ex(data_hash, &data_pointer);
