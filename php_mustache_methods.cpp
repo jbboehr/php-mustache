@@ -498,6 +498,7 @@ void mustache_partials_from_zval(mustache::Mustache * mustache,
     } else {
       // String key, string value
       ckey.assign(key_str);
+      tmpl.assign(Z_STRVAL_PP(data_entry));
       partials->insert(make_pair(ckey, node));
       mustache->tokenize(&tmpl, &(*partials)[ckey]);
     }
