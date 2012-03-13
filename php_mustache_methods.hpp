@@ -65,5 +65,7 @@ ZEND_END_ARG_INFO()
 void mustache_node_to_zval(mustache::Node * node, zval * current);
 void mustache_data_from_zval(mustache::Data * node, zval * current);
 zval * mustache_data_to_zval(mustache::Data * node);
+void mustache_partials_from_zval(mustache::Mustache * mustache, 
+        mustache::Node::Partials * partials, zval * current);
 
 #endif

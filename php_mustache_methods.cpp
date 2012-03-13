@@ -228,6 +228,8 @@ PHP_METHOD(Mustache, render)
   zval * partials = NULL;
   
   string templateStr;
+  mustache::Node templateNode;
+  mustache::Node::Partials templatePartials;
   mustache::Data templateData;
   string output;
 
@@ -240,16 +242,23 @@ PHP_METHOD(Mustache, render)
 
   payload = (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
   
-  // Prepare template string
-  templateStr.assign(template_str);
-  
-  // Prepare template data
-  mustache_data_from_zval(&templateData, data);
-  
-  // Render template
   try {
+    // Prepare template string
+    templateStr.assign(template_str);
     
-    payload->mustache->render(&templateStr, &templateData, NULL, &output);
+    // Prepare template data
+    mustache_data_from_zval(&templateData, data);
+    
+    // Tokenize template
+    payload->mustache->tokenize(&templateStr, &templateNode);
+    
+    // Tokenize partials
+    mustache_partials_from_zval(payload->mustache, &templatePartials, partials);
+    
+    // Render template
+    payload->mustache->render(&templateNode, &templateData, &templatePartials, &output);
+    
+    // Output
     RETURN_STRING(output.c_str(), 1); // Yes reallocate
     
   } catch( mustache::Exception& e ) {
@@ -449,4 +458,10 @@ zval * mustache_data_to_zval(mustache::Data * node)
   }
   
   return current;
+}
+
+void mustache_partials_from_zval(mustache::Mustache * mustache, 
+        mustache::Node::Partials * partials, zval * current)
+{
+  ;
 }
