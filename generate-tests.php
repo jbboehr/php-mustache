@@ -69,6 +69,7 @@ foreach( $specData as $spec => $data ) {
     // Hack in XFAIL
     if( ($spec == 'partials' && $test['name'] == 'Standalone Line Endings') ||
         ($spec == 'partials' && $test['name'] == 'Standalone Without Previous Line') ) {
+      $output .= PHP_EOL;
       $output .= '--XFAIL--' . PHP_EOL;
       $output .= 'This extension does not follow the spec\'s whitespace rules.';
     }
