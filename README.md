@@ -1,18 +1,29 @@
-# Mustache PHP Extension (C++)
+Mustache
+========
 
-C++ implementation of Mustache as a PHP extension.
+C++ implementation of Mustache as a PHP extension. See <http://mustache.github.com/>
 
-Currently only tested under Ubuntu 11.10
-
-# Features
+Features
+--------
 
 All features of Mustache are supported EXCEPT:
 
 * Lambda functions
 * Whitespace rules. All whitespace is kept as it is in the input template.
 
-# Installation
+Requirements
+------------
 
+Ubuntu:
+
+```bash
+apt-get install git-core php5-dev
+```
+
+Installation
+------------
+
+Ubuntu:
 
 ```bash
 git clone git://github.com/jbboehr/php-mustache.git
@@ -24,7 +35,8 @@ phpize
 make && make install
 ```
 
-# Usage
+Usage
+-----
 
 Example:
 
@@ -57,3 +69,9 @@ You have just won 10000 dollars!
 Well, 6000 dollars, after taxes.
 
 ```
+
+Todo
+-----
+
+* Fix whitespace non-conformity
+* Cache compiled templates in memory
