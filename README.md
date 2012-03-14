@@ -57,7 +57,7 @@ $data = array(
   'in_ca' => true,
 );
 $partials = array();
-$out = $mustache->render($tmpl, $data, $partials);
+echo $mustache->render($tmpl, $data, $partials);
 ```
 
 Produces:
