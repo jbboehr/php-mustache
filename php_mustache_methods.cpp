@@ -181,6 +181,8 @@ PHP_METHOD(Mustache, compile)
   long template_len;
   string templateStr;
   
+  mustache::Node * root;
+  
   if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &_this_zval, Mustache_ce_ptr, &template_str, &template_len) == FAILURE) {
           return;
   }
@@ -193,13 +195,24 @@ PHP_METHOD(Mustache, compile)
   templateStr.assign(template_str);
   
   // Tokenize template
-  /*
   try {
+    // @todo This could leak memory
+    root = new mustache::Node;
     
-    payload->mustache->tokenize(&templateStr, &root);
+    // Tokenize
+    payload->mustache->tokenize(&templateStr, root);
     
-    // Convert to PHP array
-    mustache_node_to_zval(&root, return_value);
+    // MustacheTemplate factor
+    if( MustacheTemplate_ce_ptr == NULL ) {
+      delete root;
+      RETURN_FALSE;
+      return;
+    }
+    
+    return_value->type = IS_OBJECT;
+    return_value->value.obj = MustacheTemplate_obj_create_ex(MustacheTemplate_ce_ptr, root);
+    Z_SET_REFCOUNT_P(return_value, 1);
+    Z_SET_ISREF_P(return_value);
     
   } catch( mustache::Exception& e ) {
     
@@ -207,8 +220,6 @@ PHP_METHOD(Mustache, compile)
     RETURN_FALSE;
     
   }
-  */
-  RETURN_FALSE;
 }
 /* }}} compile */
 

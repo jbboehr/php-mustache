@@ -14,6 +14,7 @@ extern "C" {
 
 #include "mustache/mustache.hpp"
 
+
 using namespace std;
 
 PHP_METHOD(Mustache, __construct);

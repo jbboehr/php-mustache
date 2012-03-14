@@ -70,18 +70,27 @@ static zend_function_entry MustacheTemplate_methods[] = {
 
 static zend_object_handlers MustacheTemplate_obj_handlers;
 
-static void MustacheTemplate_obj_free(void *object TSRMLS_DC)
+void MustacheTemplate_obj_free(void *object TSRMLS_DC)
 {
   php_obj_MustacheTemplate *payload = (php_obj_MustacheTemplate *)object;
 
   mustache::Node * node = payload->node;
 
-  delete node;
+  cout << "FREEING" << endl;
+  if( node != NULL ) {
+  cout << "FREEING NOT NULL" << endl;
+    delete node;
+  }
 
   efree(object);
 }
 
-static zend_object_value MustacheTemplate_obj_create(zend_class_entry *class_type TSRMLS_DC)
+zend_object_value MustacheTemplate_obj_create(zend_class_entry *class_type TSRMLS_DC)
+{
+  return MustacheTemplate_obj_create_ex(class_type, new mustache::Node);
+}
+
+zend_object_value MustacheTemplate_obj_create_ex(zend_class_entry *class_type, mustache::Node * node TSRMLS_DC)
 {
   php_obj_MustacheTemplate *payload;
   zval *tmp;
@@ -91,7 +100,7 @@ static zend_object_value MustacheTemplate_obj_create(zend_class_entry *class_typ
   memset(payload, 0, sizeof(php_obj_MustacheTemplate));
   payload->obj.ce = class_type;
 
-  payload->node = new mustache::Node;
+  payload->node = node;
 
   retval.handle = zend_objects_store_put(payload, NULL, (zend_objects_free_object_storage_t) MustacheTemplate_obj_free, NULL TSRMLS_CC);
   retval.handlers = &MustacheTemplate_obj_handlers;
@@ -99,7 +108,7 @@ static zend_object_value MustacheTemplate_obj_create(zend_class_entry *class_typ
   return retval;
 }
 
-static void class_init_MustacheTemplate(void)
+void class_init_MustacheTemplate(void)
 {
   zend_class_entry ce;
 
@@ -136,6 +145,7 @@ extern "C" {
 PHP_MINIT_FUNCTION(mustache)
 {
   class_init_Mustache();
+  class_init_MustacheTemplate();
   return SUCCESS;
 }
 
