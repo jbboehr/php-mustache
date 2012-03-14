@@ -11,6 +11,7 @@ static zend_function_entry Mustache_methods[] = {
   PHP_ME(Mustache, setEscapeByDefault, Mustache__setEscapeByDefault_args, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, setStartSequence, Mustache__setStartSequence_args, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, setStopSequence, Mustache__setStopSequence_args, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, compile, Mustache__compile_args, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, tokenize, Mustache__tokenize_args, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, render, Mustache__render_args, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, debugDataStructure, Mustache__debugDataStructure_args, ZEND_ACC_PUBLIC)
@@ -57,6 +58,56 @@ static void class_init_Mustache(void)
   Mustache_ce_ptr = zend_register_internal_class(&ce);
   memcpy(&Mustache_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
   Mustache_obj_handlers.clone_obj = NULL;
+}
+
+// MustacheTemplate Class Method Entries ---------------------------------------
+
+static zend_function_entry MustacheTemplate_methods[] = {
+  //PHP_ME(MustacheTemplate, __construct, MustacheTemplate____construct_args, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+  PHP_ME(MustacheTemplate, render, MustacheTemplate__render_args, ZEND_ACC_PUBLIC)
+  { NULL, NULL, NULL }
+};
+
+static zend_object_handlers MustacheTemplate_obj_handlers;
+
+static void MustacheTemplate_obj_free(void *object TSRMLS_DC)
+{
+  php_obj_MustacheTemplate *payload = (php_obj_MustacheTemplate *)object;
+
+  mustache::Node * node = payload->node;
+
+  delete node;
+
+  efree(object);
+}
+
+static zend_object_value MustacheTemplate_obj_create(zend_class_entry *class_type TSRMLS_DC)
+{
+  php_obj_MustacheTemplate *payload;
+  zval *tmp;
+  zend_object_value retval;
+
+  payload = (php_obj_MustacheTemplate *)emalloc(sizeof(php_obj_MustacheTemplate));
+  memset(payload, 0, sizeof(php_obj_MustacheTemplate));
+  payload->obj.ce = class_type;
+
+  payload->node = new mustache::Node;
+
+  retval.handle = zend_objects_store_put(payload, NULL, (zend_objects_free_object_storage_t) MustacheTemplate_obj_free, NULL TSRMLS_CC);
+  retval.handlers = &MustacheTemplate_obj_handlers;
+
+  return retval;
+}
+
+static void class_init_MustacheTemplate(void)
+{
+  zend_class_entry ce;
+
+  INIT_CLASS_ENTRY(ce, "MustacheTemplate", MustacheTemplate_methods);
+  ce.create_object = MustacheTemplate_obj_create;
+  MustacheTemplate_ce_ptr = zend_register_internal_class(&ce);
+  memcpy(&MustacheTemplate_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+  MustacheTemplate_obj_handlers.clone_obj = NULL;
 }
 
 // Module Entry ----------------------------------------------------------------

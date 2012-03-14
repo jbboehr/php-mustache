@@ -40,6 +40,8 @@ extern "C" {
 #include "php_mustache_methods.hpp"
 
 static zend_class_entry * Mustache_ce_ptr = NULL;
+static zend_class_entry * MustacheTemplate_ce_ptr = NULL;
+
 extern zend_module_entry mustache_module_entry;
 #define phpext_mustache_ptr &mustache_module_entry
 
@@ -51,6 +53,10 @@ typedef struct _php_obj_Mustache {
     mustache::Mustache * mustache;
 } php_obj_Mustache;
 
+typedef struct _php_obj_MustacheTemplate {
+    zend_object obj;
+    mustache::Node * node;
+} php_obj_MustacheTemplate;
 
 
 #endif /* PHP_MUSTACHE_HPP */

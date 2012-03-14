@@ -169,6 +169,49 @@ PHP_METHOD(Mustache, setStopSequence)
 }
 /* }}} setStartSequence */
 
+/* {{{ proto MustacheTemplate compile(string template)
+   */
+PHP_METHOD(Mustache, compile)
+{
+  zend_class_entry * _this_ce;
+  zval * _this_zval;
+  php_obj_Mustache *payload;
+  
+  char * template_str;
+  long template_len;
+  string templateStr;
+  
+  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &_this_zval, Mustache_ce_ptr, &template_str, &template_len) == FAILURE) {
+          return;
+  }
+
+  _this_zval = getThis();
+  _this_ce = Z_OBJCE_P(_this_zval);
+
+  payload = (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
+  
+  templateStr.assign(template_str);
+  
+  // Tokenize template
+  /*
+  try {
+    
+    payload->mustache->tokenize(&templateStr, &root);
+    
+    // Convert to PHP array
+    mustache_node_to_zval(&root, return_value);
+    
+  } catch( mustache::Exception& e ) {
+    
+    php_error(E_WARNING, (char *) e.what());
+    RETURN_FALSE;
+    
+  }
+  */
+  RETURN_FALSE;
+}
+/* }}} compile */
+
 /* {{{ proto array tokenize(string template)
    */
 PHP_METHOD(Mustache, tokenize)
@@ -303,6 +346,33 @@ PHP_METHOD(Mustache, debugDataStructure)
 }
 /* }}} debugDataStructure */
 
+
+
+/* {{{ proto string render(array data, array partials)
+   */
+PHP_METHOD(MustacheTemplate, render)
+{
+  zend_class_entry * _this_ce;
+  zval * _this_zval;
+  php_obj_MustacheTemplate * payload;
+  
+  zval * data = NULL;
+  zval * partials = NULL;
+  
+  mustache::Data templateData;
+  
+  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa/|a/", &_this_zval, MustacheTemplate_ce_ptr, &data, &partials) == FAILURE) {
+          return;
+  }
+  
+  _this_zval = getThis();
+  _this_ce = Z_OBJCE_P(_this_zval);
+
+  payload = (php_obj_MustacheTemplate *) zend_object_store_get_object(_this_zval TSRMLS_CC);
+  
+  RETURN_FALSE;
+}
+/* }}} render */
 
 
 
