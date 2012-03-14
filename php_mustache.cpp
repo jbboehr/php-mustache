@@ -94,14 +94,9 @@ PHP_MINFO_FUNCTION(mustache)
 {
   php_info_print_table_start();
   php_info_print_table_row(2, "Version", PHP_MUSTACHE_VERSION);
-  php_info_print_table_row(2, "Released", "2012-02-25");
-  php_info_print_table_row(2, "SVN Revision", "$Id: $");
-  php_info_print_table_row(2, "Authors", "John Boehr 'jbboehr@gmail.com' (lead)\n");
-#if HAVE_MUSTACHE_PROFILER
-  php_info_print_table_row(2, "Profiler", "enabled");
-#else
-  php_info_print_table_row(2, "Profiler", "disabled");
-#endif
+  php_info_print_table_row(2, "Released", PHP_MUSTACHE_RELEASE);
+  php_info_print_table_row(2, "Revision", PHP_MUSTACHE_BUILD);
+  php_info_print_table_row(2, "Authors", PHP_MUSTACHE_AUTHORS);
   php_info_print_table_end();
   /* add your stuff here */
 

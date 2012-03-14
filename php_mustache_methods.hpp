@@ -12,7 +12,7 @@ extern "C" {
 #include <memory>
 #include <utility>
 
-#include "mustache.hpp"
+#include "mustache/mustache.hpp"
 
 using namespace std;
 

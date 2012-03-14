@@ -5,7 +5,10 @@
 extern "C" {
 
 #define PHP_MUSTACHE_NAME "mustache"  
-#define PHP_MUSTACHE_VERSION "0.0.1"
+#define PHP_MUSTACHE_VERSION "0.1.0"
+#define PHP_MUSTACHE_RELEASE "2012-03-14"
+#define PHP_MUSTACHE_BUILD "master"
+#define PHP_MUSTACHE_AUTHORS "John Boehr <jbboehr@gmail.com> (lead)\n"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -33,18 +36,12 @@ extern "C" {
 #include <string>
 
 #include "mustache/mustache.hpp"
-//#include "data.hpp"
-//#include "exception.hpp"
-//#include "node.hpp"
-//#include "renderer.hpp"
-//#include "tokenizer.hpp"
-//#include "utils.hpp"
 
 #include "php_mustache_methods.hpp"
 
 static zend_class_entry * Mustache_ce_ptr = NULL;
-extern zend_module_entry mustache_module_entry;  
-#define phpext_mustache_ptr &mustache_module_entry  
+extern zend_module_entry mustache_module_entry;
+#define phpext_mustache_ptr &mustache_module_entry
 
 PHP_MINIT_FUNCTION(mustache);
 PHP_MINFO_FUNCTION(mustache);
