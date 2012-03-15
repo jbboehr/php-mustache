@@ -274,27 +274,16 @@ PHP_METHOD(Mustache, compile)
     
     // Get MustacheTemplate class entry
     std::string className("MustacheTemplate");
-    zend_class_entry ** tmp_ce_ptr;
     zend_class_entry * MustacheTemplate_ce_ptr;
     php_obj_MustacheTemplate * intern;
     
-    int found;
-    char * lc_name;
-    ALLOCA_FLAG(use_heap)
-
-    lc_name = (char *) do_alloca(className.length() + 1, use_heap);
-    zend_str_tolower_copy(lc_name, className.c_str(), className.length());
-
-    found = zend_hash_find(EG(class_table), lc_name, className.length() + 1, (void **) &tmp_ce_ptr);
-    free_alloca(lc_name, use_heap);
+    MustacheTemplate_ce_ptr = mustache_get_class_entry((char *)className.c_str(), className.length());
     
-    if( found != SUCCESS ) {
+    if( MustacheTemplate_ce_ptr == NULL ) {
       php_error_docref(NULL TSRMLS_CC, E_WARNING, "Class %s does not exist%s", className.c_str());
       RETURN_FALSE;
       return;
     }
-    
-    MustacheTemplate_ce_ptr = *tmp_ce_ptr;
     
     // Initialize new object
     object_init_ex(return_value, MustacheTemplate_ce_ptr);

@@ -2,6 +2,7 @@
 #include "php_mustache.hpp"
 
 #include "mustache_mustache.hpp"
+#include "mustache_data.hpp"
 #include "mustache_template.hpp"
 
 // Module Entry ----------------------------------------------------------------
@@ -30,6 +31,7 @@ extern "C" {
 PHP_MINIT_FUNCTION(mustache)
 {
   PHP_MINIT(mustache_mustache)(INIT_FUNC_ARGS_PASSTHRU);
+  PHP_MINIT(mustache_data)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_template)(INIT_FUNC_ARGS_PASSTHRU);
   
   return SUCCESS;
@@ -93,6 +95,7 @@ void mustache_data_from_zval(mustache::Data * node, zval * current)
   
   int ArrayPos = 0;
   mustache::Data * child = NULL;
+  zend_class_entry * ce = NULL;
   
   switch( Z_TYPE_P(current) ) {
       case IS_NULL:
@@ -148,7 +151,22 @@ void mustache_data_from_zval(mustache::Data * node, zval * current)
   
         break; // END IS_ARRAY -------------------------------------------------
     case IS_OBJECT:
-      // @todo
+      ce = Z_OBJCE_P(current);
+      if( ce != NULL ) {
+        std::string className("MustacheData");
+        zend_class_entry * mtce = mustache_get_class_entry((char *)className.c_str(), className.length());
+        if( mtce == NULL ) {
+          php_error(E_WARNING, "Invalid object type (2)");
+        } else if( mtce != ce ) {
+          php_error(E_WARNING, "Invalid object type (3)");
+        } else {
+          // @todo
+          php_error(E_WARNING, "MustacheData not implemented here");
+        }
+      } else {
+        php_error(E_WARNING, "Invalid object type (1)");
+      }
+      break;
     default:
       php_error(E_WARNING, "Invalid data type: %d", Z_TYPE_P(current));
       break;
@@ -167,6 +185,9 @@ zval * mustache_data_to_zval(mustache::Data * node)
   ALLOC_INIT_ZVAL(current);
   
   switch( node->type ) {
+    case mustache::Data::TypeNone:
+      Z_TYPE_P(current) = IS_NULL;
+      break;
     case mustache::Data::TypeString:
       Z_TYPE_P(current) = IS_STRING;
       Z_STRVAL_P(current) = (char *) estrdup(node->val->c_str());
@@ -246,5 +267,27 @@ void mustache_partials_from_zval(mustache::Mustache * mustache,
       mustache->tokenize(&tmpl, &(*partials)[ckey]);
     }
     zend_hash_move_forward_ex(data_hash, &data_pointer);
+  }
+}
+
+zend_class_entry * mustache_get_class_entry(char * name, int len)
+{
+  zend_class_entry ** ce;
+  int found;
+  char * lc_name;
+  
+  ALLOCA_FLAG(use_heap)
+
+  lc_name = (char *) do_alloca(len + 1, use_heap);
+  zend_str_tolower_copy(lc_name, name, len);
+
+  found = zend_hash_find(EG(class_table), lc_name, len + 1, (void **) &ce);
+  free_alloca(lc_name, use_heap);
+
+  if( found != SUCCESS ) {
+    php_error_docref(NULL TSRMLS_CC, E_WARNING, "Class %s does not exist", name);
+    return NULL;
+  } else {
+    return *ce;
   }
 }

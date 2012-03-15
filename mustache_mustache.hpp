@@ -1,6 +1,6 @@
 
-#ifndef MUSTACHE_MUSTACHE_HPP
-#define MUSTACHE_MUSTACHE_HPP
+#ifndef PHP_MUSTACHE_MUSTACHE_HPP
+#define PHP_MUSTACHE_MUSTACHE_HPP
 
 #include "php_mustache.hpp"
 

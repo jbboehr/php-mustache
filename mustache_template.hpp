@@ -1,6 +1,6 @@
 
-#ifndef MUSTACHE_TEMPLATE_HPP
-#define MUSTACHE_TEMPLATE_HPP
+#ifndef PHP_MUSTACHE_TEMPLATE_HPP
+#define PHP_MUSTACHE_TEMPLATE_HPP
 
 #include "php_mustache.hpp"
 
@@ -18,10 +18,15 @@ typedef struct _php_obj_MustacheTemplate {
 PHP_MINIT_FUNCTION(mustache_template);
 
 
+PHP_METHOD(MustacheTemplate, __construct);
+ZEND_BEGIN_ARG_INFO_EX(MustacheTemplate____construct_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+    ZEND_ARG_INFO(0, vars)
+ZEND_END_ARG_INFO()
+        
 PHP_METHOD(MustacheTemplate, render);
 ZEND_BEGIN_ARG_INFO_EX(MustacheTemplate__render_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 2)
-        ZEND_ARG_INFO(0, vars)
-        ZEND_ARG_INFO(0, partials)
+    ZEND_ARG_INFO(0, vars)
+    ZEND_ARG_INFO(0, partials)
 ZEND_END_ARG_INFO()
         
 PHP_METHOD(MustacheTemplate, toArray);
@@ -30,4 +35,3 @@ ZEND_END_ARG_INFO()
 
 
 #endif
-
