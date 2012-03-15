@@ -38,44 +38,23 @@ extern "C" {
 
 #include "mustache/mustache.hpp"
 
-#include "php_mustache_methods.hpp"
-
+// Module entry
 
 extern zend_module_entry mustache_module_entry;
 #define phpext_mustache_ptr &mustache_module_entry
 
+// Module init/info
+
 PHP_MINIT_FUNCTION(mustache);
 PHP_MINFO_FUNCTION(mustache);
 
+// Utils
 
-
-// Class Mustache
-
-static zend_class_entry * Mustache_ce_ptr = NULL;
-
-typedef struct _php_obj_Mustache {
-    zend_object obj;
-    mustache::Mustache * mustache;
-} php_obj_Mustache;
-
-
-
-// Class MustacheTemplate
-
-static zend_class_entry * MustacheTemplate_ce_ptr = NULL;
-
-void MustacheTemplate_obj_free(void *object TSRMLS_DC);
-
-zend_object_value MustacheTemplate_obj_create(zend_class_entry *class_type TSRMLS_DC);
-
-zend_object_value MustacheTemplate_obj_create_ex(zend_class_entry *class_type, mustache::Node * node TSRMLS_DC);
-
-void class_init_MustacheTemplate(void);
-
-typedef struct _php_obj_MustacheTemplate {
-    zend_object obj;
-    mustache::Node * node;
-} php_obj_MustacheTemplate;
+void mustache_node_to_zval(mustache::Node * node, zval * current);
+void mustache_data_from_zval(mustache::Data * node, zval * current);
+zval * mustache_data_to_zval(mustache::Data * node);
+void mustache_partials_from_zval(mustache::Mustache * mustache, 
+        mustache::Node::Partials * partials, zval * current);
 
 
 #endif /* PHP_MUSTACHE_HPP */
