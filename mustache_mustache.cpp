@@ -1,5 +1,6 @@
 
 #include "mustache_mustache.hpp"
+#include "mustache_data.hpp"
 #include "mustache_template.hpp"
 
 
@@ -382,7 +383,7 @@ PHP_METHOD(Mustache, tokenize)
 }
 /* }}} tokenize */
 
-/* {{{ proto string render(string template, array data, array partials)
+/* {{{ proto string render(mixed template, array data, array partials)
    */
 PHP_METHOD(Mustache, render)
 {
@@ -390,19 +391,19 @@ PHP_METHOD(Mustache, render)
   zval * _this_zval;
   php_obj_Mustache * payload;
   
-  char * template_str;
-  long template_len;
+  zval * tmpl = NULL;
   zval * data = NULL;
   zval * partials = NULL;
   
-  std::string templateStr;
   mustache::Node templateNode;
-  mustache::Node::Partials templatePartials;
+  mustache::Node * templateNodePtr = NULL;
   mustache::Data templateData;
+  mustache::Data * templateDataPtr = NULL;
+  mustache::Node::Partials templatePartials;
   std::string output;
-
-  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Osa/|a/", 
-          &_this_zval, Mustache_ce_ptr, &template_str, &template_len, &data, &partials) == FAILURE) {
+  
+  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ozz|a/", 
+          &_this_zval, Mustache_ce_ptr, &tmpl, &data, &partials) == FAILURE) {
     return;
   }
 
@@ -413,20 +414,25 @@ PHP_METHOD(Mustache, render)
   
   // Main
   try {
-    // Prepare template string
-    templateStr.assign(template_str, (size_t) template_len);
+    // Prepare template tree
+    templateNodePtr = &templateNode;
+    if( !mustache_parse_template_param(tmpl, payload->mustache, &templateNodePtr) ) {
+      RETURN_FALSE;
+      return;
+    }
     
     // Prepare template data
-    mustache_data_from_zval(&templateData, data);
-    
-    // Tokenize template
-    payload->mustache->tokenize(&templateStr, &templateNode);
+    templateDataPtr = &templateData;
+    if( !mustache_parse_data_param(data, payload->mustache, &templateDataPtr) ) {
+      RETURN_FALSE;
+      return;
+    }
     
     // Tokenize partials
     mustache_partials_from_zval(payload->mustache, &templatePartials, partials);
     
     // Render template
-    payload->mustache->render(&templateNode, &templateData, &templatePartials, &output);
+    payload->mustache->render(templateNodePtr, templateDataPtr, &templatePartials, &output);
     
     // Output
     RETURN_STRING(output.c_str(), 1); // Yes reallocate

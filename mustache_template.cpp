@@ -135,13 +135,9 @@ PHP_METHOD(MustacheTemplate, render)
   zval * partials = NULL;
   
   mustache::Data templateData;
-  mustache::Data * templateDataPtr;
+  mustache::Data * templateDataPtr = NULL;
   mustache::Node::Partials templatePartials;
   std::string output;
-  
-  zend_class_entry * tmp_ce;
-  std::string className("MustacheData");
-  zend_class_entry * mtce;
   
   if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|za/", 
           &_this_zval, MustacheTemplate_ce_ptr, &data, &partials) == FAILURE) {
@@ -162,21 +158,11 @@ PHP_METHOD(MustacheTemplate, render)
       return;
     }
     
-    // Check mixed argument
-    if( Z_TYPE_P(data) == IS_OBJECT ) {
-      tmp_ce = Z_OBJCE_P(data);
-      mtce = mustache_get_class_entry((char *)className.c_str(), className.length());
-      if( tmp_ce == NULL || mtce == NULL || tmp_ce != mtce ) {
-        php_error(E_WARNING, "Object not an instance of MustacheData");
-        RETURN_FALSE;
-        return;
-      } else {
-        php_obj_MustacheData * dataPayload = (php_obj_MustacheData *) zend_object_store_get_object(data TSRMLS_CC);
-        templateDataPtr = dataPayload->data;
-      }
-    } else {
-      mustache_data_from_zval(&templateData, data);
-      templateDataPtr = &templateData;
+    // Prepare template data
+    templateDataPtr = &templateData;
+    if( !mustache_parse_data_param(data, payload->mustache, &templateDataPtr) ) {
+      RETURN_FALSE;
+      return;
     }
     
     // Tokenize partials

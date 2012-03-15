@@ -299,3 +299,67 @@ void mustache_error_handler(const char * msg, mustache::Exception * e, zval * re
     RETURN_FALSE;
   }
 }
+
+bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
+        mustache::Node ** node)
+{
+  std::string templateStr;
+  std::string mtClassName("MustacheTemplate");
+  zend_class_entry * tmp_ce;
+  zend_class_entry * mtce;
+  php_obj_MustacheTemplate * mtPayload;
+  
+  // Prepare template string
+  if( Z_TYPE_P(tmpl) == IS_STRING ) {
+    
+    // Assign string
+    templateStr.assign(Z_STRVAL_P(tmpl), (size_t) Z_STRLEN_P(tmpl));
+    
+    // Tokenize template
+    mustache->tokenize(&templateStr, *node);
+    
+    return true;
+
+  } else if( Z_TYPE_P(tmpl) == IS_OBJECT ) {
+    
+    // Use compiled template
+    tmp_ce = Z_OBJCE_P(tmpl);
+    mtce = mustache_get_class_entry((char *)mtClassName.c_str(), mtClassName.length());
+    if( tmp_ce == NULL || mtce == NULL || tmp_ce != mtce ) {
+      php_error(E_WARNING, "Object not an instance of MustacheTemplate");
+      return false;
+    } else {
+      mtPayload = (php_obj_MustacheTemplate *) zend_object_store_get_object(tmpl TSRMLS_CC);
+      *node = mtPayload->node;
+      return true;
+    }
+  } else {
+    php_error(E_WARNING, "Invalid argument");
+    return false;
+  }
+}
+
+bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
+        mustache::Data ** node)
+{
+  zend_class_entry * tmp_ce;
+  std::string mdClassName("MustacheData");
+  zend_class_entry * mdce;
+  php_obj_MustacheData * mdPayload;
+  
+  if( Z_TYPE_P(data) == IS_OBJECT ) {
+    tmp_ce = Z_OBJCE_P(data);
+    mdce = mustache_get_class_entry((char *)mdClassName.c_str(), mdClassName.length());
+    if( tmp_ce == NULL || mdce == NULL || tmp_ce != mdce ) {
+      php_error(E_WARNING, "Object not an instance of MustacheData");
+      return false;
+    } else {
+      mdPayload = (php_obj_MustacheData *) zend_object_store_get_object(data TSRMLS_CC);
+      *node = mdPayload->data;
+      return true;
+    }
+  } else {
+    mustache_data_from_zval(*node, data);
+    return true;
+  }
+}

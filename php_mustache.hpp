@@ -58,4 +58,9 @@ void mustache_partials_from_zval(mustache::Mustache * mustache,
 zend_class_entry * mustache_get_class_entry(char * name, int len);
 void mustache_error_handler(const char * msg, mustache::Exception * e, zval * return_value);
 
+bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
+        mustache::Node ** node);
+bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
+        mustache::Data ** node);
+
 #endif /* PHP_MUSTACHE_HPP */
