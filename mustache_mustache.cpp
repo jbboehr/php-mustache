@@ -1,5 +1,6 @@
 
 #include "mustache_mustache.hpp"
+#include "mustache_template.hpp"
 
 
 
@@ -270,25 +271,48 @@ PHP_METHOD(Mustache, compile)
   
   // Tokenize template
   try {
-    /*
-    // @todo This could leak memory
-    root = new mustache::Node;
     
-    // Tokenize
-    payload->mustache->tokenize(&templateStr, root);
+    // Get MustacheTemplate class entry
+    std::string className("MustacheTemplate");
+    zend_class_entry ** tmp_ce_ptr;
+    zend_class_entry * MustacheTemplate_ce_ptr;
+    php_obj_MustacheTemplate * intern;
     
-    // MustacheTemplate factor
-    if( MustacheTemplate_ce_ptr == NULL ) {
-      delete root;
+    int found;
+    char * lc_name;
+    ALLOCA_FLAG(use_heap)
+
+    lc_name = (char *) do_alloca(className.length() + 1, use_heap);
+    zend_str_tolower_copy(lc_name, className.c_str(), className.length());
+
+    found = zend_hash_find(EG(class_table), lc_name, className.length() + 1, (void **) &tmp_ce_ptr);
+    free_alloca(lc_name, use_heap);
+    
+    if( found != SUCCESS ) {
+      php_error_docref(NULL TSRMLS_CC, E_WARNING, "Class %s does not exist%s", className.c_str());
       RETURN_FALSE;
       return;
     }
     
-    return_value->type = IS_OBJECT;
-    return_value->value.obj = MustacheTemplate_obj_create_ex(MustacheTemplate_ce_ptr, root);
-    Z_SET_REFCOUNT_P(return_value, 1);
-    Z_SET_ISREF_P(return_value);
-    */
+    MustacheTemplate_ce_ptr = *tmp_ce_ptr;
+    
+    // Initialize new object
+    object_init_ex(return_value, MustacheTemplate_ce_ptr);
+    intern = (php_obj_MustacheTemplate *) zend_objects_get_address(return_value TSRMLS_CC);
+    
+    // Get object's internal node pointer
+    if( intern->node == NULL ) {
+      intern->node = root = new mustache::Node;
+    } else {
+      root = intern->node;
+    }
+    
+    // Tokenize
+    payload->mustache->tokenize(&templateStr, root);
+    
+    // Ref - not sure if this is required
+//    Z_SET_REFCOUNT_P(return_value, 1);
+//    Z_SET_ISREF_P(return_value);
     
   } catch( mustache::Exception& e ) {
     
