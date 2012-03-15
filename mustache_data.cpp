@@ -32,7 +32,7 @@ static void MustacheData_obj_free(void *object TSRMLS_DC)
 
 static zend_object_value MustacheData_obj_create(zend_class_entry *class_type TSRMLS_DC)
 {
-  php_obj_MustacheData *payload;
+  php_obj_MustacheData * payload;
   zval *tmp;
   zend_object_value retval;
 
@@ -75,12 +75,12 @@ PHP_METHOD(MustacheData, __construct)
 {
   zend_class_entry * _this_ce;
   zval * _this_zval;
-  php_obj_MustacheData *payload;
+  php_obj_MustacheData * payload;
   
   zval * data;
 
-  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oz", &_this_zval, MustacheData_ce_ptr, &data) == FAILURE) {
-    // @todo throw exception?
+  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|z", 
+          &_this_zval, MustacheData_ce_ptr, &data) == FAILURE) {
     return;
   }
 
@@ -89,15 +89,18 @@ PHP_METHOD(MustacheData, __construct)
 
   payload = (php_obj_MustacheData *) zend_object_store_get_object(_this_zval TSRMLS_CC);
   
-  // Convert data
+  // Main
   try {
+    // Check if argument was given
+    if( data == NULL ) {
+      return;
+    }
     
+    // Convert data
     mustache_data_from_zval(payload->data, data);
     
   } catch( mustache::Exception& e ) {
-    
-    php_error(E_WARNING, (char *) e.what());
-    
+    mustache_error_handler(e.what(), &e, return_value);
   }
 }
 /* }}} __construct */
@@ -112,7 +115,8 @@ PHP_METHOD(MustacheData, toValue)
   
   zval * datacpy = NULL;
   
-  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &_this_zval, MustacheData_ce_ptr) == FAILURE) {
+  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", 
+          &_this_zval, MustacheData_ce_ptr) == FAILURE) {
     return;
   }
   
@@ -121,26 +125,24 @@ PHP_METHOD(MustacheData, toValue)
 
   payload = (php_obj_MustacheData *) zend_object_store_get_object(_this_zval TSRMLS_CC);
   
-  if( payload->data == NULL ) {
-    php_error_docref(NULL TSRMLS_CC, E_WARNING, "MustacheData was not initialized properly");
-    RETURN_FALSE;
-    return;
-  }
-  
-  // Convert data
+  // Main
   try {
+    // Check if data was initialized
+    if( payload->data == NULL ) {
+      php_error_docref(NULL TSRMLS_CC, E_WARNING, "MustacheData was not initialized properly");
+      RETURN_FALSE;
+      return;
+    }
     
     // Reverse template data
     datacpy = mustache_data_to_zval(payload->data);
     
+    // Copy data into return value
     *return_value = *datacpy;
     zval_copy_ctor(return_value);
   
   } catch( mustache::Exception& e ) {
-    
-    php_error(E_WARNING, (char *) e.what());
-    RETURN_FALSE;
-    
+    mustache_error_handler(e.what(), &e, return_value);
   }
 }
 /* }}} toValue */

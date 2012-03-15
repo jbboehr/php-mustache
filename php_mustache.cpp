@@ -291,3 +291,11 @@ zend_class_entry * mustache_get_class_entry(char * name, int len)
     return *ce;
   }
 }
+
+void mustache_error_handler(const char * msg, mustache::Exception * e, zval * return_value)
+{
+  php_error(E_WARNING, msg);
+  if( return_value != NULL ) {
+    RETURN_FALSE;
+  }
+}

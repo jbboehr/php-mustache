@@ -56,5 +56,6 @@ zval * mustache_data_to_zval(mustache::Data * node);
 void mustache_partials_from_zval(mustache::Mustache * mustache, 
         mustache::Node::Partials * partials, zval * current);
 zend_class_entry * mustache_get_class_entry(char * name, int len);
+void mustache_error_handler(const char * msg, mustache::Exception * e, zval * return_value);
 
 #endif /* PHP_MUSTACHE_HPP */
