@@ -1,21 +1,21 @@
 
-#ifndef PHP_MUSTACHE_METHODS_HPP
-#define PHP_MUSTACHE_METHODS_HPP
+#ifndef MUSTACHE_MUSTACHE_HPP
+#define MUSTACHE_MUSTACHE_HPP
 
-extern "C" {
-  #include <php.h>
-}
-
-#include <iostream>
-#include <string>
-#include <map>
-#include <memory>
-#include <utility>
-
-#include "mustache/mustache.hpp"
+#include "php_mustache.hpp"
 
 
-using namespace std;
+static zend_class_entry * Mustache_ce_ptr = NULL;
+
+
+typedef struct _php_obj_Mustache {
+    zend_object obj;
+    mustache::Mustache * mustache;
+} php_obj_Mustache;
+
+
+PHP_MINIT_FUNCTION(mustache_mustache);
+
 
 PHP_METHOD(Mustache, __construct);
 ZEND_BEGIN_ARG_INFO_EX(Mustache____construct_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
@@ -70,16 +70,5 @@ ZEND_BEGIN_ARG_INFO_EX(Mustache__debugDataStructure_args, ZEND_SEND_BY_VAL, ZEND
         ZEND_ARG_INFO(0, vars)
 ZEND_END_ARG_INFO()
 
-PHP_METHOD(MustacheTemplate, render);
-ZEND_BEGIN_ARG_INFO_EX(MustacheTemplate__render_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-        ZEND_ARG_INFO(0, vars)
-        ZEND_ARG_INFO(0, partials)
-ZEND_END_ARG_INFO()
-
-void mustache_node_to_zval(mustache::Node * node, zval * current);
-void mustache_data_from_zval(mustache::Data * node, zval * current);
-zval * mustache_data_to_zval(mustache::Data * node);
-void mustache_partials_from_zval(mustache::Mustache * mustache, 
-        mustache::Node::Partials * partials, zval * current);
 
 #endif

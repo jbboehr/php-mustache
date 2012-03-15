@@ -11,7 +11,8 @@ if test "$PHP_MUSTACHE" != "no"; then
 
   PHP_MUSTACHE_ADD_SOURCES([
     php_mustache.cpp
-    php_mustache_methods.cpp
+    mustache_mustache.cpp
+    mustache_template.cpp
     mustache/mustache.cpp
     mustache/data.cpp
     mustache/node.cpp
