@@ -307,7 +307,7 @@ PHP_METHOD(Mustache, compile)
   long template_len;
   std::string templateStr;
   mustache::Node * root;
-  std::string className("MustacheTemplate");
+  std::string className;
   zend_class_entry * MustacheTemplate_ce_ptr;
   php_obj_MustacheTemplate * intern;
   
@@ -323,10 +323,10 @@ PHP_METHOD(Mustache, compile)
   
   // Main
   try {
-    // Assign template to string
     templateStr.assign(template_str, (size_t) template_len);
     
     // Get MustacheTemplate class entry
+    className.assign("MustacheTemplate");
     MustacheTemplate_ce_ptr = mustache_get_class_entry((char *)className.c_str(), className.length() TSRMLS_CC);
     
     if( MustacheTemplate_ce_ptr == NULL ) {
@@ -336,7 +336,7 @@ PHP_METHOD(Mustache, compile)
     }
     
     // Initialize new object
-    object_init_ex(return_value, MustacheTemplate_ce_ptr);
+    object_init_ex(return_value, MustacheTemplate_ce_ptr TSRMLS_CC);
     intern = (php_obj_MustacheTemplate *) zend_objects_get_address(return_value TSRMLS_CC);
     
     // Get object's internal node pointer
