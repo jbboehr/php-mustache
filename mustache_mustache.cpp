@@ -257,8 +257,9 @@ PHP_METHOD(Mustache, setStopSequence)
   char * str;
   long str_len;
 
-  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &_this_zval, Mustache_ce_ptr, &str, &str_len) == FAILURE) {
-          return;
+  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", 
+          &_this_zval, Mustache_ce_ptr, &str, &str_len) == FAILURE) {
+    return;
   }
 
   _this_zval = getThis();
