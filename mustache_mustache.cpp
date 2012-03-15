@@ -49,7 +49,12 @@ static zend_object_value Mustache_obj_create(zend_class_entry *class_type TSRMLS
   memset(payload, 0, sizeof(php_obj_Mustache));
   payload->obj.ce = class_type;
 
-  payload->mustache = new mustache::Mustache;
+  try {
+    payload->mustache = new mustache::Mustache;
+  } catch( std::bad_alloc& e ) {
+    payload->mustache = NULL;
+    php_error(E_ERROR, "Failed to allocate memory when initializing Mustache");
+  }
 
   retval.handle = zend_objects_store_put(payload, NULL, 
       (zend_objects_free_object_storage_t) Mustache_obj_free, NULL TSRMLS_CC);
@@ -125,7 +130,9 @@ PHP_METHOD(Mustache, getEscapeByDefault)
       RETURN_FALSE;
     }
   } catch( mustache::Exception& e ) {
-    mustache_error_handler(e.what(), &e, return_value);
+    mustache_error_handler(e.what(), &e, return_value TSRMLS_CC);
+  } catch( std::bad_alloc& e ) {
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Memory allocation failed");
   }
 }
 /* }}} getEscapeByDefault */
@@ -153,7 +160,9 @@ PHP_METHOD(Mustache, getStartSequence)
     const std::string & str = payload->mustache->getStartSequence();
     RETURN_STRING(str.c_str(), 1);
   } catch( mustache::Exception& e ) {
-    mustache_error_handler(e.what(), &e, return_value);
+    mustache_error_handler(e.what(), &e, return_value TSRMLS_CC);
+  } catch( std::bad_alloc& e ) {
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Memory allocation failed");
   }
 }
 /* }}} getStartSequence */
@@ -181,7 +190,9 @@ PHP_METHOD(Mustache, getStopSequence)
     const std::string & str = payload->mustache->getStopSequence();
     RETURN_STRING(str.c_str(), 1);
   } catch( mustache::Exception& e ) {
-    mustache_error_handler(e.what(), &e, return_value);
+    mustache_error_handler(e.what(), &e, return_value TSRMLS_CC);
+  } catch( std::bad_alloc& e ) {
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Memory allocation failed");
   }
 }
 /* }}} getStopSequence */
@@ -211,7 +222,9 @@ PHP_METHOD(Mustache, setEscapeByDefault)
     payload->mustache->setEscapeByDefault((bool) flag != 0);
     RETURN_TRUE;
   } catch( mustache::Exception& e ) {
-    mustache_error_handler(e.what(), &e, return_value);
+    mustache_error_handler(e.what(), &e, return_value TSRMLS_CC);
+  } catch( std::bad_alloc& e ) {
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Memory allocation failed");
   }
 }
 /* }}} setEscapeByDefault */
@@ -242,7 +255,9 @@ PHP_METHOD(Mustache, setStartSequence)
     payload->mustache->setStartSequence(str, str_len);
     RETURN_TRUE;
   } catch( mustache::Exception& e ) {
-    mustache_error_handler(e.what(), &e, return_value);
+    mustache_error_handler(e.what(), &e, return_value TSRMLS_CC);
+  } catch( std::bad_alloc& e ) {
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Memory allocation failed");
   }
 }
 /* }}} setStartSequence */
@@ -273,7 +288,9 @@ PHP_METHOD(Mustache, setStopSequence)
     payload->mustache->setStopSequence(str, str_len);
     RETURN_TRUE;
   } catch( mustache::Exception& e ) {
-    mustache_error_handler(e.what(), &e, return_value);
+    mustache_error_handler(e.what(), &e, return_value TSRMLS_CC);
+  } catch( std::bad_alloc& e ) {
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Memory allocation failed");
   }
 }
 /* }}} setStartSequence */
@@ -310,7 +327,7 @@ PHP_METHOD(Mustache, compile)
     templateStr.assign(template_str, (size_t) template_len);
     
     // Get MustacheTemplate class entry
-    MustacheTemplate_ce_ptr = mustache_get_class_entry((char *)className.c_str(), className.length());
+    MustacheTemplate_ce_ptr = mustache_get_class_entry((char *)className.c_str(), className.length() TSRMLS_CC);
     
     if( MustacheTemplate_ce_ptr == NULL ) {
       php_error_docref(NULL TSRMLS_CC, E_WARNING, "Class %s does not exist%s", className.c_str());
@@ -337,7 +354,9 @@ PHP_METHOD(Mustache, compile)
 //    Z_SET_ISREF_P(return_value);
     
   } catch( mustache::Exception& e ) {
-    mustache_error_handler(e.what(), &e, return_value);
+    mustache_error_handler(e.what(), &e, return_value TSRMLS_CC);
+  } catch( std::bad_alloc& e ) {
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Memory allocation failed");
   }
 }
 /* }}} compile */
@@ -375,10 +394,12 @@ PHP_METHOD(Mustache, tokenize)
     payload->mustache->tokenize(&templateStr, &root);
     
     // Convert to PHP array
-    mustache_node_to_zval(&root, return_value);
+    mustache_node_to_zval(&root, return_value TSRMLS_CC);
     
   } catch( mustache::Exception& e ) {
-    mustache_error_handler(e.what(), &e, return_value);
+    mustache_error_handler(e.what(), &e, return_value TSRMLS_CC);
+  } catch( std::bad_alloc& e ) {
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Memory allocation failed");
   }
 }
 /* }}} tokenize */
@@ -416,20 +437,20 @@ PHP_METHOD(Mustache, render)
   try {
     // Prepare template tree
     templateNodePtr = &templateNode;
-    if( !mustache_parse_template_param(tmpl, payload->mustache, &templateNodePtr) ) {
+    if( !mustache_parse_template_param(tmpl, payload->mustache, &templateNodePtr TSRMLS_CC) ) {
       RETURN_FALSE;
       return;
     }
     
     // Prepare template data
     templateDataPtr = &templateData;
-    if( !mustache_parse_data_param(data, payload->mustache, &templateDataPtr) ) {
+    if( !mustache_parse_data_param(data, payload->mustache, &templateDataPtr TSRMLS_CC) ) {
       RETURN_FALSE;
       return;
     }
     
     // Tokenize partials
-    mustache_partials_from_zval(payload->mustache, &templatePartials, partials);
+    mustache_partials_from_zval(payload->mustache, &templatePartials, partials TSRMLS_CC);
     
     // Render template
     payload->mustache->render(templateNodePtr, templateDataPtr, &templatePartials, &output);
@@ -438,7 +459,9 @@ PHP_METHOD(Mustache, render)
     RETURN_STRING(output.c_str(), 1); // Yes reallocate
     
   } catch( mustache::Exception& e ) {
-    mustache_error_handler(e.what(), &e, return_value);
+    mustache_error_handler(e.what(), &e, return_value TSRMLS_CC);
+  } catch( std::bad_alloc& e ) {
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Memory allocation failed");
   }
 }
 /* }}} render */
@@ -469,16 +492,18 @@ PHP_METHOD(Mustache, debugDataStructure)
   // Main
   try {
     // Prepare template data
-    mustache_data_from_zval(&templateData, data);
+    mustache_data_from_zval(&templateData, data TSRMLS_CC);
 
     // Reverse template data
-    datacpy = mustache_data_to_zval(&templateData);
+    datacpy = mustache_data_to_zval(&templateData TSRMLS_CC);
 
     *return_value = *datacpy;
     zval_copy_ctor(return_value);
   
   } catch( mustache::Exception& e ) {
-    mustache_error_handler(e.what(), &e, return_value);
+    mustache_error_handler(e.what(), &e, return_value TSRMLS_CC);
+  } catch( std::bad_alloc& e ) {
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Memory allocation failed");
   }
 }
 /* }}} debugDataStructure */

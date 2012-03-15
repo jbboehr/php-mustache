@@ -51,7 +51,7 @@ PHP_MINFO_FUNCTION(mustache)
 
 // Utils -----------------------------------------------------------------------
 
-void mustache_node_to_zval(mustache::Node * node, zval * current)
+void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC)
 {
   array_init(current);
   
@@ -72,7 +72,7 @@ void mustache_node_to_zval(mustache::Node * node, zval * current)
     for ( it = node->children.begin() ; it != node->children.end(); it++ ) {
       zval * child;
       ALLOC_INIT_ZVAL(child);
-      mustache_node_to_zval(*it, child);
+      mustache_node_to_zval(*it, child TSRMLS_CC);
       add_next_index_zval(children, child);
     }
     
@@ -80,7 +80,7 @@ void mustache_node_to_zval(mustache::Node * node, zval * current)
   }
 }
 
-void mustache_data_from_zval(mustache::Data * node, zval * current)
+void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
 {
   HashTable * data_hash = NULL;
   HashPosition data_pointer = NULL;
@@ -105,7 +105,7 @@ void mustache_data_from_zval(mustache::Data * node, zval * current)
       case IS_STRING:
         convert_to_string(current);
         node->type = mustache::Data::TypeString;
-        node->val = new std::string(Z_STRVAL_P(current));
+        node->val = new std::string(Z_STRVAL_P(current), (size_t) Z_STRLEN_P(current));
         break;
       case IS_ARRAY: // START IS_ARRAY -----------------------------------------
         node->type = mustache::Data::TypeNone;
@@ -136,11 +136,11 @@ void mustache_data_from_zval(mustache::Data * node, zval * current)
           
           // Store value
           if( node->type == mustache::Data::TypeArray ) {
-            mustache_data_from_zval(child, *data_entry);
+            mustache_data_from_zval(child, *data_entry TSRMLS_CC);
             child++;
           } else if( node->type == mustache::Data::TypeMap ) {
-            child = new mustache::Data();
-            mustache_data_from_zval(child, *data_entry);
+            child = new mustache::Data;
+            mustache_data_from_zval(child, *data_entry TSRMLS_CC);
             ckey.assign(key_str);
             node->data.insert(std::pair<std::string,mustache::Data*>(ckey,child));
           } else {
@@ -154,7 +154,7 @@ void mustache_data_from_zval(mustache::Data * node, zval * current)
       ce = Z_OBJCE_P(current);
       if( ce != NULL ) {
         std::string className("MustacheData");
-        zend_class_entry * mtce = mustache_get_class_entry((char *)className.c_str(), className.length());
+        zend_class_entry * mtce = mustache_get_class_entry((char *)className.c_str(), className.length() TSRMLS_CC);
         if( mtce == NULL ) {
           php_error(E_WARNING, "Invalid object type (2)");
         } else if( mtce != ce ) {
@@ -173,7 +173,7 @@ void mustache_data_from_zval(mustache::Data * node, zval * current)
   }
 }
 
-zval * mustache_data_to_zval(mustache::Data * node)
+zval * mustache_data_to_zval(mustache::Data * node TSRMLS_DC)
 {
   mustache::Data::List::iterator l_it;
   mustache::Data::Map::iterator m_it;
@@ -197,21 +197,21 @@ zval * mustache_data_to_zval(mustache::Data * node)
       array_init(current);
       childNode = node->array;
       for( pos = 0; pos < node->length; pos++, childNode++ ) {
-        child = mustache_data_to_zval(childNode);
+        child = mustache_data_to_zval(childNode TSRMLS_CC);
         add_next_index_zval(current, child);
       }
       break;
     case mustache::Data::TypeList:
       array_init(current);
       for ( l_it = node->children.begin() ; l_it != node->children.end(); l_it++ ) {
-        child = mustache_data_to_zval(*l_it);
+        child = mustache_data_to_zval(*l_it TSRMLS_CC);
         add_next_index_zval(current, child);
       }
       break;
     case mustache::Data::TypeMap:
       array_init(current);
       for ( m_it = node->data.begin() ; m_it != node->data.end(); m_it++ ) {
-        child = mustache_data_to_zval((*m_it).second);
+        child = mustache_data_to_zval((*m_it).second TSRMLS_CC);
         add_assoc_zval(current, (*m_it).first.c_str(), child);
       }
       break;
@@ -225,7 +225,7 @@ zval * mustache_data_to_zval(mustache::Data * node)
 }
 
 void mustache_partials_from_zval(mustache::Mustache * mustache, 
-        mustache::Node::Partials * partials, zval * current)
+        mustache::Node::Partials * partials, zval * current TSRMLS_DC)
 {
   // Ignore if not an array
   if( current == NULL || Z_TYPE_P(current) != IS_ARRAY ) {
@@ -270,7 +270,7 @@ void mustache_partials_from_zval(mustache::Mustache * mustache,
   }
 }
 
-zend_class_entry * mustache_get_class_entry(char * name, int len)
+zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_DC)
 {
   zend_class_entry ** ce;
   int found;
@@ -292,7 +292,8 @@ zend_class_entry * mustache_get_class_entry(char * name, int len)
   }
 }
 
-void mustache_error_handler(const char * msg, mustache::Exception * e, zval * return_value)
+void mustache_error_handler(const char * msg, mustache::Exception * e, 
+        zval * return_value TSRMLS_DC)
 {
   php_error(E_WARNING, msg);
   if( return_value != NULL ) {
@@ -301,7 +302,7 @@ void mustache_error_handler(const char * msg, mustache::Exception * e, zval * re
 }
 
 bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
-        mustache::Node ** node)
+        mustache::Node ** node TSRMLS_DC)
 {
   std::string templateStr;
   std::string mtClassName("MustacheTemplate");
@@ -324,7 +325,7 @@ bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
     
     // Use compiled template
     tmp_ce = Z_OBJCE_P(tmpl);
-    mtce = mustache_get_class_entry((char *)mtClassName.c_str(), mtClassName.length());
+    mtce = mustache_get_class_entry((char *)mtClassName.c_str(), mtClassName.length() TSRMLS_CC);
     if( tmp_ce == NULL || mtce == NULL || tmp_ce != mtce ) {
       php_error(E_WARNING, "Object not an instance of MustacheTemplate");
       return false;
@@ -340,7 +341,7 @@ bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
 }
 
 bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
-        mustache::Data ** node)
+        mustache::Data ** node TSRMLS_DC)
 {
   zend_class_entry * tmp_ce;
   std::string mdClassName("MustacheData");
@@ -349,7 +350,7 @@ bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
   
   if( Z_TYPE_P(data) == IS_OBJECT ) {
     tmp_ce = Z_OBJCE_P(data);
-    mdce = mustache_get_class_entry((char *)mdClassName.c_str(), mdClassName.length());
+    mdce = mustache_get_class_entry((char *)mdClassName.c_str(), mdClassName.length() TSRMLS_CC);
     if( tmp_ce == NULL || mdce == NULL || tmp_ce != mdce ) {
       php_error(E_WARNING, "Object not an instance of MustacheData");
       return false;
@@ -359,7 +360,7 @@ bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
       return true;
     }
   } else {
-    mustache_data_from_zval(*node, data);
+    mustache_data_from_zval(*node, data TSRMLS_CC);
     return true;
   }
 }
