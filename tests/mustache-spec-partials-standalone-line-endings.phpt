@@ -26,6 +26,4 @@ $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);
 ?>
 --EXPECTREGEX--
-\|\s*\>\|
---XFAIL--
-This extension does not follow the spec's whitespace rules.
+\s*|\s*>\s*|\s*

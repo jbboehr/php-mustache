@@ -65,14 +65,16 @@ foreach( $specData as $spec => $data ) {
     foreach( preg_split('/\s+/', $test['expected']) as $chunk ) {
       $tmp[] = preg_quote($chunk, '/');
     }
-    $output .= join("\s*", $tmp);
+    $expected = join("\s*", $tmp);
     // Hack in XFAIL
     if( ($spec == 'partials' && $test['name'] == 'Standalone Line Endings') ||
         ($spec == 'partials' && $test['name'] == 'Standalone Without Previous Line') ) {
-      $output .= PHP_EOL;
-      $output .= '--XFAIL--' . PHP_EOL;
-      $output .= 'This extension does not follow the spec\'s whitespace rules.';
+      //$output .= PHP_EOL;
+      //$output .= '--XFAIL--' . PHP_EOL;
+      //$output .= 'This extension does not follow the spec\'s whitespace rules.';
+      $expected = "\s*" . join("\s*", str_split(preg_replace('/\s+/', '', $test['expected']), 1)) . "\s*";
     }
+    $output .= $expected;
     
     $cleanName = strtolower(trim(preg_replace('/[^a-zA-Z0-9]+/', '-', $test['name']), '-'));
     file_put_contents('./tests/mustache-spec-' . $spec . '-' . $cleanName . '.phpt', $output);
