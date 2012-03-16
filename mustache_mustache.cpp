@@ -421,7 +421,6 @@ PHP_METHOD(Mustache, render)
   mustache::Data templateData;
   mustache::Data * templateDataPtr = NULL;
   mustache::Node::Partials templatePartials;
-  mustache::Node::Partials * templatePartialsPtr;
   std::string output;
   
   if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ozz|a/", 

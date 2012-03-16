@@ -379,8 +379,8 @@ bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
         
         // This is kind of hack-ish
         nodePtr = &(*partials)[ckey];
-        nodePtr->childrenAreRef = true;
-        nodePtr->children.push_back(mtPayload->node);
+        nodePtr->type = mustache::Node::TypeContainer;
+        nodePtr->child = mtPayload->node;
       }
     } else {
       php_error(E_WARNING, "Partial array contains an invalid value");
