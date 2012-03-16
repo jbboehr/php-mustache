@@ -53,6 +53,8 @@ PHP_MINFO_FUNCTION(mustache)
 
 void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC)
 {
+  zval * children;
+  
   array_init(current);
   
   // Basic data
@@ -64,7 +66,6 @@ void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC)
   
   // Children
   if( node->children.size() > 0 ) {
-    zval * children;
     ALLOC_INIT_ZVAL(children);
     array_init(children);
     
@@ -77,6 +78,24 @@ void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC)
     }
     
     add_assoc_zval(current, "children", children);
+    children = NULL;
+  }
+  
+  // Partials
+  if( node->partials.size() > 0 ) {
+    ALLOC_INIT_ZVAL(children);
+    array_init(children);
+    
+    mustache::Node::Partials::iterator it;
+    for ( it = node->partials.begin() ; it != node->partials.end(); it++ ) {
+      zval * child;
+      ALLOC_INIT_ZVAL(child);
+      mustache_node_to_zval(&(it->second), child TSRMLS_CC);
+      add_assoc_zval(children, it->first.c_str(), child);
+    }
+    
+    add_assoc_zval(current, "partials", children);
+    children = NULL;
   }
 }
 
