@@ -224,52 +224,6 @@ zval * mustache_data_to_zval(mustache::Data * node TSRMLS_DC)
   return current;
 }
 
-void mustache_partials_from_zval(mustache::Mustache * mustache, 
-        mustache::Node::Partials * partials, zval * current TSRMLS_DC)
-{
-  // Ignore if not an array
-  if( current == NULL || Z_TYPE_P(current) != IS_ARRAY ) {
-    return;
-  }
-  
-  HashTable * data_hash = NULL;
-  HashPosition data_pointer = NULL;
-  zval **data_entry = NULL;
-  long data_count;
-  
-  int key_type;
-  char * key_str;
-  uint key_len;
-  ulong key_nindex;
-  std::string ckey;
-  
-  std::string tmpl;
-  mustache::Node node;
-  
-  data_hash = HASH_OF(current);
-  data_count = zend_hash_num_elements(data_hash);
-  zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
-  while( zend_hash_get_current_data_ex(data_hash, (void**) &data_entry, &data_pointer) == SUCCESS ) {
-    // Get current key
-    key_type = zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, &key_nindex, true, &data_pointer);
-    // Check key type
-    if( key_type != HASH_KEY_IS_STRING ) {
-      // Non-string key
-      php_error(E_WARNING, "Partial array contains a non-string key");
-    } else if( Z_TYPE_PP(data_entry) != IS_STRING ) {
-      // Non-string value
-      php_error(E_WARNING, "Partial array contains a non-string value");
-    } else {
-      // String key, string value
-      ckey.assign(key_str);
-      tmpl.assign(Z_STRVAL_PP(data_entry));
-      partials->insert(make_pair(ckey, node));
-      mustache->tokenize(&tmpl, &(*partials)[ckey]);
-    }
-    zend_hash_move_forward_ex(data_hash, &data_pointer);
-  }
-}
-
 zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_DC)
 {
   zend_class_entry ** ce;
@@ -362,5 +316,75 @@ bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
   } else {
     mustache_data_from_zval(*node, data TSRMLS_CC);
     return true;
+  }
+}
+
+bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
+        mustache::Node::Partials * partials TSRMLS_DC)
+{
+  HashTable * data_hash = NULL;
+  HashPosition data_pointer = NULL;
+  zval **data_entry = NULL;
+  long data_count;
+  
+  int key_type;
+  char * key_str;
+  uint key_len;
+  ulong key_nindex;
+  std::string ckey;
+  
+  std::string tmpl;
+  mustache::Node node;
+  mustache::Node * nodePtr;
+  
+  std::string mtClassName("MustacheTemplate");
+  zend_class_entry * tmp_ce;
+  zend_class_entry * mtce;
+  php_obj_MustacheTemplate * mtPayload;
+  
+  // Ignore if not an array
+  if( array == NULL || Z_TYPE_P(array) != IS_ARRAY ) {
+    return false;
+  }
+  
+  // Get MustacheTemplate class entry
+  mtce = mustache_get_class_entry((char *)mtClassName.c_str(), mtClassName.length() TSRMLS_CC);
+  
+  // Iterate over input data
+  data_hash = HASH_OF(array);
+  data_count = zend_hash_num_elements(data_hash);
+  zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
+  while( zend_hash_get_current_data_ex(data_hash, (void**) &data_entry, &data_pointer) == SUCCESS ) {
+    // Get current key
+    key_type = zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, &key_nindex, true, &data_pointer);
+    // Check key type
+    if( key_type != HASH_KEY_IS_STRING ) {
+      // Non-string key
+      php_error(E_WARNING, "Partial array contains a non-string key");
+    } else if( Z_TYPE_PP(data_entry) == IS_STRING ) {
+      // String key, string value
+      ckey.assign(key_str);
+      tmpl.assign(Z_STRVAL_PP(data_entry));
+      partials->insert(make_pair(ckey, node));
+      mustache->tokenize(&tmpl, &(*partials)[ckey]);
+    } else if( Z_TYPE_PP(data_entry) == IS_OBJECT ) {
+      // String key, object value
+      tmp_ce = Z_OBJCE_PP(data_entry);
+      if( tmp_ce == NULL || mtce == NULL || tmp_ce != mtce ) {
+        php_error(E_WARNING, "Object not an instance of MustacheTemplate");
+      } else {
+        ckey.assign(key_str);
+        mtPayload = (php_obj_MustacheTemplate *) zend_object_store_get_object(*data_entry TSRMLS_CC);
+        partials->insert(make_pair(ckey, node));
+        
+        // This is kind of hack-ish
+        nodePtr = &(*partials)[ckey];
+        nodePtr->childrenAreRef = true;
+        nodePtr->children.push_back(mtPayload->node);
+      }
+    } else {
+      php_error(E_WARNING, "Partial array contains an invalid value");
+    }
+    zend_hash_move_forward_ex(data_hash, &data_pointer);
   }
 }

@@ -175,7 +175,7 @@ PHP_METHOD(MustacheTemplate, render)
     }
     
     // Tokenize partials
-    mustache_partials_from_zval(payload->mustache, &templatePartials, partials TSRMLS_CC);
+    mustache_parse_partials_param(partials, payload->mustache, &templatePartials);
     
     // Render template
     payload->mustache->render(payload->node, templateDataPtr, &templatePartials, &output);

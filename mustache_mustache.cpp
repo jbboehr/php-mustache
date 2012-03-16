@@ -421,6 +421,7 @@ PHP_METHOD(Mustache, render)
   mustache::Data templateData;
   mustache::Data * templateDataPtr = NULL;
   mustache::Node::Partials templatePartials;
+  mustache::Node::Partials * templatePartialsPtr;
   std::string output;
   
   if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ozz|a/", 
@@ -450,7 +451,7 @@ PHP_METHOD(Mustache, render)
     }
     
     // Tokenize partials
-    mustache_partials_from_zval(payload->mustache, &templatePartials, partials TSRMLS_CC);
+    mustache_parse_partials_param(partials, payload->mustache, &templatePartials);
     
     // Render template
     payload->mustache->render(templateNodePtr, templateDataPtr, &templatePartials, &output);
