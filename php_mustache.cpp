@@ -46,6 +46,11 @@ PHP_MINFO_FUNCTION(mustache)
   php_info_print_table_row(2, "Released", PHP_MUSTACHE_RELEASE);
   php_info_print_table_row(2, "Revision", PHP_MUSTACHE_BUILD);
   php_info_print_table_row(2, "Authors", PHP_MUSTACHE_AUTHORS);
+#if HAVE_TCMALLOC
+  php_info_print_table_row(2, "tcmalloc support", "enabled");
+#else
+  php_info_print_table_row(2, "tcmalloc support", "disabled");
+#endif
   php_info_print_table_end();
 }
 

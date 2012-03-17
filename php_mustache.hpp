@@ -8,7 +8,7 @@ extern "C" {
 #define PHP_MUSTACHE_VERSION "0.1.0"
 #define PHP_MUSTACHE_RELEASE "2012-03-14"
 #define PHP_MUSTACHE_BUILD "master"
-#define PHP_MUSTACHE_AUTHORS "John Boehr <jbboehr@gmail.com> (lead)\n"
+#define PHP_MUSTACHE_AUTHORS "John Boehr <jbboehr@gmail.com> (lead)"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
