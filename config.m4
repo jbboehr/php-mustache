@@ -1,21 +1,33 @@
 
+dnl FUNCTIONS ------------------------------------------------------------------
 AC_DEFUN([PHP_MUSTACHE_ADD_SOURCES], [
   PHP_MUSTACHE_SOURCES="$PHP_MUSTACHE_SOURCES $1"
 ])
 
+dnl MUSTACHE -------------------------------------------------------------------
 PHP_ARG_ENABLE(mustache, whether to enable mustache support,
 dnl Make sure that the comment is aligned:
 [ --enable-mustache Enable mustache support])
 
-PHP_ARG_ENABLE(mustache-tcmalloc, whether to enable mustache tcmalloc support,
-dnl Make sure that the comment is aligned:
-[ --enable-mustache-tcmalloc Enable mustache tcmalloc support])
+dnl TCMALLOC -------------------------------------------------------------------
+AC_MSG_CHECKING(whether tcmalloc support is present and requested)
+AC_ARG_ENABLE(mustache-tcmalloc,
+[  --enable-mustache-tcmalloc     Enable mustache tcmalloc], 
+[
+  PHP_MUSTACHE_TCMALLOC=$enableval
+  AC_MSG_RESULT($enableval)
+], 
+[
+  PHP_MUSTACHE_TCMALLOC=no
+  AC_MSG_RESULT(no)
+])
 
-if test "$PHP_MUSTACHE_TCMALLOC" != "no"; then
+if test "$PHP_MUSTACHE_TCMALLOC" == "yes"; then
   PHP_ADD_LIBRARY(tcmalloc, 1, MUSTACHE_SHARED_LIBADD)
   AC_DEFINE(HAVE_TCMALLOC, 1, [Whether tcmalloc support is present and requested])
 fi
 
+dnl MAIN -----------------------------------------------------------------------
 if test "$PHP_MUSTACHE" != "no"; then
 
   PHP_MUSTACHE_ADD_SOURCES([
