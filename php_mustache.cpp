@@ -51,6 +51,16 @@ PHP_MINFO_FUNCTION(mustache)
 #else
   php_info_print_table_row(2, "tcmalloc support", "disabled");
 #endif
+#if HAVE_TR1
+  php_info_print_table_row(2, "tr1 support", "enabled");
+#else
+  php_info_print_table_row(2, "tr1 support", "disabled");
+#endif
+#if HAVE_LIBBOOST
+  php_info_print_table_row(2, "libboost support", "enabled");
+#else
+  php_info_print_table_row(2, "libboost support", "disabled");
+#endif
   php_info_print_table_end();
 }
 
@@ -270,15 +280,6 @@ zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_DC)
   }
 }
 
-void mustache_error_handler(const char * msg, mustache::Exception * e, 
-        zval * return_value TSRMLS_DC)
-{
-  php_error(E_WARNING, msg);
-  if( return_value != NULL ) {
-    RETURN_FALSE;
-  }
-}
-
 void mustache_exception_handler()
 {
 #if PHP_MUSTACHE_THROW_EXCEPTIONS
@@ -287,17 +288,19 @@ void mustache_exception_handler()
   try {
     throw;
   } catch( mustache::Exception& e ) {
-    php_error(E_WARNING, e.what());
+    // @todo change this to an exception
+    php_error_docref(NULL TSRMLS_CC, E_WARNING, e.what());
   } catch( InvalidParameterException& e ) {
-    php_error(E_WARNING, e.what());
+    // @todo change this to an exception
+    php_error_docref(NULL TSRMLS_CC, E_WARNING, e.what());
   } catch( PhpInvalidParameterException& e ) {
     // The error message should be handled by PHP
   } catch( std::bad_alloc& e ) {
-    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Memory allocation failed");
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Memory allocation failed.");
   } catch( std::runtime_error& e ) {
-    php_error(E_ERROR, e.what());
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, e.what());
   } catch(...) {
-    php_error(E_ERROR, "An unknown error has occurred.");
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "An unknown error has occurred.");
   }
 #endif
 }

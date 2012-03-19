@@ -55,8 +55,9 @@ class Mustache
   /**
    * Compiles a template and returns a class representing it.
    * 
-   * @param string $tmpl The input template
-   * @return MustacheTemplate The compiled template
+   * @param string|MustacheTemplate $tmpl The input template
+   * @return MustacheTemplate|bool The compiled template if given a string, or 
+   *                               true if given an instance of MustacheTemplate
    */
   public function compile($tmpl) {}
   
@@ -97,15 +98,6 @@ class MustacheTemplate
    * @param string $tmpl The input template
    */
   public function __construct($tmpl) {}
-  
-  /**
-   * Renders the current template. Alias of Mustache::render()
-   * 
-   * @param array|MustacheData $data The input data
-   * @param array $partials (Optional) The template partials
-   * @return false|string The string output, or false on failure
-   */
-  public function render($data, $partials = null) {}
   
   /**
    * Compiles a template and returns an array representing the internal 
