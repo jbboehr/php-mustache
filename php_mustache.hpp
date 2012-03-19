@@ -10,6 +10,10 @@ extern "C" {
 #define PHP_MUSTACHE_BUILD "master"
 #define PHP_MUSTACHE_AUTHORS "John Boehr <jbboehr@gmail.com> (lead)"
 
+#ifndef PHP_MUSTACHE_THROW_EXCEPTIONS
+#define PHP_MUSTACHE_THROW_EXCEPTIONS 0
+#endif
+  
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -33,7 +37,8 @@ extern "C" {
 
 } // extern "C" 
 
-#include <iostream>
+#include <exception>
+#include <stdexcept>
 #include <string>
 
 #include "mustache/mustache.hpp"
@@ -48,6 +53,15 @@ extern zend_module_entry mustache_module_entry;
 PHP_MINIT_FUNCTION(mustache);
 PHP_MINFO_FUNCTION(mustache);
 
+// Parameter exception
+class PhpInvalidParameterException : public std::exception {
+  public:
+};
+class InvalidParameterException : public std::runtime_error {
+  public:
+      InvalidParameterException(const std::string& desc) : std::runtime_error(desc) { }
+};
+
 // Utils
 
 void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC);
@@ -56,6 +70,7 @@ zval * mustache_data_to_zval(mustache::Data * node TSRMLS_DC);
 zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_DC);
 void mustache_error_handler(const char * msg, mustache::Exception * e, 
         zval * return_value TSRMLS_DC);
+void mustache_exception_handler();
 
 bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
         mustache::Node ** node TSRMLS_DC);

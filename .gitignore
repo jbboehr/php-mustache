@@ -1,3 +1,5 @@
+.*project
+*~
 .deps
 .dirstamp
 .libs
@@ -12,6 +14,7 @@ gmon*
 nbproject
 build
 modules
+test.php
 tests/*.diff
 tests/*.exp
 tests/*.php

@@ -19,36 +19,39 @@ static zend_object_handlers MustacheData_obj_handlers;
 
 static void MustacheData_obj_free(void *object TSRMLS_DC)
 {
-  php_obj_MustacheData * payload = (php_obj_MustacheData *) object;
-  
-  mustache::Data * data = payload->data;
+  try {
+    php_obj_MustacheData * payload = (php_obj_MustacheData *) object;
+    
+    if( payload->data != NULL ) {
+      delete payload->data;
+    }
 
-  if( data != NULL ) {
-    delete data;
+    efree(object);
+  } catch(...) {
+    mustache_exception_handler();
   }
-
-  efree(object);
 }
 
 static zend_object_value MustacheData_obj_create(zend_class_entry *class_type TSRMLS_DC)
 {
-  php_obj_MustacheData * payload;
-  zval *tmp;
   zend_object_value retval;
-
-  payload = (php_obj_MustacheData *) emalloc(sizeof(php_obj_MustacheData));
-  memset(payload, 0, sizeof(php_obj_MustacheData));
-  payload->obj.ce = class_type;
-
+  
   try {
-    payload->data = new mustache::Data;
-  } catch( std::bad_alloc& e ) {
-    payload->data = NULL;
-    php_error(E_ERROR, "Failed to allocate memory when initializing MustacheData");
-  }
+    php_obj_MustacheData * payload;
+    zval * tmp;
 
-  retval.handle = zend_objects_store_put(payload, NULL, (zend_objects_free_object_storage_t) MustacheData_obj_free, NULL TSRMLS_CC);
-  retval.handlers = &MustacheData_obj_handlers;
+    payload = (php_obj_MustacheData *) emalloc(sizeof(php_obj_MustacheData));
+    memset(payload, 0, sizeof(php_obj_MustacheData));
+    payload->obj.ce = class_type;
+
+    payload->data = NULL;
+
+    retval.handle = zend_objects_store_put(payload, NULL, (zend_objects_free_object_storage_t) MustacheData_obj_free, NULL TSRMLS_CC);
+    retval.handlers = &MustacheData_obj_handlers;
+
+  } catch(...) {
+    mustache_exception_handler();
+  }
 
   return retval;
 }
@@ -78,36 +81,34 @@ PHP_MINIT_FUNCTION(mustache_data)
    */
 PHP_METHOD(MustacheData, __construct)
 {
-  zend_class_entry * _this_ce;
-  zval * _this_zval;
-  php_obj_MustacheData * payload;
-  
-  zval * data;
-
-  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|z", 
-          &_this_zval, MustacheData_ce_ptr, &data) == FAILURE) {
-    return;
-  }
-
-  _this_zval = getThis();
-  _this_ce = Z_OBJCE_P(_this_zval);
-
-  payload = (php_obj_MustacheData *) zend_object_store_get_object(_this_zval TSRMLS_CC);
-  
-  // Main
   try {
+    // Custom parameters
+    zval * data;
+
+    // Check parameters
+    zval * _this_zval;
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oz", 
+            &_this_zval, MustacheData_ce_ptr, &data) == FAILURE) {
+      throw PhpInvalidParameterException();
+    }
+
+    // Class parameters
+    _this_zval = getThis();
+    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
+    php_obj_MustacheData * payload = 
+            (php_obj_MustacheData *) zend_object_store_get_object(_this_zval TSRMLS_CC);
+    
     // Check if argument was given
     if( data == NULL ) {
-      return;
+      throw PhpInvalidParameterException();
     }
     
     // Convert data
+    payload->data = new mustache::Data();
     mustache_data_from_zval(payload->data, data TSRMLS_CC);
     
-  } catch( mustache::Exception& e ) {
-    mustache_error_handler(e.what(), &e, return_value TSRMLS_CC);
-  } catch( std::bad_alloc& e ) {
-    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Memory allocation failed");
+  } catch(...) {
+    mustache_exception_handler();
   }
 }
 /* }}} __construct */
@@ -116,24 +117,19 @@ PHP_METHOD(MustacheData, __construct)
    */
 PHP_METHOD(MustacheData, toValue)
 {
-  zend_class_entry * _this_ce;
-  zval * _this_zval;
-  php_obj_MustacheData * payload;
-  
-  zval * datacpy = NULL;
-  
-  if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", 
-          &_this_zval, MustacheData_ce_ptr) == FAILURE) {
-    return;
-  }
-  
-  _this_zval = getThis();
-  _this_ce = Z_OBJCE_P(_this_zval);
-
-  payload = (php_obj_MustacheData *) zend_object_store_get_object(_this_zval TSRMLS_CC);
-  
-  // Main
   try {
+    // Check parameters
+    zval * _this_zval;
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", 
+            &_this_zval, MustacheData_ce_ptr) == FAILURE) {
+      throw PhpInvalidParameterException();
+    }
+
+    _this_zval = getThis();
+    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
+    php_obj_MustacheData * payload = 
+            (php_obj_MustacheData *) zend_object_store_get_object(_this_zval TSRMLS_CC);
+  
     // Check if data was initialized
     if( payload->data == NULL ) {
       php_error_docref(NULL TSRMLS_CC, E_WARNING, "MustacheData was not initialized properly");
@@ -142,16 +138,14 @@ PHP_METHOD(MustacheData, toValue)
     }
     
     // Reverse template data
-    datacpy = mustache_data_to_zval(payload->data TSRMLS_CC);
+    zval * datacpy = mustache_data_to_zval(payload->data TSRMLS_CC);
     
     // Copy data into return value
     *return_value = *datacpy;
     zval_copy_ctor(return_value);
   
-  } catch( mustache::Exception& e ) {
-    mustache_error_handler(e.what(), &e, return_value TSRMLS_CC);
-  } catch( std::bad_alloc& e ) {
-    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Memory allocation failed");
+  } catch(...) {
+    mustache_exception_handler();
   }
 }
 /* }}} toValue */

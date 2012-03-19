@@ -129,7 +129,7 @@ void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
       case IS_STRING:
         convert_to_string(current);
         node->type = mustache::Data::TypeString;
-        node->val = new std::string(Z_STRVAL_P(current), (size_t) Z_STRLEN_P(current));
+        node->val = new std::string(Z_STRVAL_P(current)/*, (size_t) Z_STRLEN_P(current)*/);
         break;
       case IS_ARRAY: // START IS_ARRAY -----------------------------------------
         node->type = mustache::Data::TypeNone;
@@ -279,36 +279,67 @@ void mustache_error_handler(const char * msg, mustache::Exception * e,
   }
 }
 
+void mustache_exception_handler()
+{
+#if PHP_MUSTACHE_THROW_EXCEPTIONS
+  throw;
+#else
+  try {
+    throw;
+  } catch( mustache::Exception& e ) {
+    php_error(E_WARNING, e.what());
+  } catch( InvalidParameterException& e ) {
+    php_error(E_WARNING, e.what());
+  } catch( PhpInvalidParameterException& e ) {
+    // The error message should be handled by PHP
+  } catch( std::bad_alloc& e ) {
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Memory allocation failed");
+  } catch( std::runtime_error& e ) {
+    php_error(E_ERROR, e.what());
+  } catch(...) {
+    php_error(E_ERROR, "An unknown error has occurred.");
+  }
+#endif
+}
+
 bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
         mustache::Node ** node TSRMLS_DC)
 {
-  std::string templateStr;
-  std::string mtClassName("MustacheTemplate");
-  zend_class_entry * tmp_ce;
-  zend_class_entry * mtce;
-  php_obj_MustacheTemplate * mtPayload;
-  
   // Prepare template string
   if( Z_TYPE_P(tmpl) == IS_STRING ) {
-    
-    // Assign string
-    templateStr.assign(Z_STRVAL_P(tmpl), (size_t) Z_STRLEN_P(tmpl));
-    
     // Tokenize template
-    mustache->tokenize(&templateStr, *node);
-    
+    char * tmpstr = Z_STRVAL_P(tmpl);
+    *node = new mustache::Node();
+    try {
+      std::string templateStr(tmpstr/*, (size_t) Z_STRLEN_P(tmpl)*/);
+      mustache->tokenize(&templateStr, *node);
+    } catch(...) {
+      delete *node; // Prevent leaks
+      throw;
+    }
     return true;
 
   } else if( Z_TYPE_P(tmpl) == IS_OBJECT ) {
-    
     // Use compiled template
-    tmp_ce = Z_OBJCE_P(tmpl);
-    mtce = mustache_get_class_entry((char *)mtClassName.c_str(), mtClassName.length() TSRMLS_CC);
+    std::string mtClassName("MustacheTemplate");
+    zend_class_entry * tmp_ce = Z_OBJCE_P(tmpl);
+    zend_class_entry * mtce = mustache_get_class_entry((char *)mtClassName.c_str(), mtClassName.length() TSRMLS_CC);
     if( tmp_ce == NULL || mtce == NULL || tmp_ce != mtce ) {
       php_error(E_WARNING, "Object not an instance of MustacheTemplate");
       return false;
     } else {
-      mtPayload = (php_obj_MustacheTemplate *) zend_object_store_get_object(tmpl TSRMLS_CC);
+      php_obj_MustacheTemplate * mtPayload = 
+              (php_obj_MustacheTemplate *) zend_object_store_get_object(tmpl TSRMLS_CC);
+      if( mtPayload->node == NULL ) {
+        if( mtPayload->tmpl == NULL ) {
+          php_error(E_WARNING, "Empty MustacheTemplate");
+          return false;
+        } else {
+          // This won't leak because the payload handles destruction
+          mtPayload->node = new mustache::Node();
+          mustache->tokenize(mtPayload->tmpl, mtPayload->node);
+        }
+      }
       *node = mtPayload->node;
       return true;
     }
