@@ -98,6 +98,6 @@ Todo
 Tested On
 -----
 
-* Ubuntu 11.10 / GCC 4.6.1 / PHP 5.3.6-13ubuntu3.6
+* Ubuntu 11.10 / GCC 4.6.1 / PHP 5.3.6
 * Ubuntu 10.04 LTS / GCC 4.4.3 / PHP 5.3.2
 * FreeBSD 9.0 / GCC 4.2.1 / PHP 5.3.8
