@@ -68,7 +68,7 @@ PHP_MINFO_FUNCTION(mustache)
 
 void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC)
 {
-  zval * children;
+  zval * children = NULL;
   
   array_init(current);
   
@@ -119,12 +119,12 @@ void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
   HashTable * data_hash = NULL;
   HashPosition data_pointer = NULL;
   zval **data_entry = NULL;
-  long data_count;
+  long data_count = 0;
   
-  int key_type;
-  char * key_str;
-  uint key_len;
-  ulong key_nindex;
+  int key_type = 0;
+  char * key_str = NULL;
+  uint key_len = 0;
+  ulong key_nindex = 0;
   std::string ckey;
   
   int ArrayPos = 0;
@@ -212,9 +212,9 @@ zval * mustache_data_to_zval(mustache::Data * node TSRMLS_DC)
   mustache::Data::List::iterator l_it;
   mustache::Data::Map::iterator m_it;
   mustache::Data::Array childNode;
-  int pos;
-  zval * current;
-  zval * child;
+  int pos = 0;
+  zval * current = NULL;
+  zval * child = NULL;
   
   ALLOC_INIT_ZVAL(current);
   
@@ -260,9 +260,9 @@ zval * mustache_data_to_zval(mustache::Data * node TSRMLS_DC)
 
 zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_DC)
 {
-  zend_class_entry ** ce;
-  int found;
-  char * lc_name;
+  zend_class_entry ** ce = NULL;
+  int found = 0;
+  char * lc_name = NULL;
   
   ALLOCA_FLAG(use_heap)
 
@@ -355,10 +355,10 @@ bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
 bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
         mustache::Data ** node TSRMLS_DC)
 {
-  zend_class_entry * tmp_ce;
+  zend_class_entry * tmp_ce = NULL;
   std::string mdClassName("MustacheData");
-  zend_class_entry * mdce;
-  php_obj_MustacheData * mdPayload;
+  zend_class_entry * mdce = NULL;
+  php_obj_MustacheData * mdPayload = NULL;
   
   if( Z_TYPE_P(data) == IS_OBJECT ) {
     tmp_ce = Z_OBJCE_P(data);
@@ -383,22 +383,22 @@ bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
   HashTable * data_hash = NULL;
   HashPosition data_pointer = NULL;
   zval **data_entry = NULL;
-  long data_count;
+  long data_count = 0;
   
-  int key_type;
-  char * key_str;
-  uint key_len;
-  ulong key_nindex;
+  int key_type = 0;
+  char * key_str = NULL;
+  uint key_len = 0;
+  ulong key_nindex = 0;
   std::string ckey;
   
   std::string tmpl;
   mustache::Node node;
-  mustache::Node * nodePtr;
+  mustache::Node * nodePtr = NULL;
   
   std::string mtClassName("MustacheTemplate");
-  zend_class_entry * tmp_ce;
-  zend_class_entry * mtce;
-  php_obj_MustacheTemplate * mtPayload;
+  zend_class_entry * tmp_ce = NULL;
+  zend_class_entry * mtce = NULL;
+  php_obj_MustacheTemplate * mtPayload = NULL;
   
   // Ignore if not an array
   if( array == NULL || Z_TYPE_P(array) != IS_ARRAY ) {

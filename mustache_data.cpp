@@ -62,7 +62,7 @@ static zend_object_value MustacheData_obj_create(zend_class_entry *class_type TS
 
 PHP_MINIT_FUNCTION(mustache_data)
 {
-  zend_class_entry ce;
+  zend_class_entry ce = NULL;
 
   INIT_CLASS_ENTRY(ce, "MustacheData", MustacheData_methods);
   ce.create_object = MustacheData_obj_create;
@@ -83,10 +83,10 @@ PHP_METHOD(MustacheData, __construct)
 {
   try {
     // Custom parameters
-    zval * data;
+    zval * data = NULL;
 
     // Check parameters
-    zval * _this_zval;
+    zval * _this_zval = NULL;
     if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oz", 
             &_this_zval, MustacheData_ce_ptr, &data) == FAILURE) {
       throw PhpInvalidParameterException();
@@ -119,7 +119,7 @@ PHP_METHOD(MustacheData, toValue)
 {
   try {
     // Check parameters
-    zval * _this_zval;
+    zval * _this_zval = NULL;
     if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", 
             &_this_zval, MustacheData_ce_ptr) == FAILURE) {
       throw PhpInvalidParameterException();

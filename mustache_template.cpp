@@ -71,7 +71,7 @@ static zend_object_value MustacheTemplate_obj_create(zend_class_entry *class_typ
 PHP_MINIT_FUNCTION(mustache_template)
 {
   try {
-    zend_class_entry ce;
+    zend_class_entry ce = NULL;
 
     INIT_CLASS_ENTRY(ce, "MustacheTemplate", MustacheTemplate_methods);
     ce.create_object = MustacheTemplate_obj_create;
@@ -96,11 +96,11 @@ PHP_METHOD(MustacheTemplate, __construct)
 {
   try {
     // Custom parameters
-    char * template_str;
-    long template_len;
+    char * template_str = NULL;
+    long template_len = 0;
     
     // Check parameters
-    zval * _this_zval;
+    zval * _this_zval = NULL;
     if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", 
             &_this_zval, MustacheTemplate_ce_ptr, &template_str, &template_len) == FAILURE) {
       throw PhpInvalidParameterException();
@@ -132,7 +132,7 @@ PHP_METHOD(MustacheTemplate, toArray)
 {
   try {
     // Check parameters
-    zval * _this_zval;
+    zval * _this_zval = NULL;
     if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", 
             &_this_zval, MustacheTemplate_ce_ptr) == FAILURE) {
       throw PhpInvalidParameterException();
@@ -164,7 +164,7 @@ PHP_METHOD(MustacheTemplate, __toString)
 {
   try {
     // Check parameters
-    zval * _this_zval;
+    zval * _this_zval = NULL;
     if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", 
             &_this_zval, MustacheTemplate_ce_ptr) == FAILURE) {
       throw PhpInvalidParameterException();
