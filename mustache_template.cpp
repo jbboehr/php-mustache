@@ -71,7 +71,7 @@ static zend_object_value MustacheTemplate_obj_create(zend_class_entry *class_typ
 PHP_MINIT_FUNCTION(mustache_template)
 {
   try {
-    zend_class_entry ce = NULL;
+    zend_class_entry ce;
 
     INIT_CLASS_ENTRY(ce, "MustacheTemplate", MustacheTemplate_methods);
     ce.create_object = MustacheTemplate_obj_create;

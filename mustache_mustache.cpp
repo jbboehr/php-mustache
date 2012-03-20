@@ -76,7 +76,7 @@ static zend_object_value Mustache_obj_create(zend_class_entry *class_type TSRMLS
 PHP_MINIT_FUNCTION(mustache_mustache)
 {
   try {
-    zend_class_entry ce = NULL;
+    zend_class_entry ce;
 
     INIT_CLASS_ENTRY(ce, "Mustache", Mustache_methods);
     ce.create_object = Mustache_obj_create;

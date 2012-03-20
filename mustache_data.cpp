@@ -62,7 +62,7 @@ static zend_object_value MustacheData_obj_create(zend_class_entry *class_type TS
 
 PHP_MINIT_FUNCTION(mustache_data)
 {
-  zend_class_entry ce = NULL;
+  zend_class_entry ce;
 
   INIT_CLASS_ENTRY(ce, "MustacheData", MustacheData_methods);
   ce.create_object = MustacheData_obj_create;
