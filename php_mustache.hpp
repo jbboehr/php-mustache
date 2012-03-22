@@ -5,8 +5,8 @@
 extern "C" {
 
 #define PHP_MUSTACHE_NAME "mustache"  
-#define PHP_MUSTACHE_VERSION "0.1.0"
-#define PHP_MUSTACHE_RELEASE "2012-03-14"
+#define PHP_MUSTACHE_VERSION "0.2.0"
+#define PHP_MUSTACHE_RELEASE "2012-03-22"
 #define PHP_MUSTACHE_BUILD "master"
 #define PHP_MUSTACHE_AUTHORS "John Boehr <jbboehr@gmail.com> (lead)"
 
@@ -26,12 +26,6 @@ extern "C" {
 #include "zend_interfaces.h"
 #include <Zend/zend_exceptions.h>
 #include <Zend/zend_extensions.h>
-
-#ifdef PHP_WIN32
-#define PHP_FFTW_API __declspec(dllexport)
-#else
-#define PHP_FFTW_API
-#endif
 
 #ifdef ZTS
 #include "TSRM.h"
