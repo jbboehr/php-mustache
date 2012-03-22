@@ -93,7 +93,6 @@ Todo
 
 * Fix whitespace non-conformity
 * Cache compiled templates in memory
-* Fix std::bad_alloc when xdebug is enabled
 * Test in thread-safe mode
 
 Tested On
