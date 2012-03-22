@@ -1,10 +1,11 @@
 Mustache
-========
+================================================================================
 
-C++ implementation of Mustache as a PHP extension. See <http://mustache.github.com/>
+C++ implementation of Mustache as a PHP extension.
+See <http://mustache.github.com/>
 
 Features
---------
+--------------------------------------------------------------------------------
 
 All features of Mustache are supported EXCEPT:
 
@@ -12,7 +13,7 @@ All features of Mustache are supported EXCEPT:
 * Whitespace rules. All whitespace is kept as it is in the input template.
 
 Requirements
-------------
+--------------------------------------------------------------------------------
 
 Ubuntu:
 
@@ -21,7 +22,7 @@ apt-get install git-core php5-dev
 ```
 
 Installation
-------------
+--------------------------------------------------------------------------------
 
 Ubuntu:
 
@@ -36,7 +37,7 @@ make && make install
 ```
 
 Usage
------
+--------------------------------------------------------------------------------
 
 Example:
 
@@ -89,14 +90,13 @@ valvalvalvalval
 ```
 
 Todo
-----
-
+--------------------------------------------------------------------------------
 * Fix whitespace non-conformity
 * Cache compiled templates in memory
 * Test in thread-safe mode
 
 Tested On
----------
+--------------------------------------------------------------------------------
 
 * Ubuntu 11.10 / GCC 4.6.1 / PHP 5.3.6
 * Ubuntu 10.04 LTS / GCC 4.4.3 / PHP 5.3.2
