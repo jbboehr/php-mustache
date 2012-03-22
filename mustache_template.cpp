@@ -1,7 +1,13 @@
 
+#include "php_mustache.hpp"
+#include "mustache_data.hpp"
 #include "mustache_template.hpp"
 
-#include "mustache_data.hpp"
+
+
+// Class Entries  --------------------------------------------------------------
+
+PHPAPI zend_class_entry * MustacheTemplate_ce_ptr = NULL;
 
 
 
@@ -35,7 +41,7 @@ static void MustacheTemplate_obj_free(void *object TSRMLS_DC)
     efree(object);
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 
@@ -58,7 +64,7 @@ static zend_object_value MustacheTemplate_obj_create(zend_class_entry *class_typ
     retval.handlers = &MustacheTemplate_obj_handlers;
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
   
   return retval;
@@ -81,7 +87,7 @@ PHP_MINIT_FUNCTION(mustache_template)
 
     return SUCCESS;
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
     return FAILURE;
   }
 }
@@ -121,7 +127,7 @@ PHP_METHOD(MustacheTemplate, __construct)
     payload->tmpl = new std::string(template_str/*, template_len*/);
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} __construct */
@@ -153,7 +159,7 @@ PHP_METHOD(MustacheTemplate, toArray)
     mustache_node_to_zval(payload->node, return_value TSRMLS_CC);
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} toArray */
@@ -185,7 +191,7 @@ PHP_METHOD(MustacheTemplate, __toString)
     RETURN_STRING(payload->tmpl->c_str(), 1); // Yes reallocate
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} toArray */

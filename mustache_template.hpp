@@ -2,10 +2,11 @@
 #ifndef PHP_MUSTACHE_TEMPLATE_HPP
 #define PHP_MUSTACHE_TEMPLATE_HPP
 
-#include "php_mustache.hpp"
+
+#include "php.h"
 
 
-static zend_class_entry * MustacheTemplate_ce_ptr = NULL;
+extern "C" PHPAPI zend_class_entry * MustacheTemplate_ce_ptr;
 
 
 typedef struct _php_obj_MustacheTemplate {

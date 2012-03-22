@@ -1,7 +1,7 @@
 
 #include "php_mustache.hpp"
-
 #include "mustache_mustache.hpp"
+#include "mustache_exceptions.hpp"
 #include "mustache_data.hpp"
 #include "mustache_template.hpp"
 
@@ -33,6 +33,7 @@ PHP_MINIT_FUNCTION(mustache)
   PHP_MINIT(mustache_mustache)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_data)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_template)(INIT_FUNC_ARGS_PASSTHRU);
+  PHP_MINIT(mustache_exceptions)(INIT_FUNC_ARGS_PASSTHRU);
   
   return SUCCESS;
 }
@@ -280,16 +281,22 @@ zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_DC)
   }
 }
 
-void mustache_exception_handler()
+void mustache_exception_handler(TSRMLS_D)
 {
 #if PHP_MUSTACHE_THROW_EXCEPTIONS
   throw;
 #else
   try {
     throw;
+  } catch( mustache::TokenizerException& e ) {
+    zval * exception = zend_throw_exception_ex(MustacheParserException_ce_ptr, 
+            0 TSRMLS_CC, (char *) e.what(), "MustacheParserException");
+    zend_update_property_long(MustacheParserException_ce_ptr, exception, "templateLineNo", strlen("templateLineNo"), e.lineNo TSRMLS_CC);
+    zend_update_property_long(MustacheParserException_ce_ptr, exception, "templateCharNo", strlen("templateCharNo"), e.charNo TSRMLS_CC);
   } catch( mustache::Exception& e ) {
-    // @todo change this to an exception
-    php_error_docref(NULL TSRMLS_CC, E_WARNING, e.what());
+    zend_throw_exception_ex(MustacheException_ce_ptr, 0 TSRMLS_CC, 
+            (char *) e.what(), "MustacheException");
+    //php_error_docref(NULL TSRMLS_CC, E_WARNING, e.what());
   } catch( InvalidParameterException& e ) {
     // @todo change this to an exception
     php_error_docref(NULL TSRMLS_CC, E_WARNING, e.what());

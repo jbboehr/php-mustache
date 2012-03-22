@@ -23,8 +23,10 @@ extern "C" {
 #include <php_ini.h>
 #include <SAPI.h>
 #include <ext/standard/info.h>
+#include "zend_interfaces.h"
+#include <Zend/zend_exceptions.h>
 #include <Zend/zend_extensions.h>
-  
+
 #ifdef PHP_WIN32
 #define PHP_FFTW_API __declspec(dllexport)
 #else
@@ -68,7 +70,7 @@ void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC);
 void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC);
 zval * mustache_data_to_zval(mustache::Data * node TSRMLS_DC);
 zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_DC);
-void mustache_exception_handler();
+void mustache_exception_handler(TSRMLS_D);
 
 bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
         mustache::Node ** node TSRMLS_DC);

@@ -1,5 +1,12 @@
 
+#include "php_mustache.hpp"
 #include "mustache_data.hpp"
+
+
+
+// Class Entries  --------------------------------------------------------------
+
+PHPAPI zend_class_entry * MustacheData_ce_ptr = NULL;
 
 
 
@@ -28,7 +35,7 @@ static void MustacheData_obj_free(void *object TSRMLS_DC)
 
     efree(object);
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 
@@ -50,7 +57,7 @@ static zend_object_value MustacheData_obj_create(zend_class_entry *class_type TS
     retval.handlers = &MustacheData_obj_handlers;
 
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 
   return retval;
@@ -108,7 +115,7 @@ PHP_METHOD(MustacheData, __construct)
     mustache_data_from_zval(payload->data, data TSRMLS_CC);
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} __construct */
@@ -145,7 +152,7 @@ PHP_METHOD(MustacheData, toValue)
     zval_copy_ctor(return_value);
   
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} toValue */

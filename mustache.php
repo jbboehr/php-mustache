@@ -131,3 +131,5 @@ class MustacheData
    */
   public function toValue() {}
 }
+
+class MustacheException extends Exception {}

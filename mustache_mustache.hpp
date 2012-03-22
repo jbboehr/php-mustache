@@ -5,7 +5,7 @@
 #include "php_mustache.hpp"
 
 
-static zend_class_entry * Mustache_ce_ptr = NULL;
+extern "C" PHPAPI zend_class_entry * Mustache_ce_ptr;
 
 
 typedef struct _php_obj_Mustache {

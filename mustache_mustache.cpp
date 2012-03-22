@@ -5,6 +5,12 @@
 
 
 
+// Class Entries  --------------------------------------------------------------
+
+PHPAPI zend_class_entry * Mustache_ce_ptr = NULL;
+
+
+
 // Method Entries --------------------------------------------------------------
 
 static zend_function_entry Mustache_methods[] = {
@@ -40,7 +46,7 @@ static void Mustache_obj_free(void *object TSRMLS_DC)
     efree(object);
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 
@@ -63,7 +69,7 @@ static zend_object_value Mustache_obj_create(zend_class_entry *class_type TSRMLS
     retval.handlers = &Mustache_obj_handlers;
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 
   return retval;
@@ -86,7 +92,7 @@ PHP_MINIT_FUNCTION(mustache_mustache)
 
     return SUCCESS;
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
     return FAILURE;
   }
 }
@@ -114,7 +120,7 @@ PHP_METHOD(Mustache, __construct)
             (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} __construct */
@@ -145,7 +151,7 @@ PHP_METHOD(Mustache, getEscapeByDefault)
     }
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} getEscapeByDefault */
@@ -173,7 +179,7 @@ PHP_METHOD(Mustache, getStartSequence)
     RETURN_STRING(str.c_str(), 1);
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} getStartSequence */
@@ -201,7 +207,7 @@ PHP_METHOD(Mustache, getStopSequence)
     RETURN_STRING(str.c_str(), 1);
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} getStopSequence */
@@ -232,7 +238,7 @@ PHP_METHOD(Mustache, setEscapeByDefault)
     RETURN_TRUE;
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} setEscapeByDefault */
@@ -264,7 +270,7 @@ PHP_METHOD(Mustache, setStartSequence)
     RETURN_TRUE;
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} setStartSequence */
@@ -296,7 +302,7 @@ PHP_METHOD(Mustache, setStopSequence)
     RETURN_TRUE;
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} setStartSequence */
@@ -363,7 +369,7 @@ PHP_METHOD(Mustache, compile)
     }
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} compile */
@@ -401,7 +407,7 @@ PHP_METHOD(Mustache, tokenize)
     mustache_node_to_zval(&root, return_value TSRMLS_CC);
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} tokenize */
@@ -457,7 +463,7 @@ PHP_METHOD(Mustache, render)
     RETURN_STRING(output.c_str(), 1); // Yes reallocate
     
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} render */
@@ -494,7 +500,7 @@ PHP_METHOD(Mustache, debugDataStructure)
     zval_copy_ctor(return_value);
   
   } catch(...) {
-    mustache_exception_handler();
+    mustache_exception_handler(TSRMLS_C);
   }
 }
 /* }}} debugDataStructure */

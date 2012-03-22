@@ -54,6 +54,7 @@ if test "$PHP_MUSTACHE" != "no"; then
   PHP_MUSTACHE_ADD_SOURCES([
     php_mustache.cpp
     mustache_mustache.cpp
+    mustache_exceptions.cpp
     mustache_data.cpp
     mustache_template.cpp
     mustache/mustache.cpp
