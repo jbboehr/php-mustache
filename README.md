@@ -89,14 +89,14 @@ valvalvalvalval
 ```
 
 Todo
------
+----
 
 * Fix whitespace non-conformity
 * Cache compiled templates in memory
 * Test in thread-safe mode
 
 Tested On
------
+---------
 
 * Ubuntu 11.10 / GCC 4.6.1 / PHP 5.3.6
 * Ubuntu 10.04 LTS / GCC 4.4.3 / PHP 5.3.2
