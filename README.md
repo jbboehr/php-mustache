@@ -1,8 +1,9 @@
 Mustache
-================================================================================
+--------------------------------------------------------------------------------
+
 
 C++ implementation of Mustache as a PHP extension.
-See <http://mustache.github.com/>
+See [Mustache](http://mustache.github.com/)
 
 Features
 --------------------------------------------------------------------------------
@@ -94,6 +95,7 @@ Todo
 * Fix whitespace non-conformity
 * Cache compiled templates in memory
 * Test in thread-safe mode
+* Implement tr1::unordered_map or boost::unordered_map to see performance differences
 
 Tested On
 --------------------------------------------------------------------------------
