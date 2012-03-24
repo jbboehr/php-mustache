@@ -5,19 +5,32 @@
 #include "mustache_data.hpp"
 #include "mustache_template.hpp"
 
-// Module Entry ----------------------------------------------------------------
+/* {{{ Declarations --------------------------------------------------------- */
+
+ZEND_DECLARE_MODULE_GLOBALS(mustache)
+static PHP_MINIT_FUNCTION(mustache);
+static PHP_MSHUTDOWN_FUNCTION(mustache);
+static PHP_MINFO_FUNCTION(mustache);
+static PHP_GINIT_FUNCTION(mustache);
+
+/* }}} ---------------------------------------------------------------------- */
+/* {{{ Module Entry --------------------------------------------------------- */
 
 zend_module_entry mustache_module_entry = {
   STANDARD_MODULE_HEADER,
-  PHP_MUSTACHE_NAME,        // Define PHP extension name  
-  NULL,        /* Functions */  
-  PHP_MINIT(mustache),        /* MINIT */  
-  NULL,        /* MSHUTDOWN */  
-  NULL,        /* RINIT */  
-  NULL,        /* RSHUTDOWN */  
-  PHP_MINFO(mustache),        /* MINFO */  
-  PHP_MUSTACHE_VERSION,
-  STANDARD_MODULE_PROPERTIES  
+  PHP_MUSTACHE_NAME,            /* Name */
+  NULL,                         /* Functions */
+  PHP_MINIT(mustache),          /* MINIT */
+  NULL,                         /* MSHUTDOWN */
+  NULL,                         /* RINIT */
+  NULL,                         /* RSHUTDOWN */
+  PHP_MINFO(mustache),          /* MINFO */
+  PHP_MUSTACHE_VERSION,         /* Version */
+  PHP_MODULE_GLOBALS(mustache), /* Globals */
+  PHP_GINIT(mustache),          /* GINIT */
+  NULL,
+  NULL,
+  STANDARD_MODULE_PROPERTIES_EX
 };  
 
 #ifdef COMPILE_DL_MUSTACHE 
@@ -26,10 +39,22 @@ extern "C" {
 }
 #endif
 
-// MINIT -----------------------------------------------------------------------
-  
-PHP_MINIT_FUNCTION(mustache)
+/* }}} ---------------------------------------------------------------------- */
+/* {{{ INI Settings --------------------------------------------------------- */
+
+PHP_INI_BEGIN()
+  STD_PHP_INI_BOOLEAN("mustache.default_escape", "1", PHP_INI_ALL, OnUpdateBool, default_escape_by_default, zend_mustache_globals, mustache_globals)
+  STD_PHP_INI_ENTRY("mustache.default_start", "{{", PHP_INI_ALL, OnUpdateString, default_start_sequence, zend_mustache_globals, mustache_globals)
+  STD_PHP_INI_ENTRY("mustache.default_stop", "}}", PHP_INI_ALL, OnUpdateString, default_stop_sequence, zend_mustache_globals, mustache_globals)
+PHP_INI_END()
+
+/* }}} ---------------------------------------------------------------------- */
+/* {{{ Module Hooks --------------------------------------------------------- */
+
+static PHP_MINIT_FUNCTION(mustache)
 {
+  REGISTER_INI_ENTRIES();
+  
   PHP_MINIT(mustache_mustache)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_data)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_template)(INIT_FUNC_ARGS_PASSTHRU);
@@ -38,9 +63,21 @@ PHP_MINIT_FUNCTION(mustache)
   return SUCCESS;
 }
 
-// MINFO -----------------------------------------------------------------------
+static PHP_MSHUTDOWN_FUNCTION(mustache)
+{
+  UNREGISTER_INI_ENTRIES();
   
-PHP_MINFO_FUNCTION(mustache)
+  return SUCCESS;
+}
+
+static PHP_GINIT_FUNCTION(mustache)
+{
+  mustache_globals->default_escape_by_default = 1;
+  mustache_globals->default_start_sequence = "{{";
+  mustache_globals->default_stop_sequence = "}}";
+}
+
+static PHP_MINFO_FUNCTION(mustache)
 {
   php_info_print_table_start();
   php_info_print_table_row(2, "Version", PHP_MUSTACHE_VERSION);
@@ -63,11 +100,14 @@ PHP_MINFO_FUNCTION(mustache)
   php_info_print_table_row(2, "libboost support", "disabled");
 #endif
   php_info_print_table_end();
+  
+  DISPLAY_INI_ENTRIES();
 }
 
-// Utils -----------------------------------------------------------------------
+/* }}} ---------------------------------------------------------------------- */
+/* {{{ Utils ---------------------------------------------------------------- */
 
-void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC)
+PHPAPI void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC)
 {
   zval * children = NULL;
   
@@ -115,7 +155,7 @@ void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC)
   }
 }
 
-void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
+PHPAPI void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
 {
   HashTable * data_hash = NULL;
   HashPosition data_pointer = NULL;
@@ -208,7 +248,7 @@ void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
   }
 }
 
-zval * mustache_data_to_zval(mustache::Data * node TSRMLS_DC)
+PHPAPI zval * mustache_data_to_zval(mustache::Data * node TSRMLS_DC)
 {
   mustache::Data::List::iterator l_it;
   mustache::Data::Map::iterator m_it;
@@ -259,7 +299,7 @@ zval * mustache_data_to_zval(mustache::Data * node TSRMLS_DC)
   return current;
 }
 
-zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_DC)
+PHPAPI zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_DC)
 {
   zend_class_entry ** ce = NULL;
   int found = 0;
@@ -281,7 +321,7 @@ zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_DC)
   }
 }
 
-void mustache_exception_handler(TSRMLS_D)
+PHPAPI void mustache_exception_handler(TSRMLS_D)
 {
 #if PHP_MUSTACHE_THROW_EXCEPTIONS
   throw;
@@ -312,7 +352,7 @@ void mustache_exception_handler(TSRMLS_D)
 #endif
 }
 
-bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
+PHPAPI bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
         mustache::Node ** node TSRMLS_DC)
 {
   // Prepare template string
@@ -359,7 +399,7 @@ bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
   }
 }
 
-bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
+PHPAPI bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
         mustache::Data ** node TSRMLS_DC)
 {
   zend_class_entry * tmp_ce = NULL;
@@ -384,7 +424,7 @@ bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
   }
 }
 
-bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
+PHPAPI bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
         mustache::Node::Partials * partials TSRMLS_DC)
 {
   HashTable * data_hash = NULL;
@@ -453,3 +493,5 @@ bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
     zend_hash_move_forward_ex(data_hash, &data_pointer);
   }
 }
+
+/* }}} ---------------------------------------------------------------------- */

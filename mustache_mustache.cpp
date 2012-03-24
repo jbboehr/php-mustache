@@ -64,6 +64,19 @@ static zend_object_value Mustache_obj_create(zend_class_entry *class_type TSRMLS
 
     payload->mustache = new mustache::Mustache;
     
+    // Set ini settings
+    if( MUSTACHEG(default_escape_by_default) ) {
+      payload->mustache->setEscapeByDefault(true);
+    } else {
+      payload->mustache->setEscapeByDefault(false);
+    }
+    if( MUSTACHEG(default_start_sequence) ) {
+      payload->mustache->setStartSequence(MUSTACHEG(default_start_sequence), 0);
+    }
+    if( MUSTACHEG(default_stop_sequence) ) {
+      payload->mustache->setStopSequence(MUSTACHEG(default_stop_sequence), 0);
+    }
+    
     retval.handle = zend_objects_store_put(payload, NULL, 
         (zend_objects_free_object_storage_t) Mustache_obj_free, NULL TSRMLS_CC);
     retval.handlers = &Mustache_obj_handlers;
