@@ -24,9 +24,9 @@ array(3) {
     [0]=>
     array(3) {
       ["type"]=>
-      int(3)
+      int(16)
       ["flags"]=>
-      int(0)
+      int(1)
       ["data"]=>
       string(4) "test"
     }
