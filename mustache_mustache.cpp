@@ -491,7 +491,7 @@ PHP_METHOD(Mustache, debugDataStructure)
     
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa/", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oz", 
             &_this_zval, Mustache_ce_ptr, &data) == FAILURE) {
       throw PhpInvalidParameterException();
     }
