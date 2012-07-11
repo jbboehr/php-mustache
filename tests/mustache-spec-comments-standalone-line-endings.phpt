@@ -8,15 +8,15 @@ Standalone Line Endings
 <?php
 $test = array (
   'name' => 'Standalone Line Endings',
+  'desc' => '"\\r\\n" should be considered a newline for standalone tags.',
   'data' => 
   array (
   ),
-  'expected' => '|
-|',
   'template' => '|
 {{! Standalone Comment }}
 |',
-  'desc' => '"\\r\\n" should be considered a newline for standalone tags.',
+  'expected' => '|
+|',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

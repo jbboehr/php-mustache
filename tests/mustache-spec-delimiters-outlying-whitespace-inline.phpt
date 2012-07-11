@@ -8,14 +8,14 @@ Whitespace should be left untouched.
 <?php
 $test = array (
   'name' => 'Outlying Whitespace (Inline)',
+  'desc' => 'Whitespace should be left untouched.',
   'data' => 
   array (
   ),
-  'expected' => ' | 
-',
   'template' => ' | {{=@ @=}}
 ',
-  'desc' => 'Whitespace should be left untouched.',
+  'expected' => ' | 
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

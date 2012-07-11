@@ -8,15 +8,12 @@ Multiple inverted sections per template should be permitted.
 <?php
 $test = array (
   'name' => 'Doubled',
+  'desc' => 'Multiple inverted sections per template should be permitted.',
   'data' => 
   array (
-    'two' => 'second',
     'bool' => false,
+    'two' => 'second',
   ),
-  'expected' => '* first
-* second
-* third
-',
   'template' => '{{^bool}}
 * first
 {{/bool}}
@@ -25,7 +22,10 @@ $test = array (
 * third
 {{/bool}}
 ',
-  'desc' => 'Multiple inverted sections per template should be permitted.',
+  'expected' => '* first
+* second
+* third
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

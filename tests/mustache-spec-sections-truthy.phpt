@@ -8,13 +8,13 @@ Truthy sections should have their contents rendered.
 <?php
 $test = array (
   'name' => 'Truthy',
+  'desc' => 'Truthy sections should have their contents rendered.',
   'data' => 
   array (
     'boolean' => true,
   ),
-  'expected' => '"This should be rendered."',
   'template' => '"{{#boolean}}This should be rendered.{{/boolean}}"',
-  'desc' => 'Truthy sections should have their contents rendered.',
+  'expected' => '"This should be rendered."',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

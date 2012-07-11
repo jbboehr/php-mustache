@@ -8,15 +8,15 @@ Dotted names that cannot be resolved should be considered falsey.
 <?php
 $test = array (
   'name' => 'Dotted Names - Broken Chains',
+  'desc' => 'Dotted names that cannot be resolved should be considered falsey.',
   'data' => 
   array (
     'a' => 
     array (
     ),
   ),
-  'expected' => '"" == ""',
   'template' => '"{{#a.b.c}}Here{{/a.b.c}}" == ""',
-  'desc' => 'Dotted names that cannot be resolved should be considered falsey.',
+  'expected' => '"" == ""',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

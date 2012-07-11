@@ -8,17 +8,17 @@ Inverted should not alter internal whitespace.
 <?php
 $test = array (
   'name' => 'Internal Whitespace',
+  'desc' => 'Inverted should not alter internal whitespace.',
   'data' => 
   array (
     'boolean' => false,
   ),
-  'expected' => ' |  
-  | 
-',
   'template' => ' | {{^boolean}} {{! Important Whitespace }}
  {{/boolean}} | 
 ',
-  'desc' => 'Inverted should not alter internal whitespace.',
+  'expected' => ' |  
+  | 
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

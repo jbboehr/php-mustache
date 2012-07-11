@@ -8,14 +8,14 @@ Mustache-free templates should render as-is.
 <?php
 $test = array (
   'name' => 'No Interpolation',
+  'desc' => 'Mustache-free templates should render as-is.',
   'data' => 
   array (
   ),
-  'expected' => 'Hello from {Mustache}!
-',
   'template' => 'Hello from {Mustache}!
 ',
-  'desc' => 'Mustache-free templates should render as-is.',
+  'expected' => 'Hello from {Mustache}!
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

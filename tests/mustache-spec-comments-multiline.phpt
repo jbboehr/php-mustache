@@ -8,17 +8,17 @@ Multiline comments should be permitted.
 <?php
 $test = array (
   'name' => 'Multiline',
+  'desc' => 'Multiline comments should be permitted.',
   'data' => 
   array (
   ),
-  'expected' => '1234567890
-',
   'template' => '12345{{!
   This is a
   multi-line comment...
 }}67890
 ',
-  'desc' => 'Multiline comments should be permitted.',
+  'expected' => '1234567890
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

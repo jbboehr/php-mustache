@@ -8,12 +8,12 @@ Failed context lookups should default to empty strings.
 <?php
 $test = array (
   'name' => 'Ampersand Context Miss Interpolation',
+  'desc' => 'Failed context lookups should default to empty strings.',
   'data' => 
   array (
   ),
-  'expected' => 'I () be seen!',
   'template' => 'I ({{&cannot}}) be seen!',
-  'desc' => 'Failed context lookups should default to empty strings.',
+  'expected' => 'I () be seen!',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

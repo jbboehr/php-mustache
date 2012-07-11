@@ -8,6 +8,7 @@ Dotted names should be functional to any level of nesting.
 <?php
 $test = array (
   'name' => 'Dotted Names - Arbitrary Depth',
+  'desc' => 'Dotted names should be functional to any level of nesting.',
   'data' => 
   array (
     'a' => 
@@ -27,9 +28,8 @@ $test = array (
       ),
     ),
   ),
-  'expected' => '"Phil" == "Phil"',
   'template' => '"{{a.b.c.d.e.name}}" == "Phil"',
-  'desc' => 'Dotted names should be functional to any level of nesting.',
+  'expected' => '"Phil" == "Phil"',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

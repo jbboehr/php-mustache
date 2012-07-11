@@ -8,13 +8,13 @@ Nested truthy sections should be omitted.
 <?php
 $test = array (
   'name' => 'Nested (Truthy)',
+  'desc' => 'Nested truthy sections should be omitted.',
   'data' => 
   array (
     'bool' => true,
   ),
-  'expected' => '| A  E |',
   'template' => '| A {{^bool}}B {{^bool}}C{{/bool}} D{{/bool}} E |',
-  'desc' => 'Nested truthy sections should be omitted.',
+  'expected' => '| A  E |',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

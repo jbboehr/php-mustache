@@ -8,6 +8,7 @@ The greater-than operator should properly recurse.
 <?php
 $test = array (
   'name' => 'Recursion',
+  'desc' => 'The greater-than operator should properly recurse.',
   'data' => 
   array (
     'content' => 'X',
@@ -22,13 +23,12 @@ $test = array (
       ),
     ),
   ),
-  'expected' => 'X<Y<>>',
   'template' => '{{>node}}',
-  'desc' => 'The greater-than operator should properly recurse.',
   'partials' => 
   array (
     'node' => '{{content}}<{{#nodes}}{{>node}}{{/nodes}}>',
   ),
+  'expected' => 'X<Y<>>',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);

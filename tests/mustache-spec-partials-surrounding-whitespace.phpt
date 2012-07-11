@@ -8,16 +8,16 @@ The greater-than operator should not alter surrounding whitespace.
 <?php
 $test = array (
   'name' => 'Surrounding Whitespace',
+  'desc' => 'The greater-than operator should not alter surrounding whitespace.',
   'data' => 
   array (
   ),
-  'expected' => '| 	|	 |',
   'template' => '| {{>partial}} |',
-  'desc' => 'The greater-than operator should not alter surrounding whitespace.',
   'partials' => 
   array (
     'partial' => '	|	',
   ),
+  'expected' => '| 	|	 |',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);

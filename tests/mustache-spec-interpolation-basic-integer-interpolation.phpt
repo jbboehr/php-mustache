@@ -8,13 +8,13 @@ Integers should interpolate seamlessly.
 <?php
 $test = array (
   'name' => 'Basic Integer Interpolation',
+  'desc' => 'Integers should interpolate seamlessly.',
   'data' => 
   array (
     'mph' => 85,
   ),
-  'expected' => '"85 miles an hour!"',
   'template' => '"{{mph}} miles an hour!"',
-  'desc' => 'Integers should interpolate seamlessly.',
+  'expected' => '"85 miles an hour!"',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

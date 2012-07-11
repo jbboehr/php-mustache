@@ -8,6 +8,7 @@ Dotted names should be valid for Section tags.
 <?php
 $test = array (
   'name' => 'Dotted Names - Falsey',
+  'desc' => 'Dotted names should be valid for Section tags.',
   'data' => 
   array (
     'a' => 
@@ -18,9 +19,8 @@ $test = array (
       ),
     ),
   ),
-  'expected' => '"" == ""',
   'template' => '"{{#a.b.c}}Here{{/a.b.c}}" == ""',
-  'desc' => 'Dotted names should be valid for Section tags.',
+  'expected' => '"" == ""',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

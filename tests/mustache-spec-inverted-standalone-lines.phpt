@@ -8,21 +8,21 @@ Standalone lines should be removed from the template.
 <?php
 $test = array (
   'name' => 'Standalone Lines',
+  'desc' => 'Standalone lines should be removed from the template.',
   'data' => 
   array (
     'boolean' => false,
   ),
-  'expected' => '| This Is
-|
-| A Line
-',
   'template' => '| This Is
 {{^boolean}}
 |
 {{/boolean}}
 | A Line
 ',
-  'desc' => 'Standalone lines should be removed from the template.',
+  'expected' => '| This Is
+|
+| A Line
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

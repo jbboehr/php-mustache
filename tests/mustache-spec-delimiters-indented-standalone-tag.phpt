@@ -8,17 +8,17 @@ Indented standalone lines should be removed from the template.
 <?php
 $test = array (
   'name' => 'Indented Standalone Tag',
+  'desc' => 'Indented standalone lines should be removed from the template.',
   'data' => 
   array (
   ),
-  'expected' => 'Begin.
-End.
-',
   'template' => 'Begin.
   {{=@ @=}}
 End.
 ',
-  'desc' => 'Indented standalone lines should be removed from the template.',
+  'expected' => 'Begin.
+End.
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

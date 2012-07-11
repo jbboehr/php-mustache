@@ -8,13 +8,13 @@ Truthy sections should have their contents omitted.
 <?php
 $test = array (
   'name' => 'Truthy',
+  'desc' => 'Truthy sections should have their contents omitted.',
   'data' => 
   array (
     'boolean' => true,
   ),
-  'expected' => '""',
   'template' => '"{{^boolean}}This should not be rendered.{{/boolean}}"',
-  'desc' => 'Truthy sections should have their contents omitted.',
+  'expected' => '""',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

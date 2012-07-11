@@ -8,6 +8,7 @@ Objects and hashes should be pushed onto the context stack.
 <?php
 $test = array (
   'name' => 'Context',
+  'desc' => 'Objects and hashes should be pushed onto the context stack.',
   'data' => 
   array (
     'context' => 
@@ -15,9 +16,8 @@ $test = array (
       'name' => 'Joe',
     ),
   ),
-  'expected' => '"Hi Joe."',
   'template' => '"{{#context}}Hi {{name}}.{{/context}}"',
-  'desc' => 'Objects and hashes should be pushed onto the context stack.',
+  'expected' => '"Hi Joe."',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

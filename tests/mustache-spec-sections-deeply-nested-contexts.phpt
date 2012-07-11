@@ -8,6 +8,7 @@ All elements on the context stack should be accessible.
 <?php
 $test = array (
   'name' => 'Deeply Nested Contexts',
+  'desc' => 'All elements on the context stack should be accessible.',
   'data' => 
   array (
     'a' => 
@@ -31,16 +32,6 @@ $test = array (
       'five' => 5,
     ),
   ),
-  'expected' => '1
-121
-12321
-1234321
-123454321
-1234321
-12321
-121
-1
-',
   'template' => '{{#a}}
 {{one}}
 {{#b}}
@@ -61,7 +52,16 @@ $test = array (
 {{one}}
 {{/a}}
 ',
-  'desc' => 'All elements on the context stack should be accessible.',
+  'expected' => '1
+121
+12321
+1234321
+123454321
+1234321
+12321
+121
+1
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

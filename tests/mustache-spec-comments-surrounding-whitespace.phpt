@@ -8,12 +8,12 @@ Comment removal should preserve surrounding whitespace.
 <?php
 $test = array (
   'name' => 'Surrounding Whitespace',
+  'desc' => 'Comment removal should preserve surrounding whitespace.',
   'data' => 
   array (
   ),
-  'expected' => '12345  67890',
   'template' => '12345 {{! Comment Block! }} 67890',
-  'desc' => 'Comment removal should preserve surrounding whitespace.',
+  'expected' => '12345  67890',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

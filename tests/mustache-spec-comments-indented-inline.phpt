@@ -8,14 +8,14 @@ Inline comments should not strip whitespace
 <?php
 $test = array (
   'name' => 'Indented Inline',
+  'desc' => 'Inline comments should not strip whitespace',
   'data' => 
   array (
   ),
-  'expected' => '  12 
-',
   'template' => '  12 {{! 34 }}
 ',
-  'desc' => 'Inline comments should not strip whitespace',
+  'expected' => '  12 
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

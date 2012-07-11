@@ -8,13 +8,13 @@ Nested falsey sections should be omitted.
 <?php
 $test = array (
   'name' => 'Nested (Falsey)',
+  'desc' => 'Nested falsey sections should be omitted.',
   'data' => 
   array (
     'bool' => false,
   ),
-  'expected' => '| A  E |',
   'template' => '| A {{#bool}}B {{#bool}}C{{/bool}} D{{/bool}} E |',
-  'desc' => 'Nested falsey sections should be omitted.',
+  'expected' => '| A  E |',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

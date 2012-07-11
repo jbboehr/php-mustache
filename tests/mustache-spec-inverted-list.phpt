@@ -8,27 +8,27 @@ Lists should behave like truthy values.
 <?php
 $test = array (
   'name' => 'List',
+  'desc' => 'Lists should behave like truthy values.',
   'data' => 
   array (
     'list' => 
     array (
       0 => 
       array (
-        'n' => 1,
+        '' => 1,
       ),
       1 => 
       array (
-        'n' => 2,
+        '' => 2,
       ),
       2 => 
       array (
-        'n' => 3,
+        '' => 3,
       ),
     ),
   ),
-  'expected' => '""',
   'template' => '"{{^list}}{{n}}{{/list}}"',
-  'desc' => 'Lists should behave like truthy values.',
+  'expected' => '""',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

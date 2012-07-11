@@ -8,15 +8,15 @@ Sections should not alter surrounding whitespace.
 <?php
 $test = array (
   'name' => 'Surrounding Whitespace',
+  'desc' => 'Sections should not alter surrounding whitespace.',
   'data' => 
   array (
     'boolean' => true,
   ),
-  'expected' => ' | 	|	 | 
-',
   'template' => ' | {{#boolean}}	|	{{/boolean}} | 
 ',
-  'desc' => 'Sections should not alter surrounding whitespace.',
+  'expected' => ' | 	|	 | 
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

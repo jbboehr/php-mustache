@@ -8,13 +8,13 @@ Characters with special meaning regexen should be valid delimiters.
 <?php
 $test = array (
   'name' => 'Special Characters',
+  'desc' => 'Characters with special meaning regexen should be valid delimiters.',
   'data' => 
   array (
     'text' => 'It worked!',
   ),
-  'expected' => '(It worked!)',
   'template' => '({{=[ ]=}}[text])',
-  'desc' => 'Characters with special meaning regexen should be valid delimiters.',
+  'expected' => '(It worked!)',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

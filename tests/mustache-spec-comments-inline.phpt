@@ -8,12 +8,12 @@ Comment blocks should be removed from the template.
 <?php
 $test = array (
   'name' => 'Inline',
+  'desc' => 'Comment blocks should be removed from the template.',
   'data' => 
   array (
   ),
-  'expected' => '1234567890',
   'template' => '12345{{! Comment Block! }}67890',
-  'desc' => 'Comment blocks should be removed from the template.',
+  'expected' => '1234567890',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

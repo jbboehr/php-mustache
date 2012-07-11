@@ -8,21 +8,21 @@ Indented standalone lines should be removed from the template.
 <?php
 $test = array (
   'name' => 'Indented Standalone Lines',
+  'desc' => 'Indented standalone lines should be removed from the template.',
   'data' => 
   array (
     'boolean' => true,
   ),
-  'expected' => '| This Is
-|
-| A Line
-',
   'template' => '| This Is
   {{#boolean}}
 |
   {{/boolean}}
 | A Line
 ',
-  'desc' => 'Indented standalone lines should be removed from the template.',
+  'expected' => '| This Is
+|
+| A Line
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

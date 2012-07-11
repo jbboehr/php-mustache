@@ -8,12 +8,12 @@ Failed context lookups should be considered falsey.
 <?php
 $test = array (
   'name' => 'Context Misses',
+  'desc' => 'Failed context lookups should be considered falsey.',
   'data' => 
   array (
   ),
-  'expected' => '[Cannot find key \'missing\'!]',
   'template' => '[{{^missing}}Cannot find key \'missing\'!{{/missing}}]',
-  'desc' => 'Failed context lookups should be considered falsey.',
+  'expected' => '[Cannot find key \'missing\'!]',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

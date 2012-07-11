@@ -8,17 +8,17 @@ Single-line sections should not alter surrounding whitespace.
 <?php
 $test = array (
   'name' => 'Indented Inline Sections',
+  'desc' => 'Single-line sections should not alter surrounding whitespace.',
   'data' => 
   array (
     'boolean' => false,
   ),
-  'expected' => ' NO
- WAY
-',
   'template' => ' {{^boolean}}NO{{/boolean}}
  {{^boolean}}WAY{{/boolean}}
 ',
-  'desc' => 'Single-line sections should not alter surrounding whitespace.',
+  'expected' => ' NO
+ WAY
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

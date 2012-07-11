@@ -8,10 +8,22 @@ Each line of the partial should be indented before rendering.
 <?php
 $test = array (
   'name' => 'Standalone Indentation',
+  'desc' => 'Each line of the partial should be indented before rendering.',
   'data' => 
   array (
     'content' => '<
 ->',
+  ),
+  'template' => '\\
+ {{>partial}}
+/
+',
+  'partials' => 
+  array (
+    'partial' => '|
+{{{content}}}
+|
+',
   ),
   'expected' => '\\
  |
@@ -20,18 +32,6 @@ $test = array (
  |
 /
 ',
-  'template' => '\\
- {{>partial}}
-/
-',
-  'desc' => 'Each line of the partial should be indented before rendering.',
-  'partials' => 
-  array (
-    'partial' => '|
-{{{content}}}
-|
-',
-  ),
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);

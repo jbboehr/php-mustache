@@ -8,17 +8,17 @@ All standalone comment lines should be removed.
 <?php
 $test = array (
   'name' => 'Indented Standalone',
+  'desc' => 'All standalone comment lines should be removed.',
   'data' => 
   array (
   ),
-  'expected' => 'Begin.
-End.
-',
   'template' => 'Begin.
   {{! Indented Comment Block! }}
 End.
 ',
-  'desc' => 'All standalone comment lines should be removed.',
+  'expected' => 'Begin.
+End.
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

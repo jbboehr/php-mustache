@@ -8,6 +8,7 @@ Dotted names should be valid for Inverted Section tags.
 <?php
 $test = array (
   'name' => 'Dotted Names - Falsey',
+  'desc' => 'Dotted names should be valid for Inverted Section tags.',
   'data' => 
   array (
     'a' => 
@@ -18,9 +19,8 @@ $test = array (
       ),
     ),
   ),
-  'expected' => '"Not Here" == "Not Here"',
   'template' => '"{{^a.b.c}}Not Here{{/a.b.c}}" == "Not Here"',
-  'desc' => 'Dotted names should be valid for Inverted Section tags.',
+  'expected' => '"Not Here" == "Not Here"',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

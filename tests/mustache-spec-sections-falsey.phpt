@@ -8,13 +8,13 @@ Falsey sections should have their contents omitted.
 <?php
 $test = array (
   'name' => 'Falsey',
+  'desc' => 'Falsey sections should have their contents omitted.',
   'data' => 
   array (
     'boolean' => false,
   ),
-  'expected' => '""',
   'template' => '"{{#boolean}}This should not be rendered.{{/boolean}}"',
-  'desc' => 'Falsey sections should have their contents omitted.',
+  'expected' => '""',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

@@ -8,15 +8,15 @@ Basic interpolation should be HTML escaped.
 <?php
 $test = array (
   'name' => 'HTML Escaping',
+  'desc' => 'Basic interpolation should be HTML escaped.',
   'data' => 
   array (
     'forbidden' => '& " < >',
   ),
-  'expected' => 'These characters should be HTML escaped: &amp; &quot; &lt; &gt;
-',
   'template' => 'These characters should be HTML escaped: {{forbidden}}
 ',
-  'desc' => 'Basic interpolation should be HTML escaped.',
+  'expected' => 'These characters should be HTML escaped: &amp; &quot; &lt; &gt;
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

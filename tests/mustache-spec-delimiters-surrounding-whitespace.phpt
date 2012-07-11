@@ -8,12 +8,12 @@ Surrounding whitespace should be left untouched.
 <?php
 $test = array (
   'name' => 'Surrounding Whitespace',
+  'desc' => 'Surrounding whitespace should be left untouched.',
   'data' => 
   array (
   ),
-  'expected' => '|  |',
   'template' => '| {{=@ @=}} |',
-  'desc' => 'Surrounding whitespace should be left untouched.',
+  'expected' => '|  |',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

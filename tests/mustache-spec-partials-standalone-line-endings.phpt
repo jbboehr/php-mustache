@@ -8,19 +8,19 @@ Standalone Line Endings
 <?php
 $test = array (
   'name' => 'Standalone Line Endings',
+  'desc' => '"\\r\\n" should be considered a newline for standalone tags.',
   'data' => 
   array (
   ),
-  'expected' => '|
->|',
   'template' => '|
 {{>partial}}
 |',
-  'desc' => '"\\r\\n" should be considered a newline for standalone tags.',
   'partials' => 
   array (
     'partial' => '>',
   ),
+  'expected' => '|
+>|',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);

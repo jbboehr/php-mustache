@@ -8,6 +8,7 @@ Implicit iterators should cast decimals to strings and interpolate.
 <?php
 $test = array (
   'name' => 'Implicit Iterator - Decimal',
+  'desc' => 'Implicit iterators should cast decimals to strings and interpolate.',
   'data' => 
   array (
     'list' => 
@@ -19,9 +20,8 @@ $test = array (
       4 => 5.5,
     ),
   ),
-  'expected' => '"(1.1)(2.2)(3.3)(4.4)(5.5)"',
   'template' => '"{{#list}}({{.}}){{/list}}"',
-  'desc' => 'Implicit iterators should cast decimals to strings and interpolate.',
+  'expected' => '"(1.1)(2.2)(3.3)(4.4)(5.5)"',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

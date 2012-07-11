@@ -8,15 +8,15 @@ The empty string should be used when the named partial is not found.
 <?php
 $test = array (
   'name' => 'Failed Lookup',
+  'desc' => 'The empty string should be used when the named partial is not found.',
   'data' => 
   array (
   ),
-  'expected' => '""',
   'template' => '"{{>text}}"',
-  'desc' => 'The empty string should be used when the named partial is not found.',
   'partials' => 
   array (
   ),
+  'expected' => '""',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

@@ -8,17 +8,17 @@ Superfluous in-tag whitespace should be ignored.
 <?php
 $test = array (
   'name' => 'Padding Whitespace',
+  'desc' => 'Superfluous in-tag whitespace should be ignored.',
   'data' => 
   array (
     'boolean' => true,
   ),
-  'expected' => '|[]|',
   'template' => '|{{> partial }}|',
-  'desc' => 'Superfluous in-tag whitespace should be ignored.',
   'partials' => 
   array (
     'partial' => '[]',
   ),
+  'expected' => '|[]|',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);

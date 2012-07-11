@@ -8,15 +8,15 @@ Inverted sections should not alter surrounding whitespace.
 <?php
 $test = array (
   'name' => 'Surrounding Whitespace',
+  'desc' => 'Inverted sections should not alter surrounding whitespace.',
   'data' => 
   array (
     'boolean' => false,
   ),
-  'expected' => ' | 	|	 | 
-',
   'template' => ' | {{^boolean}}	|	{{/boolean}} | 
 ',
-  'desc' => 'Inverted sections should not alter surrounding whitespace.',
+  'expected' => ' | 	|	 | 
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

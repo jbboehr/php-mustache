@@ -8,6 +8,7 @@ Each part of a dotted name should resolve only against its parent.
 <?php
 $test = array (
   'name' => 'Dotted Names - Broken Chain Resolution',
+  'desc' => 'Each part of a dotted name should resolve only against its parent.',
   'data' => 
   array (
     'a' => 
@@ -21,9 +22,8 @@ $test = array (
       'name' => 'Jim',
     ),
   ),
-  'expected' => '"" == ""',
   'template' => '"{{a.b.c.name}}" == ""',
-  'desc' => 'Each part of a dotted name should resolve only against its parent.',
+  'expected' => '"" == ""',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

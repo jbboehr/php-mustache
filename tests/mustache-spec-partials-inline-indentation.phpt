@@ -8,21 +8,21 @@ Whitespace should be left untouched.
 <?php
 $test = array (
   'name' => 'Inline Indentation',
+  'desc' => 'Whitespace should be left untouched.',
   'data' => 
   array (
     'data' => '|',
   ),
-  'expected' => '  |  >
->
-',
   'template' => '  {{data}}  {{> partial}}
 ',
-  'desc' => 'Whitespace should be left untouched.',
   'partials' => 
   array (
     'partial' => '>
 >',
   ),
+  'expected' => '  |  >
+>
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);

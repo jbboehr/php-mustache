@@ -8,14 +8,14 @@ Standalone tags should not require a newline to follow them.
 <?php
 $test = array (
   'name' => 'Standalone Without Newline',
+  'desc' => 'Standalone tags should not require a newline to follow them.',
   'data' => 
   array (
   ),
-  'expected' => '!
-',
   'template' => '!
   {{! I\'m Still Standalone }}',
-  'desc' => 'Standalone tags should not require a newline to follow them.',
+  'expected' => '!
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

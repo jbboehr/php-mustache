@@ -8,13 +8,13 @@ Interpolation should not alter surrounding whitespace.
 <?php
 $test = array (
   'name' => 'Ampersand - Surrounding Whitespace',
+  'desc' => 'Interpolation should not alter surrounding whitespace.',
   'data' => 
   array (
     'string' => '---',
   ),
-  'expected' => '| --- |',
   'template' => '| {{&string}} |',
-  'desc' => 'Interpolation should not alter surrounding whitespace.',
+  'expected' => '| --- |',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

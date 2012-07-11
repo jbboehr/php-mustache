@@ -8,15 +8,15 @@ Empty lists should behave like falsey values.
 <?php
 $test = array (
   'name' => 'Empty List',
+  'desc' => 'Empty lists should behave like falsey values.',
   'data' => 
   array (
     'list' => 
     array (
     ),
   ),
-  'expected' => '"Yay lists!"',
   'template' => '"{{^list}}Yay lists!{{/list}}"',
-  'desc' => 'Empty lists should behave like falsey values.',
+  'expected' => '"Yay lists!"',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

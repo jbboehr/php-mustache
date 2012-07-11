@@ -8,13 +8,13 @@ Falsey sections should have their contents rendered.
 <?php
 $test = array (
   'name' => 'Falsey',
+  'desc' => 'Falsey sections should have their contents rendered.',
   'data' => 
   array (
     'boolean' => false,
   ),
-  'expected' => '"This should be rendered."',
   'template' => '"{{^boolean}}This should be rendered.{{/boolean}}"',
-  'desc' => 'Falsey sections should have their contents rendered.',
+  'expected' => '"This should be rendered."',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

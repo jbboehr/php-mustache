@@ -29,7 +29,7 @@ foreach( scandir($specDir) as $file ) {
   }
   //if( strlen($file) > 5 && substr($file, -5) ==  '.json' ) {
   if( strlen($file) > 4 && substr($file, -4) == '.yml' ) {
-    $spec = substr($file, 0, -5);
+    $spec = substr($file, 0, -4);
     $specs[] = $spec;
     
     $contents = file_get_contents($specDir . DIRECTORY_SEPARATOR . $file);

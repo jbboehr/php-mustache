@@ -8,13 +8,13 @@ Superfluous in-tag whitespace should be ignored.
 <?php
 $test = array (
   'name' => 'Ampersand With Padding',
+  'desc' => 'Superfluous in-tag whitespace should be ignored.',
   'data' => 
   array (
     'string' => '---',
   ),
-  'expected' => '|---|',
   'template' => '|{{& string }}|',
-  'desc' => 'Superfluous in-tag whitespace should be ignored.',
+  'expected' => '|---|',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

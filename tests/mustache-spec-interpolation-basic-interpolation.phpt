@@ -8,15 +8,15 @@ Unadorned tags should interpolate content into the template.
 <?php
 $test = array (
   'name' => 'Basic Interpolation',
+  'desc' => 'Unadorned tags should interpolate content into the template.',
   'data' => 
   array (
     'subject' => 'world',
   ),
-  'expected' => 'Hello, world!
-',
   'template' => 'Hello, {{subject}}!
 ',
-  'desc' => 'Unadorned tags should interpolate content into the template.',
+  'expected' => 'Hello, world!
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

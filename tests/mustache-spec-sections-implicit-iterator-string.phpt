@@ -8,6 +8,7 @@ Implicit iterators should directly interpolate strings.
 <?php
 $test = array (
   'name' => 'Implicit Iterator - String',
+  'desc' => 'Implicit iterators should directly interpolate strings.',
   'data' => 
   array (
     'list' => 
@@ -19,9 +20,8 @@ $test = array (
       4 => 'e',
     ),
   ),
-  'expected' => '"(a)(b)(c)(d)(e)"',
   'template' => '"{{#list}}({{.}}){{/list}}"',
-  'desc' => 'Implicit iterators should directly interpolate strings.',
+  'expected' => '"(a)(b)(c)(d)(e)"',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

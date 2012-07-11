@@ -8,16 +8,16 @@ The greater-than operator should expand to the named partial.
 <?php
 $test = array (
   'name' => 'Basic Behavior',
+  'desc' => 'The greater-than operator should expand to the named partial.',
   'data' => 
   array (
   ),
-  'expected' => '"from partial"',
   'template' => '"{{>text}}"',
-  'desc' => 'The greater-than operator should expand to the named partial.',
   'partials' => 
   array (
     'text' => 'from partial',
   ),
+  'expected' => '"from partial"',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);

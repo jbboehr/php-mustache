@@ -8,6 +8,7 @@ Dotted names should be considered a form of shorthand for sections.
 <?php
 $test = array (
   'name' => 'Dotted Names - Triple Mustache Interpolation',
+  'desc' => 'Dotted names should be considered a form of shorthand for sections.',
   'data' => 
   array (
     'person' => 
@@ -15,9 +16,8 @@ $test = array (
       'name' => 'Joe',
     ),
   ),
-  'expected' => '"Joe" == "Joe"',
   'template' => '"{{{person.name}}}" == "{{#person}}{{{name}}}{{/person}}"',
-  'desc' => 'Dotted names should be considered a form of shorthand for sections.',
+  'expected' => '"Joe" == "Joe"',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

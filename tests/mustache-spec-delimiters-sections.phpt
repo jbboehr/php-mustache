@@ -8,19 +8,12 @@ Delimiters set outside sections should persist.
 <?php
 $test = array (
   'name' => 'Sections',
+  'desc' => 'Delimiters set outside sections should persist.',
   'data' => 
   array (
     'section' => true,
     'data' => 'I got interpolated.',
   ),
-  'expected' => '[
-  I got interpolated.
-  |data|
-
-  {{data}}
-  I got interpolated.
-]
-',
   'template' => '[
 {{#section}}
   {{data}}
@@ -34,7 +27,14 @@ $test = array (
 |/section|
 ]
 ',
-  'desc' => 'Delimiters set outside sections should persist.',
+  'expected' => '[
+  I got interpolated.
+  |data|
+
+  {{data}}
+  I got interpolated.
+]
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

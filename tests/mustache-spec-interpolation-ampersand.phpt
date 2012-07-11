@@ -8,15 +8,15 @@ Ampersand should interpolate without HTML escaping.
 <?php
 $test = array (
   'name' => 'Ampersand',
+  'desc' => 'Ampersand should interpolate without HTML escaping.',
   'data' => 
   array (
     'forbidden' => '& " < >',
   ),
-  'expected' => 'These characters should not be HTML escaped: & " < >
-',
   'template' => 'These characters should not be HTML escaped: {{&forbidden}}
 ',
-  'desc' => 'Ampersand should interpolate without HTML escaping.',
+  'expected' => 'These characters should not be HTML escaped: & " < >
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

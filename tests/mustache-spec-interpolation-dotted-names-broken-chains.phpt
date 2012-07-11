@@ -8,15 +8,15 @@ Any falsey value prior to the last part of the name should yield ''.
 <?php
 $test = array (
   'name' => 'Dotted Names - Broken Chains',
+  'desc' => 'Any falsey value prior to the last part of the name should yield \'\'.',
   'data' => 
   array (
     'a' => 
     array (
     ),
   ),
-  'expected' => '"" == ""',
   'template' => '"{{a.b.c}}" == ""',
-  'desc' => 'Any falsey value prior to the last part of the name should yield \'\'.',
+  'expected' => '"" == ""',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

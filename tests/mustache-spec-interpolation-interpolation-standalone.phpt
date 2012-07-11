@@ -8,15 +8,15 @@ Standalone interpolation should not alter surrounding whitespace.
 <?php
 $test = array (
   'name' => 'Interpolation - Standalone',
+  'desc' => 'Standalone interpolation should not alter surrounding whitespace.',
   'data' => 
   array (
     'string' => '---',
   ),
-  'expected' => '  ---
-',
   'template' => '  {{string}}
 ',
-  'desc' => 'Standalone interpolation should not alter surrounding whitespace.',
+  'expected' => '  ---
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

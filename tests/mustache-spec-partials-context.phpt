@@ -8,17 +8,17 @@ The greater-than operator should operate within the current context.
 <?php
 $test = array (
   'name' => 'Context',
+  'desc' => 'The greater-than operator should operate within the current context.',
   'data' => 
   array (
     'text' => 'content',
   ),
-  'expected' => '"*content*"',
   'template' => '"{{>partial}}"',
-  'desc' => 'The greater-than operator should operate within the current context.',
   'partials' => 
   array (
     'partial' => '*{{text}}*',
   ),
+  'expected' => '"*content*"',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);

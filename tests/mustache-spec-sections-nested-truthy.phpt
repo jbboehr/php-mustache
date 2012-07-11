@@ -8,13 +8,13 @@ Nested truthy sections should have their contents rendered.
 <?php
 $test = array (
   'name' => 'Nested (Truthy)',
+  'desc' => 'Nested truthy sections should have their contents rendered.',
   'data' => 
   array (
     'bool' => true,
   ),
-  'expected' => '| A B C D E |',
   'template' => '| A {{#bool}}B {{#bool}}C{{/bool}} D{{/bool}} E |',
-  'desc' => 'Nested truthy sections should have their contents rendered.',
+  'expected' => '| A B C D E |',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

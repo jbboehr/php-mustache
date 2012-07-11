@@ -8,6 +8,7 @@ Objects and hashes should behave like truthy values.
 <?php
 $test = array (
   'name' => 'Context',
+  'desc' => 'Objects and hashes should behave like truthy values.',
   'data' => 
   array (
     'context' => 
@@ -15,9 +16,8 @@ $test = array (
       'name' => 'Joe',
     ),
   ),
-  'expected' => '""',
   'template' => '"{{^context}}Hi {{name}}.{{/context}}"',
-  'desc' => 'Objects and hashes should behave like truthy values.',
+  'expected' => '""',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

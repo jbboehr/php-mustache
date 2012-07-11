@@ -8,19 +8,19 @@ Standalone tags should not require a newline to precede them.
 <?php
 $test = array (
   'name' => 'Standalone Without Previous Line',
+  'desc' => 'Standalone tags should not require a newline to precede them.',
   'data' => 
   array (
   ),
-  'expected' => '  >
-  >>',
   'template' => '  {{>partial}}
 >',
-  'desc' => 'Standalone tags should not require a newline to precede them.',
   'partials' => 
   array (
     'partial' => '>
 >',
   ),
+  'expected' => '  >
+  >>',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);

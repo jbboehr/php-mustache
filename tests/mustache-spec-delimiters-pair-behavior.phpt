@@ -8,13 +8,13 @@ The equals sign (used on both sides) should permit delimiter changes.
 <?php
 $test = array (
   'name' => 'Pair Behavior',
+  'desc' => 'The equals sign (used on both sides) should permit delimiter changes.',
   'data' => 
   array (
     'text' => 'Hey!',
   ),
-  'expected' => '(Hey!)',
   'template' => '{{=<% %>=}}(<%text%>)',
-  'desc' => 'The equals sign (used on both sides) should permit delimiter changes.',
+  'expected' => '(Hey!)',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

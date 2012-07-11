@@ -8,16 +8,16 @@ Standalone tags should not require a newline to precede them.
 <?php
 $test = array (
   'name' => 'Standalone Without Previous Line',
+  'desc' => 'Standalone tags should not require a newline to precede them.',
   'data' => 
   array (
     'boolean' => false,
   ),
-  'expected' => '^
-/',
   'template' => '  {{^boolean}}
 ^{{/boolean}}
 /',
-  'desc' => 'Standalone tags should not require a newline to precede them.',
+  'expected' => '^
+/',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

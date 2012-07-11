@@ -8,13 +8,13 @@ Decimals should interpolate seamlessly with proper significance.
 <?php
 $test = array (
   'name' => 'Ampersand Decimal Interpolation',
+  'desc' => 'Decimals should interpolate seamlessly with proper significance.',
   'data' => 
   array (
     'power' => 1.21,
   ),
-  'expected' => '"1.21 jiggawatts!"',
   'template' => '"{{&power}} jiggawatts!"',
-  'desc' => 'Decimals should interpolate seamlessly with proper significance.',
+  'expected' => '"1.21 jiggawatts!"',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

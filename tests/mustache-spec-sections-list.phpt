@@ -8,6 +8,7 @@ Lists should be iterated; list items should visit the context stack.
 <?php
 $test = array (
   'name' => 'List',
+  'desc' => 'Lists should be iterated; list items should visit the context stack.',
   'data' => 
   array (
     'list' => 
@@ -26,9 +27,8 @@ $test = array (
       ),
     ),
   ),
-  'expected' => '"123"',
   'template' => '"{{#list}}{{item}}{{/list}}"',
-  'desc' => 'Lists should be iterated; list items should visit the context stack.',
+  'expected' => '"123"',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

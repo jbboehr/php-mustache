@@ -8,21 +8,21 @@ Delimiters set in a partial should not affect the parent template.
 <?php
 $test = array (
   'name' => 'Post-Partial Behavior',
+  'desc' => 'Delimiters set in a partial should not affect the parent template.',
   'data' => 
   array (
     'value' => 'yes',
   ),
-  'expected' => '[ .yes.  .yes. ]
-[ .yes.  .|value|. ]
-',
-  'template' => '[ {{>include}} ]
-[ .{{value}}.  .|value|. ]
-',
-  'desc' => 'Delimiters set in a partial should not affect the parent template.',
   'partials' => 
   array (
     'include' => '.{{value}}. {{= | | =}} .|value|.',
   ),
+  'template' => '[ {{>include}} ]
+[ .{{value}}.  .|value|. ]
+',
+  'expected' => '[ .yes.  .yes. ]
+[ .yes.  .|value|. ]
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);

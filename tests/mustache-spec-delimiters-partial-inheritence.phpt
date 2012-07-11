@@ -8,22 +8,22 @@ Delimiters set in a parent template should not affect a partial.
 <?php
 $test = array (
   'name' => 'Partial Inheritence',
+  'desc' => 'Delimiters set in a parent template should not affect a partial.',
   'data' => 
   array (
     'value' => 'yes',
   ),
-  'expected' => '[ .yes. ]
-[ .yes. ]
-',
-  'template' => '[ {{>include}} ]
-{{= | | =}}
-[ |>include| ]
-',
-  'desc' => 'Delimiters set in a parent template should not affect a partial.',
   'partials' => 
   array (
     'include' => '.{{value}}.',
   ),
+  'template' => '[ {{>include}} ]
+{{= | | =}}
+[ |>include| ]
+',
+  'expected' => '[ .yes. ]
+[ .yes. ]
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);
