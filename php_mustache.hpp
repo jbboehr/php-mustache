@@ -5,10 +5,11 @@
 extern "C" {
 
 #define PHP_MUSTACHE_NAME "mustache"  
-#define PHP_MUSTACHE_VERSION "0.2.0"
+#define PHP_MUSTACHE_VERSION "0.3.0"
 #define PHP_MUSTACHE_RELEASE "2012-03-22"
 #define PHP_MUSTACHE_BUILD "master"
 #define PHP_MUSTACHE_AUTHORS "John Boehr <jbboehr@gmail.com> (lead)"
+#define PHP_MUSTACHE_SPEC "1.1.2"
 
 #ifndef PHP_MUSTACHE_THROW_EXCEPTIONS
 #define PHP_MUSTACHE_THROW_EXCEPTIONS 0
