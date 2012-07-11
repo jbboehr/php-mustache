@@ -1,29 +1,31 @@
 --TEST--
-Standalone Line Endings
+Inline Indentation
 --DESCRIPTION--
-"\r\n" should be considered a newline for standalone tags.
+Whitespace should be left untouched.
 --SKIPIF--
 <?php if(!extension_loaded('mustache')) die('skip '); ?>
 --FILE--
 <?php
 $test = array (
-  'name' => 'Standalone Line Endings',
+  'name' => 'Inline Indentation',
+  'desc' => 'Whitespace should be left untouched.',
   'data' => 
   array (
+    'data' => '|',
   ),
-  'expected' => '|
->|',
-  'template' => '|
-{{>partial}}
-|',
-  'desc' => '"\\r\\n" should be considered a newline for standalone tags.',
+  'template' => '  {{data}}  {{> partial}}
+',
   'partials' => 
   array (
-    'partial' => '>',
+    'partial' => '>
+>',
   ),
+  'expected' => '  |  >
+>
+',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);
 ?>
 --EXPECTREGEX--
-\s*|\s*>\s*|\s*
+\s*\|\s*\>\s*\>\s*

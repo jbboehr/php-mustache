@@ -1,22 +1,19 @@
 --TEST--
-Standalone Line Endings
+Surrounding Whitespace
 --DESCRIPTION--
-"\r\n" should be considered a newline for standalone tags.
+Surrounding whitespace should be left untouched.
 --SKIPIF--
 <?php if(!extension_loaded('mustache')) die('skip '); ?>
 --FILE--
 <?php
 $test = array (
-  'name' => 'Standalone Line Endings',
+  'name' => 'Surrounding Whitespace',
+  'desc' => 'Surrounding whitespace should be left untouched.',
   'data' => 
   array (
   ),
-  'expected' => '|
-|',
-  'template' => '|
-{{= @ @ =}}
-|',
-  'desc' => '"\\r\\n" should be considered a newline for standalone tags.',
+  'template' => '| {{=@ @=}} |',
+  'expected' => '|  |',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);

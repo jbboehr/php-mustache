@@ -1,29 +1,27 @@
 --TEST--
-Standalone Line Endings
+Padding Whitespace
 --DESCRIPTION--
-"\r\n" should be considered a newline for standalone tags.
+Superfluous in-tag whitespace should be ignored.
 --SKIPIF--
 <?php if(!extension_loaded('mustache')) die('skip '); ?>
 --FILE--
 <?php
 $test = array (
-  'name' => 'Standalone Line Endings',
+  'name' => 'Padding Whitespace',
+  'desc' => 'Superfluous in-tag whitespace should be ignored.',
   'data' => 
   array (
+    'boolean' => true,
   ),
-  'expected' => '|
->|',
-  'template' => '|
-{{>partial}}
-|',
-  'desc' => '"\\r\\n" should be considered a newline for standalone tags.',
+  'template' => '|{{> partial }}|',
   'partials' => 
   array (
-    'partial' => '>',
+    'partial' => '[]',
   ),
+  'expected' => '|[]|',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);
 ?>
 --EXPECTREGEX--
-\s*|\s*>\s*|\s*
+\|\[\]\|

@@ -1,27 +1,23 @@
 --TEST--
-Standalone Line Endings
+Falsey
 --DESCRIPTION--
-"\r\n" should be considered a newline for standalone tags.
+Falsey sections should have their contents omitted.
 --SKIPIF--
 <?php if(!extension_loaded('mustache')) die('skip '); ?>
 --FILE--
 <?php
 $test = array (
-  'name' => 'Standalone Line Endings',
+  'name' => 'Falsey',
+  'desc' => 'Falsey sections should have their contents omitted.',
   'data' => 
   array (
     'boolean' => false,
   ),
-  'expected' => '|
-|',
-  'template' => '|
-{{^boolean}}
-{{/boolean}}
-|',
-  'desc' => '"\\r\\n" should be considered a newline for standalone tags.',
+  'template' => '"{{#boolean}}This should not be rendered.{{/boolean}}"',
+  'expected' => '""',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"]);
 ?>
 --EXPECTREGEX--
-\|\s*\|
+""

@@ -73,9 +73,9 @@ class Mustache
   /**
    * Renders a template
    * 
-   * @param string|MustacheTemplate $tmpl The input template
-   * @param array|MustacheData $data The input data
-   * @param array $partials (Optional) The template partials
+   * @param mixed $tmpl The input template
+   * @param mixed $data The input data
+   * @param mixed $partials (Optional) The template partials
    * @return false|string The string output, or false on failure
    */
   public function render($tmpl, $data, $partials = null) {}

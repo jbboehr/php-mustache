@@ -1,29 +1,30 @@
 --TEST--
-Standalone Line Endings
+Standalone Without Newline
 --DESCRIPTION--
-"\r\n" should be considered a newline for standalone tags.
+Standalone tags should not require a newline to follow them.
 --SKIPIF--
 <?php if(!extension_loaded('mustache')) die('skip '); ?>
 --FILE--
 <?php
 $test = array (
-  'name' => 'Standalone Line Endings',
+  'name' => 'Standalone Without Newline',
+  'desc' => 'Standalone tags should not require a newline to follow them.',
   'data' => 
   array (
   ),
-  'expected' => '|
->|',
-  'template' => '|
-{{>partial}}
-|',
-  'desc' => '"\\r\\n" should be considered a newline for standalone tags.',
+  'template' => '>
+  {{>partial}}',
   'partials' => 
   array (
-    'partial' => '>',
+    'partial' => '>
+>',
   ),
+  'expected' => '>
+  >
+  >',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);
 ?>
 --EXPECTREGEX--
-\s*|\s*>\s*|\s*
+\>\s*\>\s*\>

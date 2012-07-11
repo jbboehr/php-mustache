@@ -1,29 +1,26 @@
 --TEST--
-Standalone Line Endings
+Basic Behavior
 --DESCRIPTION--
-"\r\n" should be considered a newline for standalone tags.
+The greater-than operator should expand to the named partial.
 --SKIPIF--
 <?php if(!extension_loaded('mustache')) die('skip '); ?>
 --FILE--
 <?php
 $test = array (
-  'name' => 'Standalone Line Endings',
+  'name' => 'Basic Behavior',
+  'desc' => 'The greater-than operator should expand to the named partial.',
   'data' => 
   array (
   ),
-  'expected' => '|
->|',
-  'template' => '|
-{{>partial}}
-|',
-  'desc' => '"\\r\\n" should be considered a newline for standalone tags.',
+  'template' => '"{{>text}}"',
   'partials' => 
   array (
-    'partial' => '>',
+    'text' => 'from partial',
   ),
+  'expected' => '"from partial"',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);
 ?>
 --EXPECTREGEX--
-\s*|\s*>\s*|\s*
+"from\s*partial"

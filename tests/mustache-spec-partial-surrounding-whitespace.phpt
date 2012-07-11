@@ -1,29 +1,26 @@
 --TEST--
-Standalone Line Endings
+Surrounding Whitespace
 --DESCRIPTION--
-"\r\n" should be considered a newline for standalone tags.
+The greater-than operator should not alter surrounding whitespace.
 --SKIPIF--
 <?php if(!extension_loaded('mustache')) die('skip '); ?>
 --FILE--
 <?php
 $test = array (
-  'name' => 'Standalone Line Endings',
+  'name' => 'Surrounding Whitespace',
+  'desc' => 'The greater-than operator should not alter surrounding whitespace.',
   'data' => 
   array (
   ),
-  'expected' => '|
->|',
-  'template' => '|
-{{>partial}}
-|',
-  'desc' => '"\\r\\n" should be considered a newline for standalone tags.',
+  'template' => '| {{>partial}} |',
   'partials' => 
   array (
-    'partial' => '>',
+    'partial' => '	|	',
   ),
+  'expected' => '| 	|	 |',
 );
 $mustache = new Mustache();
 echo $mustache->render($test["template"], $test["data"], $test["partials"]);
 ?>
 --EXPECTREGEX--
-\s*|\s*>\s*|\s*
+\|\s*\|\s*\|
