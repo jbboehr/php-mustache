@@ -12,4 +12,4 @@ script:
   - phpize
   - ./configure --enable-mustache
   - make
-  - make test
+  - echo n | make test

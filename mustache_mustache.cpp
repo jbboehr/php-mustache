@@ -364,7 +364,7 @@ PHP_METHOD(Mustache, compile)
       }
       
       // Initialize new object
-      object_init_ex(return_value, (zend_class_entry *) MustacheTemplate_ce_ptr TSRMLS_CC);
+      object_init_ex(return_value, MustacheTemplate_ce_ptr);
       php_obj_MustacheTemplate * intern = 
               (php_obj_MustacheTemplate *) zend_objects_get_address(return_value TSRMLS_CC);
       
