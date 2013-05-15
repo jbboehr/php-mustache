@@ -99,7 +99,7 @@ PHP_MINIT_FUNCTION(mustache_mustache)
 
     INIT_CLASS_ENTRY(ce, "Mustache", Mustache_methods);
     ce.create_object = Mustache_obj_create;
-    Mustache_ce_ptr = zend_register_internal_class(&ce);
+    Mustache_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
     memcpy(&Mustache_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
     Mustache_obj_handlers.clone_obj = NULL;
 
@@ -364,7 +364,7 @@ PHP_METHOD(Mustache, compile)
       }
       
       // Initialize new object
-      object_init_ex(return_value, MustacheTemplate_ce_ptr TSRMLS_CC);
+      object_init_ex(return_value, (zend_class_entry *) MustacheTemplate_ce_ptr TSRMLS_CC);
       php_obj_MustacheTemplate * intern = 
               (php_obj_MustacheTemplate *) zend_objects_get_address(return_value TSRMLS_CC);
       
@@ -466,7 +466,7 @@ PHP_METHOD(Mustache, render)
     
     // Tokenize partials
     mustache::Node::Partials templatePartials;
-    mustache_parse_partials_param(partials, payload->mustache, &templatePartials);
+    mustache_parse_partials_param(partials, payload->mustache, &templatePartials TSRMLS_CC);
     
     // Render template
     std::string output;
