@@ -9,6 +9,7 @@ php:
   - 5.5
 
 script:
+  - phpize
   - ./configure --enable-mustache
   - make
   - make test
