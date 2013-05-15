@@ -1,0 +1,14 @@
+language: php
+
+before_install:
+  - git submodule update --init --recursive
+
+php:
+  - 5.3
+  - 5.4
+  - 5.5
+
+script:
+  - ./configure --enable-mustache
+  - make
+  - make test
