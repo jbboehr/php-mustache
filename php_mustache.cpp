@@ -245,7 +245,11 @@ PHPAPI void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS
           while( zend_hash_get_current_data_ex(data_hash, (void**) &data_entry, &data_pointer) == SUCCESS ) {
             if( zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, 
                     &key_nindex, true, &data_pointer) == HASH_KEY_IS_STRING ) {
+#if PHP_API_VERSION >= 20100412
               zend_unmangle_property_name(key_str, key_len-1, (const char **) &class_name, (const char **) &prop_name);
+#else
+              zend_unmangle_property_name(key_str, key_len-1, &class_name, &prop_name);
+#endif
               child = new mustache::Data;
               mustache_data_from_zval(child, *data_entry TSRMLS_CC);
               ckey.assign(prop_name);
