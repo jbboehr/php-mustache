@@ -1,6 +1,7 @@
 Mustache
 --------------------------------------------------------------------------------
 
+[![Build Status](https://travis-ci.org/jbboehr/php-mustache.png?branch=master)](https://travis-ci.org/jbboehr/php-mustache)
 
 C++ implementation of Mustache as a PHP extension.
 See [Mustache](http://mustache.github.com/)
