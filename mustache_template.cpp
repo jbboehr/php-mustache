@@ -81,7 +81,7 @@ PHP_MINIT_FUNCTION(mustache_template)
 
     INIT_CLASS_ENTRY(ce, "MustacheTemplate", MustacheTemplate_methods);
     ce.create_object = MustacheTemplate_obj_create;
-    MustacheTemplate_ce_ptr = zend_register_internal_class(&ce);
+    MustacheTemplate_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
     memcpy(&MustacheTemplate_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
     MustacheTemplate_obj_handlers.clone_obj = NULL;
 

@@ -507,10 +507,7 @@ PHP_METHOD(Mustache, debugDataStructure)
     mustache_data_from_zval(&templateData, data TSRMLS_CC);
 
     // Reverse template data
-    zval * datacpy = mustache_data_to_zval(&templateData TSRMLS_CC);
-
-    *return_value = *datacpy;
-    zval_copy_ctor(return_value);
+    mustache_data_to_zval(&templateData, return_value TSRMLS_CC);
   
   } catch(...) {
     mustache_exception_handler(TSRMLS_C);

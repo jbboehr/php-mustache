@@ -75,7 +75,7 @@ ZEND_EXTERN_MODULE_GLOBALS(mustache);
 
 PHPAPI void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC);
 PHPAPI void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC);
-PHPAPI zval * mustache_data_to_zval(mustache::Data * node TSRMLS_DC);
+PHPAPI void mustache_data_to_zval(mustache::Data * node, zval * current TSRMLS_DC);
 PHPAPI zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_DC);
 PHPAPI void mustache_exception_handler(TSRMLS_D);
 

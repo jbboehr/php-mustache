@@ -73,7 +73,7 @@ PHP_MINIT_FUNCTION(mustache_data)
 
   INIT_CLASS_ENTRY(ce, "MustacheData", MustacheData_methods);
   ce.create_object = MustacheData_obj_create;
-  MustacheData_ce_ptr = zend_register_internal_class(&ce);
+  MustacheData_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
   memcpy(&MustacheData_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
   MustacheData_obj_handlers.clone_obj = NULL;
   
@@ -145,11 +145,7 @@ PHP_METHOD(MustacheData, toValue)
     }
     
     // Reverse template data
-    zval * datacpy = mustache_data_to_zval(payload->data TSRMLS_CC);
-    
-    // Copy data into return value
-    *return_value = *datacpy;
-    zval_copy_ctor(return_value);
+    mustache_data_to_zval(payload->data, return_value TSRMLS_CC);
   
   } catch(...) {
     mustache_exception_handler(TSRMLS_C);

@@ -245,7 +245,7 @@ PHPAPI void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS
           while( zend_hash_get_current_data_ex(data_hash, (void**) &data_entry, &data_pointer) == SUCCESS ) {
             if( zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, 
                     &key_nindex, true, &data_pointer) == HASH_KEY_IS_STRING ) {
-              zend_unmangle_property_name(key_str, key_len-1, &class_name, &prop_name);
+              zend_unmangle_property_name(key_str, key_len-1, (const char **) &class_name, (const char **) &prop_name);
               child = new mustache::Data;
               mustache_data_from_zval(child, *data_entry TSRMLS_CC);
               ckey.assign(prop_name);
@@ -262,16 +262,12 @@ PHPAPI void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS
   }
 }
 
-PHPAPI zval * mustache_data_to_zval(mustache::Data * node TSRMLS_DC)
+PHPAPI void mustache_data_to_zval(mustache::Data * node, zval * current TSRMLS_DC)
 {
   mustache::Data::List::iterator l_it;
   mustache::Data::Map::iterator m_it;
   mustache::Data::Array childNode;
   int pos = 0;
-  zval * current = NULL;
-  zval * child = NULL;
-  
-  ALLOC_INIT_ZVAL(current);
   
   switch( node->type ) {
     case mustache::Data::TypeNone:
@@ -286,21 +282,27 @@ PHPAPI zval * mustache_data_to_zval(mustache::Data * node TSRMLS_DC)
       array_init(current);
       childNode = node->array;
       for( pos = 0; pos < node->length; pos++, childNode++ ) {
-        child = mustache_data_to_zval(childNode TSRMLS_CC);
+        zval * child = NULL;
+        ALLOC_INIT_ZVAL(child);
+        mustache_data_to_zval(childNode, child TSRMLS_CC);
         add_next_index_zval(current, child);
       }
       break;
     case mustache::Data::TypeList:
       array_init(current);
       for ( l_it = node->children.begin() ; l_it != node->children.end(); l_it++ ) {
-        child = mustache_data_to_zval(*l_it TSRMLS_CC);
+        zval * child = NULL;
+        ALLOC_INIT_ZVAL(child);
+        mustache_data_to_zval(*l_it, child TSRMLS_CC);
         add_next_index_zval(current, child);
       }
       break;
     case mustache::Data::TypeMap:
       array_init(current);
       for ( m_it = node->data.begin() ; m_it != node->data.end(); m_it++ ) {
-        child = mustache_data_to_zval((*m_it).second TSRMLS_CC);
+        zval * child = NULL;
+        ALLOC_INIT_ZVAL(child);
+        mustache_data_to_zval((*m_it).second, child TSRMLS_CC);
         add_assoc_zval(current, (*m_it).first.c_str(), child);
       }
       break;
@@ -309,8 +311,6 @@ PHPAPI zval * mustache_data_to_zval(mustache::Data * node TSRMLS_DC)
       php_error(E_WARNING, "Invalid data type");
       break;
   }
-  
-  return current;
 }
 
 PHPAPI zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_DC)
