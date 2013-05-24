@@ -6,7 +6,7 @@
 
 // Class Entries  --------------------------------------------------------------
 
-PHPAPI zend_class_entry * MustacheData_ce_ptr = NULL;
+zend_class_entry * MustacheData_ce_ptr;
 
 
 
@@ -45,7 +45,6 @@ static zend_object_value MustacheData_obj_create(zend_class_entry *class_type TS
   
   try {
     php_obj_MustacheData * payload;
-    zval * tmp;
 
     payload = (php_obj_MustacheData *) emalloc(sizeof(php_obj_MustacheData));
     memset(payload, 0, sizeof(php_obj_MustacheData));

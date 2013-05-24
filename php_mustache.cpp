@@ -108,7 +108,7 @@ static PHP_MINFO_FUNCTION(mustache)
 /* }}} ---------------------------------------------------------------------- */
 /* {{{ Utils ---------------------------------------------------------------- */
 
-PHPAPI void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC)
+void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC)
 {
   zval * children = NULL;
   
@@ -156,7 +156,7 @@ PHPAPI void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_D
   }
 }
 
-PHPAPI void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
+void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
 {
   HashTable * data_hash = NULL;
   HashPosition data_pointer = NULL;
@@ -266,7 +266,7 @@ PHPAPI void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS
   }
 }
 
-PHPAPI void mustache_data_to_zval(mustache::Data * node, zval * current TSRMLS_DC)
+void mustache_data_to_zval(mustache::Data * node, zval * current TSRMLS_DC)
 {
   mustache::Data::List::iterator l_it;
   mustache::Data::Map::iterator m_it;
@@ -317,7 +317,7 @@ PHPAPI void mustache_data_to_zval(mustache::Data * node, zval * current TSRMLS_D
   }
 }
 
-PHPAPI zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_DC)
+zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_DC)
 {
   zend_class_entry ** ce = NULL;
   int found = 0;
@@ -339,7 +339,7 @@ PHPAPI zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_D
   }
 }
 
-PHPAPI void mustache_exception_handler(TSRMLS_D)
+void mustache_exception_handler(TSRMLS_D)
 {
 #if PHP_MUSTACHE_THROW_EXCEPTIONS
   throw;
@@ -370,7 +370,7 @@ PHPAPI void mustache_exception_handler(TSRMLS_D)
 #endif
 }
 
-PHPAPI bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
+bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
         mustache::Node ** node TSRMLS_DC)
 {
   // Prepare template string
@@ -414,7 +414,7 @@ PHPAPI bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * must
   }
 }
 
-PHPAPI bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
+bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
         mustache::Data ** node TSRMLS_DC)
 {
   php_obj_MustacheData * mdPayload = NULL;
@@ -434,7 +434,7 @@ PHPAPI bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache
   }
 }
 
-PHPAPI bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
+bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
         mustache::Node::Partials * partials TSRMLS_DC)
 {
   HashTable * data_hash = NULL;

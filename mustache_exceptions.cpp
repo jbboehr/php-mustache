@@ -6,8 +6,8 @@
 
 // Class Entries  --------------------------------------------------------------
 
-PHPAPI zend_class_entry * MustacheException_ce_ptr;
-PHPAPI zend_class_entry * MustacheParserException_ce_ptr;
+zend_class_entry * MustacheException_ce_ptr;
+zend_class_entry * MustacheParserException_ce_ptr;
 
 
 

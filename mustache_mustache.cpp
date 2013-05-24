@@ -7,7 +7,7 @@
 
 // Class Entries  --------------------------------------------------------------
 
-PHPAPI zend_class_entry * Mustache_ce_ptr = NULL;
+zend_class_entry * Mustache_ce_ptr;
 
 
 
