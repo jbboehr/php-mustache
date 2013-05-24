@@ -14,28 +14,20 @@ All features of Mustache are supported EXCEPT:
 * Lambda functions
 * Whitespace rules. All whitespace is kept as it is in the input template.
 
-Requirements
---------------------------------------------------------------------------------
-
-Ubuntu:
-
-```bash
-apt-get install git-core php5-dev
-```
-
 Installation
 --------------------------------------------------------------------------------
 
 Ubuntu:
 
 ```bash
+sudo apt-get install git-core php5-dev
 git clone git://github.com/jbboehr/php-mustache.git
 cd php-mustache
-git submodule init
-git submodule update
+git submodule update --init --recursive
 phpize
 ./configure --enable-mustache
-make && make install
+make
+sudo make install
 ```
 
 Usage
@@ -95,12 +87,20 @@ Todo
 --------------------------------------------------------------------------------
 * Fix whitespace non-conformity
 * Cache compiled templates in memory
-* Test in thread-safe mode
 * Implement tr1::unordered_map or boost::unordered_map to see performance differences
 
-Tested On
+
+Compiling on Windows
 --------------------------------------------------------------------------------
 
-* Ubuntu 11.10 / GCC 4.6.1 / PHP 5.3.6
-* Ubuntu 10.04 LTS / GCC 4.4.3 / PHP 5.3.2
-* FreeBSD 9.0 / GCC 4.2.1 / PHP 5.3.8
+* See [Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild). 
+Note: SetEnv.cmd is not always in the path, mine was in 
+`C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd`
+* Place sources into the ext directory (e.g. `C:\php-sdk\php53dev\vc9\x86\php5.3-xyz\ext\mustache`)
+* `configure --enable-mustache=shared ...` or `configure --enable-mustache ...` to compile it into PHP
+* `nmake`
+
+To run the tests for the shared extension, add 
+`extension=C:\php-sdk\php53\vc9\x86\php5.3-xyz\Release\php_mustache.dll` to 
+`C:\php-sdk\php53\vc9\x86\php5.3-xyz\Release\php.ini`
+then run `nmake test TESTS=ext\mustache\tests\*` (replace `Release` with `Release_TS` if thread safety is enabled)
