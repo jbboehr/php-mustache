@@ -28,7 +28,16 @@ phpize
 ./configure --enable-mustache
 make
 sudo make install
+sudo sh -c "echo extension=mustache.so > /etc/php5/conf.d/mustache.ini"
 ```
+
+Windows:
+
+* Get a [Mustache Windows Build](https://jbboehr.github.com/php-mustache)
+* Place into your PHP extension directory and add `extension=php_mustache.dll` to your php.ini
+
+Note: these pass all of the tests, but may or may not be production safe.
+
 
 Usage
 --------------------------------------------------------------------------------
@@ -95,9 +104,11 @@ Compiling on Windows
 
 * See [Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild). 
 Note: SetEnv.cmd is not always in the path, mine was in 
-`C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd`
+`C:\Program Files\Microsoft SDKs\Windows\v6.1\Bin\SetEnv.cmd` and needed to be modified
+(modified version is in the win32 folder in this repository)
 * Place sources into the ext directory (e.g. `C:\php-sdk\php53dev\vc9\x86\php5.3-xyz\ext\mustache`)
-* `configure --enable-mustache=shared ...` or `configure --enable-mustache ...` to compile it into PHP
+* `configure --enable-mustache=shared ...` or `configure --enable-mustache ...` to compile it into PHP.
+  If compiling it as shared, make sure --enable-zts matches the version you have installed.
 * `nmake`
 
 To run the tests for the shared extension, add 
