@@ -13,3 +13,7 @@ script:
   - ./configure --enable-mustache
   - make
   - echo n | make test
+
+branches:
+  only:
+    - master
