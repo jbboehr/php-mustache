@@ -3,4 +3,4 @@
 	url = git://github.com/jbboehr/libmustache.git
 [submodule "spec"]
 	path = spec
-	url = git://github.com/mustache/spec.git
+	url = git://github.com/jbboehr/mustache-spec.git
