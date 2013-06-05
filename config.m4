@@ -148,20 +148,20 @@ if test "$PHP_MUSTACHE" != "no"; then
   dnl   PHP_MUSTACHE_ADD_FLAGS("-std=gnu++0x")
   dnl fi
   
-  PHP_ADD_INCLUDE(mustache)
-  PHP_ADD_BUILD_DIR(mustache)
+  PHP_ADD_INCLUDE(mustache/src)
+  PHP_ADD_BUILD_DIR(mustache/src)
   PHP_MUSTACHE_ADD_SOURCES([
     php_mustache.cpp
     mustache_mustache.cpp
     mustache_exceptions.cpp
     mustache_data.cpp
     mustache_template.cpp
-    mustache/mustache.cpp
-    mustache/data.cpp
-    mustache/node.cpp
-    mustache/renderer.cpp
-    mustache/tokenizer.cpp
-    mustache/utils.cpp
+    mustache/src/mustache.cpp
+    mustache/src/data.cpp
+    mustache/src/node.cpp
+    mustache/src/renderer.cpp
+    mustache/src/tokenizer.cpp
+    mustache/src/utils.cpp
   ])
   
   PHP_SUBST(MUSTACHE_SHARED_LIBADD)

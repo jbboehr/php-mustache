@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "mustache/mustache.hpp"
+#include "mustache/src/mustache.hpp"
 
 // Parameter exception
 class PhpInvalidParameterException : public std::exception {

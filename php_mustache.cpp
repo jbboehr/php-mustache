@@ -85,6 +85,7 @@ static PHP_MINFO_FUNCTION(mustache)
   php_info_print_table_row(2, "Revision", PHP_MUSTACHE_BUILD);
   php_info_print_table_row(2, "Authors", PHP_MUSTACHE_AUTHORS);
   php_info_print_table_row(2, "Spec Version", PHP_MUSTACHE_SPEC);
+  php_info_print_table_row(2, "Libmustache Version", mustache_version());
 #if HAVE_TCMALLOC
   php_info_print_table_row(2, "tcmalloc support", "enabled");
 #else
