@@ -67,7 +67,7 @@ static zend_object_value MustacheTemplate_obj_create(zend_class_entry *class_typ
     zend_hash_copy(payload->obj.properties, &(class_type->default_properties),
         (copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval*));
 #else
-    object_properties_init(&tobj->std, class_type);
+    object_properties_init(&payload->obj, class_type);
 #endif
     
     payload->tmpl = NULL; //new std::string();
