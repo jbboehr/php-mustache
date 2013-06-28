@@ -25,6 +25,8 @@ class InvalidParameterException : public std::runtime_error {
    extern "C" {
 #endif
 
+void mustache_node_from_binary_string(mustache::Node ** node, char * str, int len);
+void mustache_node_to_binary_string(mustache::Node * node, char ** estr, int * elen);
 void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC);
 void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC);
 void mustache_data_to_zval(mustache::Data * node, zval * current TSRMLS_DC);

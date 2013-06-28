@@ -147,7 +147,7 @@ if test "$PHP_MUSTACHE" != "no"; then
   dnl elif test "$ax_cv_cxx_compile_cxx0x_gxx" = yes; then
   dnl   PHP_MUSTACHE_ADD_FLAGS("-std=gnu++0x")
   dnl fi
-  
+
   PHP_ADD_INCLUDE(mustache/src)
   PHP_ADD_BUILD_DIR(mustache/src)
   PHP_MUSTACHE_ADD_SOURCES([

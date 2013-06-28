@@ -97,7 +97,22 @@ class MustacheTemplate
    * 
    * @param string $tmpl The input template
    */
-  public function __construct($tmpl) {}
+  public function __construct($tmpl = null) {}
+  
+  /**
+   * Stores the C uncompiled and compiled templates in string properties
+   * 
+   * @return array
+   */
+  public function __sleep() {}
+  
+  /**
+   * Sets the internal compiled template to a binary string representing the 
+   * internal structure.
+   * 
+   * @return void
+   */
+  public function setFromBinary($binaryString) {}
   
   /**
    * Compiles a template and returns an array representing the internal 
@@ -108,11 +123,26 @@ class MustacheTemplate
   public function toArray() {}
   
   /**
+   * Compiles a template and returns a binary string representing the internal 
+   * structure.
+   * 
+   * @return string The serialized compiled template structure
+   */
+  public function toBinary() {}
+  
+  /**
    * Gets the string version of the template
    * 
    * @return string The template string 
    */
   public function __toString() {}
+  
+  /**
+   * Restores the string properies to the internal C structure
+   * 
+   * @return void
+   */
+  public function __wakeup() {}
 }
 
 class MustacheData
