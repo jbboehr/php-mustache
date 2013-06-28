@@ -222,7 +222,7 @@ void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
         zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
         while( zend_hash_get_current_data_ex(data_hash, (void**) &data_entry, &data_pointer) == SUCCESS ) {
           // Get current key
-          key_type = zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, &key_nindex, true, &data_pointer);
+          key_type = zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, &key_nindex, false, &data_pointer);
           // Check key type
           if( key_type == HASH_KEY_IS_LONG ) {
             if( node->type == mustache::Data::TypeNone ) {
@@ -275,7 +275,7 @@ void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
           zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
           while( zend_hash_get_current_data_ex(data_hash, (void**) &data_entry, &data_pointer) == SUCCESS ) {
             if( zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, 
-                    &key_nindex, true, &data_pointer) == HASH_KEY_IS_STRING ) {
+                    &key_nindex, false, &data_pointer) == HASH_KEY_IS_STRING ) {
 #if PHP_API_VERSION >= 20100412
               zend_unmangle_property_name(key_str, key_len-1, (const char **) &class_name, (const char **) &prop_name);
 #else
@@ -496,7 +496,7 @@ bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
   zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
   while( zend_hash_get_current_data_ex(data_hash, (void**) &data_entry, &data_pointer) == SUCCESS ) {
     // Get current key
-    key_type = zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, &key_nindex, true, &data_pointer);
+    key_type = zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, &key_nindex, false, &data_pointer);
     // Check key type
     if( key_type != HASH_KEY_IS_STRING ) {
       // Non-string key
