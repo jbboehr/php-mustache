@@ -91,15 +91,10 @@ static PHP_MINFO_FUNCTION(mustache)
 #else
   php_info_print_table_row(2, "tcmalloc support", "disabled");
 #endif
-#if HAVE_TR1
-  php_info_print_table_row(2, "tr1 support", "enabled");
+#if HAVE_CXX11
+  php_info_print_table_row(2, "c++11 unordered map support", "enabled");
 #else
-  php_info_print_table_row(2, "tr1 support", "disabled");
-#endif
-#if HAVE_LIBBOOST
-  php_info_print_table_row(2, "libboost support", "enabled");
-#else
-  php_info_print_table_row(2, "libboost support", "disabled");
+  php_info_print_table_row(2, "c++11 unordered map support", "disabled");
 #endif
   php_info_print_table_end();
   

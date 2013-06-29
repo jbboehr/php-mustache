@@ -468,8 +468,13 @@ PHP_METHOD(Mustache, render)
     mustache::Node::Partials templatePartials;
     mustache_parse_partials_param(partials, payload->mustache, &templatePartials TSRMLS_CC);
     
-    // Render template
+    // Reserve length of template
     std::string output;
+    if( Z_TYPE_P(tmpl) == IS_STRING ) {
+      output.reserve(Z_STRLEN_P(tmpl));
+    }
+    
+    // Render template
     payload->mustache->render(templateNodePtr, templateDataPtr, &templatePartials, &output);
     
     // Output
