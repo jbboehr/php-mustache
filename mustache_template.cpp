@@ -1,12 +1,49 @@
 
 #include <stdint.h>
 #include "php_mustache.hpp"
-#include "mustache_data.hpp"
-#include "mustache_template.hpp"
 
 
 
-// Class Entries  --------------------------------------------------------------
+// Declarations ----------------------------------------------------------------
+
+PHP_METHOD(MustacheTemplate, __construct);
+PHP_METHOD(MustacheTemplate, __sleep);
+PHP_METHOD(MustacheTemplate, setFromBinary);
+PHP_METHOD(MustacheTemplate, toArray);
+PHP_METHOD(MustacheTemplate, toBinary);
+PHP_METHOD(MustacheTemplate, __toString);
+PHP_METHOD(MustacheTemplate, __wakeup);
+
+
+
+// Argument Info ---------------------------------------------------------------
+
+ZEND_BEGIN_ARG_INFO_EX(MustacheTemplate____construct_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+    ZEND_ARG_INFO(0, vars)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(MustacheTemplate____sleep_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(MustacheTemplate__setFromBinary_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+    ZEND_ARG_INFO(0, binaryString)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(MustacheTemplate__toArray_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(MustacheTemplate__toBinary_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(MustacheTemplate____toString_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(MustacheTemplate____wakeup_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+
+
+// Class Entries ---------------------------------------------------------------
 
 zend_class_entry * MustacheTemplate_ce_ptr;
 
@@ -24,6 +61,88 @@ static zend_function_entry MustacheTemplate_methods[] = {
   PHP_ME(MustacheTemplate, __wakeup, MustacheTemplate____wakeup_args, ZEND_ACC_PUBLIC)
   { NULL, NULL, NULL }
 };
+
+
+
+// Helpers ---------------------------------------------------------------------
+
+void mustache_node_from_binary_string(mustache::Node ** node, char * str, int len)
+{
+  std::vector<uint8_t> uint_str;
+  uint_str.resize(len);
+  int i = 0;
+  for( i = 0; i < len; i++ ) {
+    uint_str[i] = str[i];
+  }
+  
+  size_t vpos = 0;
+  *node = mustache::Node::unserialize(uint_str, 0, &vpos);
+}
+
+void mustache_node_to_binary_string(mustache::Node * node, char ** estr, int * elen)
+{
+  std::vector<uint8_t> * serialPtr = node->serialize();
+  std::vector<uint8_t> & serial = *serialPtr;
+  int serialLen = serial.size();
+  
+  char * str = (char *) emalloc(sizeof(char *) * (serialLen + 1));
+  for( int i = 0 ; i < serialLen; i++ ) {
+    str[i] = (char) serial[i];
+  }
+  str[serialLen] = '\0';
+  delete serialPtr;
+  
+  *elen = serialLen;
+  *estr = str;
+}
+
+void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC)
+{
+  zval * children = NULL;
+  
+  array_init(current);
+  
+  // Basic data
+  add_assoc_long(current, "type", node->type);
+  add_assoc_long(current, "flags", node->flags);
+  if( NULL != node->data && node->data->length() > 0 ) {
+    add_assoc_stringl(current, "data", (char *) node->data->c_str(), node->data->length(), 1);
+  }
+  
+  // Children
+  if( node->children.size() > 0 ) {
+    ALLOC_INIT_ZVAL(children);
+    array_init(children);
+    
+    mustache::Node::Children::iterator it;
+    for ( it = node->children.begin() ; it != node->children.end(); it++ ) {
+      zval * child;
+      ALLOC_INIT_ZVAL(child);
+      mustache_node_to_zval(*it, child TSRMLS_CC);
+      add_next_index_zval(children, child);
+    }
+    
+    add_assoc_zval(current, "children", children);
+    children = NULL;
+  }
+  
+  // Partials
+  if( node->partials.size() > 0 ) {
+    ALLOC_INIT_ZVAL(children);
+    array_init(children);
+    
+    mustache::Node::Partials::iterator it;
+    for ( it = node->partials.begin() ; it != node->partials.end(); it++ ) {
+      zval * child;
+      ALLOC_INIT_ZVAL(child);
+      mustache_node_to_zval(&(it->second), child TSRMLS_CC);
+      add_assoc_zval(children, it->first.c_str(), child);
+    }
+    
+    add_assoc_zval(current, "partials", children);
+    children = NULL;
+  }
+}
 
 
 
@@ -123,7 +242,7 @@ PHP_METHOD(MustacheTemplate, __construct)
     
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|s", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "O|s", 
             &_this_zval, MustacheTemplate_ce_ptr, &template_str, &template_len) == FAILURE) {
       throw PhpInvalidParameterException();
     }
@@ -153,7 +272,7 @@ PHP_METHOD(MustacheTemplate, __sleep)
   try {
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "O", 
             &_this_zval, MustacheTemplate_ce_ptr) == FAILURE) {
       throw PhpInvalidParameterException();
     }
@@ -213,7 +332,7 @@ PHP_METHOD(MustacheTemplate, setFromBinary)
     
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "Os", 
             &_this_zval, MustacheTemplate_ce_ptr, &str, &str_len) == FAILURE) {
       throw PhpInvalidParameterException();
     }
@@ -245,7 +364,7 @@ PHP_METHOD(MustacheTemplate, toArray)
   try {
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "O", 
             &_this_zval, MustacheTemplate_ce_ptr) == FAILURE) {
       throw PhpInvalidParameterException();
     }
@@ -277,7 +396,7 @@ PHP_METHOD(MustacheTemplate, toBinary)
   try {
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "O", 
             &_this_zval, MustacheTemplate_ce_ptr) == FAILURE) {
       throw PhpInvalidParameterException();
     }
@@ -315,7 +434,7 @@ PHP_METHOD(MustacheTemplate, __toString)
   try {
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "O", 
             &_this_zval, MustacheTemplate_ce_ptr) == FAILURE) {
       throw PhpInvalidParameterException();
     }
@@ -348,7 +467,7 @@ PHP_METHOD(MustacheTemplate, __wakeup)
   try {
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "O", 
             &_this_zval, MustacheTemplate_ce_ptr) == FAILURE) {
       throw PhpInvalidParameterException();
     }

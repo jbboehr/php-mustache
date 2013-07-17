@@ -25,20 +25,23 @@ class InvalidParameterException : public std::runtime_error {
    extern "C" {
 #endif
 
-void mustache_node_from_binary_string(mustache::Node ** node, char * str, int len);
-void mustache_node_to_binary_string(mustache::Node * node, char ** estr, int * elen);
-void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC);
-void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC);
-void mustache_data_to_zval(mustache::Data * node, zval * current TSRMLS_DC);
-zend_class_entry * mustache_get_class_entry(char * name, int len TSRMLS_DC);
-void mustache_exception_handler(TSRMLS_D);
+typedef struct _php_obj_Mustache {
+    zend_object obj;
+    mustache::Mustache * mustache;
+} php_obj_Mustache;
 
-bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
-        mustache::Node ** node TSRMLS_DC);
-bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
-        mustache::Data ** node TSRMLS_DC);
-bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
-        mustache::Node::Partials * partials TSRMLS_DC);
+typedef struct _php_obj_MustacheData {
+    zend_object obj;
+    mustache::Data * data;
+} php_obj_MustacheData;
+
+typedef struct _php_obj_MustacheTemplate {
+    zend_object obj;
+    std::string * tmpl;
+    mustache::Node * node;
+} php_obj_MustacheTemplate;
+
+void mustache_exception_handler(TSRMLS_D);
 
 #ifdef __cplusplus
   } // extern "C" 
