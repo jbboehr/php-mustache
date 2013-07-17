@@ -51,16 +51,20 @@ if test "$PHP_MUSTACHE" != "no"; then
   PHP_ADD_BUILD_DIR(mustache/src)
   PHP_MUSTACHE_ADD_SOURCES([
     php_mustache.cpp
+    mustache_ast.cpp
+    mustache_code.cpp
     mustache_mustache.cpp
     mustache_exceptions.cpp
     mustache_data.cpp
     mustache_template.cpp
     mustache/src/mustache.cpp
+    mustache/src/compiler.cpp
     mustache/src/data.cpp
     mustache/src/node.cpp
     mustache/src/renderer.cpp
     mustache/src/tokenizer.cpp
     mustache/src/utils.cpp
+    mustache/src/vm.cpp
   ])
   
   PHP_SUBST(MUSTACHE_SHARED_LIBADD)

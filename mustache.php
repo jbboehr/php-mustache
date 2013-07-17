@@ -90,6 +90,48 @@ class Mustache
   public function debugDataStructure(array $data) {}
 }
 
+/**
+ * Represents the parsed AST
+ */
+class MustacheAST
+{
+  /**
+   * Constructor.
+   * 
+   * @param string $binaryString The serialized AST string
+   */
+  public function __construct($binaryString = null) {}
+  
+  /**
+   * Stores the AST in a string property
+   * 
+   * @return array
+   */
+  public function __sleep() {}
+  
+  /**
+   * Compiles a template and returns an array representing the internal 
+   * structure. Alias of Mustache::tokenize()
+   * 
+   * @return array The compiled template structure
+   */
+  public function toArray() {}
+  
+  /**
+   * Gets the serialized binary AST
+   * 
+   * @return string The template string 
+   */
+  public function __toString() {}
+  
+  /**
+   * Restores the string properies to the internal C structure
+   * 
+   * @return void
+   */
+  public function __wakeup() {}
+}
+
 class MustacheTemplate
 {
   /**
