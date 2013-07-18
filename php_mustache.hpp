@@ -35,6 +35,12 @@ typedef struct _php_obj_MustacheAST {
     mustache::Node * node;
 } php_obj_MustacheAST;
 
+typedef struct _php_obj_MustacheCode {
+    zend_object obj;
+    uint8_t * codes;
+    size_t length;
+} php_obj_MustacheCode;
+
 typedef struct _php_obj_MustacheData {
     zend_object obj;
     mustache::Data * data;

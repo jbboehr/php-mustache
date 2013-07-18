@@ -17,6 +17,7 @@ extern zend_class_entry * MustacheParserException_ce_ptr;
 extern zend_class_entry * MustacheTemplate_ce_ptr;
 
 extern PHP_MINIT_FUNCTION(mustache_ast);
+extern PHP_MINIT_FUNCTION(mustache_code);
 extern PHP_MINIT_FUNCTION(mustache_data);
 extern PHP_MINIT_FUNCTION(mustache_exceptions);
 extern PHP_MINIT_FUNCTION(mustache_mustache);
@@ -65,6 +66,7 @@ static PHP_MINIT_FUNCTION(mustache)
   REGISTER_INI_ENTRIES();
   
   PHP_MINIT(mustache_ast)(INIT_FUNC_ARGS_PASSTHRU);
+  PHP_MINIT(mustache_code)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_mustache)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_data)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_template)(INIT_FUNC_ARGS_PASSTHRU);
