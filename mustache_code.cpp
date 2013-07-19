@@ -1,55 +1,11 @@
 
-#include <stdint.h>
 #include "php_mustache.hpp"
-
-
-
-// Declarations ----------------------------------------------------------------
-
-PHP_METHOD(MustacheCode, __construct);
-//PHP_METHOD(MustacheCode, toReadableString);
-PHP_METHOD(MustacheCode, __sleep);
-PHP_METHOD(MustacheCode, __toString);
-PHP_METHOD(MustacheCode, __wakeup);
-
-
-
-// Argument Info ---------------------------------------------------------------
-
-ZEND_BEGIN_ARG_INFO_EX(MustacheCode____construct_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-    ZEND_ARG_INFO(0, codeString)
-ZEND_END_ARG_INFO()
-
-//ZEND_BEGIN_ARG_INFO_EX(MustacheCode__toReadableString_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-//ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(MustacheCode____sleep_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(MustacheCode____toString_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(MustacheCode____wakeup_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO()
 
 
 
 // Class Entries ---------------------------------------------------------------
 
 zend_class_entry * MustacheCode_ce_ptr;
-
-
-
-// Method Entries --------------------------------------------------------------
-
-static zend_function_entry MustacheCode_methods[] = {
-  PHP_ME(MustacheCode, __construct, MustacheCode____construct_args, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-  //PHP_ME(MustacheCode, toReadableString, MustacheCode__toArray_args, ZEND_ACC_PUBLIC)
-  PHP_ME(MustacheCode, __sleep, MustacheCode____sleep_args, ZEND_ACC_PUBLIC)
-  PHP_ME(MustacheCode, __toString, MustacheCode____toString_args, ZEND_ACC_PUBLIC)
-  PHP_ME(MustacheCode, __wakeup, MustacheCode____wakeup_args, ZEND_ACC_PUBLIC)
-  { NULL, NULL, NULL }
-};
 
 
 
@@ -101,31 +57,6 @@ static zend_object_value MustacheCode_obj_create(zend_class_entry *class_type TS
   }
   
   return retval;
-}
-
-
-
-// MINIT -----------------------------------------------------------------------
-
-PHP_MINIT_FUNCTION(mustache_code)
-{
-  try {
-    zend_class_entry ce;
-
-    memcpy(&MustacheCode_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-    MustacheCode_obj_handlers.clone_obj = NULL;
-    
-    INIT_CLASS_ENTRY(ce, "MustacheCode", MustacheCode_methods);
-    ce.create_object = MustacheCode_obj_create;
-    
-    MustacheCode_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
-    MustacheCode_ce_ptr->create_object = MustacheCode_obj_create;
-    
-    return SUCCESS;
-  } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
-    return FAILURE;
-  }
 }
 
 
@@ -216,6 +147,46 @@ PHP_METHOD(MustacheCode, __sleep)
   }
 }
 /* }}} __sleep */
+
+/* {{{ proto string toReadableString()
+   */
+PHP_METHOD(MustacheCode, toReadableString)
+{
+  try {
+    // Check parameters
+    zval * _this_zval = NULL;
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "O", 
+            &_this_zval, MustacheCode_ce_ptr) == FAILURE) {
+      throw PhpInvalidParameterException();
+    }
+    
+    // Class parameters
+    _this_zval = getThis();
+    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
+    php_obj_MustacheCode * payload = 
+            (php_obj_MustacheCode *) zend_object_store_get_object(_this_zval TSRMLS_CC);
+    
+    // Check payload
+    if( payload->codes == NULL ) {
+      throw InvalidParameterException("MustacheCode was not initialized properly");
+    }
+    
+    // Print codes
+    std::string * output = mustache::Compiler::print(payload->codes, payload->length);
+    
+    // Copy
+    if( output != NULL ) {
+      int length = output->length();
+      char * str = (char *) estrndup((char *) output->c_str(), length);
+      delete output;
+      RETURN_STRINGL(str, length, 0);
+    }
+    
+  } catch(...) {
+    mustache_exception_handler(TSRMLS_C);
+  }
+}
+/* }}} toReadableString */
 
 /* {{{ proto string __toString()
    */
@@ -314,3 +285,61 @@ PHP_METHOD(MustacheCode, __wakeup)
   }
 }
 /* }}} __wakeup */
+
+
+
+// Argument Info ---------------------------------------------------------------
+
+ZEND_BEGIN_ARG_INFO_EX(MustacheCode____construct_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+    ZEND_ARG_INFO(0, codeString)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(MustacheCode____sleep_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(MustacheCode__toReadableString_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(MustacheCode____toString_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(MustacheCode____wakeup_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+
+
+// Method Entries --------------------------------------------------------------
+
+static zend_function_entry MustacheCode_methods[] = {
+  PHP_ME(MustacheCode, __construct, MustacheCode____construct_args, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+  PHP_ME(MustacheCode, __sleep, MustacheCode____sleep_args, ZEND_ACC_PUBLIC)
+  PHP_ME(MustacheCode, toReadableString, MustacheCode__toReadableString_args, ZEND_ACC_PUBLIC)
+  PHP_ME(MustacheCode, __toString, MustacheCode____toString_args, ZEND_ACC_PUBLIC)
+  PHP_ME(MustacheCode, __wakeup, MustacheCode____wakeup_args, ZEND_ACC_PUBLIC)
+  { NULL, NULL, NULL }
+};
+
+
+
+// MINIT -----------------------------------------------------------------------
+
+PHP_MINIT_FUNCTION(mustache_code)
+{
+  try {
+    zend_class_entry ce;
+
+    memcpy(&MustacheCode_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+    MustacheCode_obj_handlers.clone_obj = NULL;
+    
+    INIT_CLASS_ENTRY(ce, "MustacheCode", MustacheCode_methods);
+    ce.create_object = MustacheCode_obj_create;
+    
+    MustacheCode_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
+    MustacheCode_ce_ptr->create_object = MustacheCode_obj_create;
+    
+    return SUCCESS;
+  } catch(...) {
+    mustache_exception_handler(TSRMLS_C);
+    return FAILURE;
+  }
+}

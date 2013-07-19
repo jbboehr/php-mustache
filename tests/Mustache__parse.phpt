@@ -1,5 +1,5 @@
 --TEST--
-Mustache::compile() member function
+Mustache::parse() member function
 --SKIPIF--
 <?php 
 if( !extension_loaded('mustache') ) die('skip ');
@@ -7,8 +7,8 @@ if( !extension_loaded('mustache') ) die('skip ');
 --FILE--
 <?php
 $m = new Mustache();
-$tmpl = $m->compile('{{test}}');
+$tmpl = $m->parse('{{test}}');
 var_dump(get_class($tmpl));
 ?>
 --EXPECT--
-string(16) "MustacheTemplate"
+string(16) "MustacheAST"

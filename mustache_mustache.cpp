@@ -10,91 +10,14 @@ void mustache_data_to_zval(mustache::Data * node, zval * current TSRMLS_DC);
 void mustache_node_to_zval(mustache::Node * node, zval * current TSRMLS_DC);
 bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache, mustache::Data ** node TSRMLS_DC);
 
-PHP_METHOD(Mustache, __construct);
-PHP_METHOD(Mustache, getEscapeByDefault);
-PHP_METHOD(Mustache, getStartSequence);
-PHP_METHOD(Mustache, getStopSequence);
-PHP_METHOD(Mustache, setEscapeByDefault);
-PHP_METHOD(Mustache, setStartSequence);
-PHP_METHOD(Mustache, setStopSequence);
-PHP_METHOD(Mustache, compile);
-PHP_METHOD(Mustache, tokenize);
-PHP_METHOD(Mustache, render);
-PHP_METHOD(Mustache, debugDataStructure);
-
 extern zend_class_entry * MustacheData_ce_ptr;
 extern zend_class_entry * MustacheTemplate_ce_ptr;
-
-
-
-// Argument Info ---------------------------------------------------------------
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache____construct_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__getEscapeByDefault_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__getStartSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__getStopSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__setEscapeByDefault_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, escapeByDefault)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__setStartSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, startSequence)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__setStopSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, stopSequence)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__compile_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, tmpl)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__tokenize_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, tmpl)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__render_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 3)
-	ZEND_ARG_INFO(0, str)
-        ZEND_ARG_INFO(0, vars)
-        ZEND_ARG_INFO(0, partials)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__debugDataStructure_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-        ZEND_ARG_INFO(0, vars)
-ZEND_END_ARG_INFO()
 
 
 
 // Class Entries  --------------------------------------------------------------
 
 zend_class_entry * Mustache_ce_ptr;
-
-
-
-// Method Entries --------------------------------------------------------------
-
-static zend_function_entry Mustache_methods[] = {
-  PHP_ME(Mustache, __construct, Mustache____construct_args, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-  PHP_ME(Mustache, getEscapeByDefault, Mustache__getEscapeByDefault_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, getStartSequence, Mustache__getStartSequence_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, getStopSequence, Mustache__getStopSequence_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, setEscapeByDefault, Mustache__setEscapeByDefault_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, setStartSequence, Mustache__setStartSequence_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, setStopSequence, Mustache__setStopSequence_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, compile, Mustache__compile_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, tokenize, Mustache__tokenize_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, render, Mustache__render_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, debugDataStructure, Mustache__debugDataStructure_args, ZEND_ACC_PUBLIC)
-  { NULL, NULL, NULL }
-};
 
 
 
@@ -154,28 +77,6 @@ static zend_object_value Mustache_obj_create(zend_class_entry *class_type TSRMLS
   }
 
   return retval;
-}
-
-
-
-// MINIT -----------------------------------------------------------------------
-
-PHP_MINIT_FUNCTION(mustache_mustache)
-{
-  try {
-    zend_class_entry ce;
-
-    INIT_CLASS_ENTRY(ce, "Mustache", Mustache_methods);
-    ce.create_object = Mustache_obj_create;
-    Mustache_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
-    memcpy(&Mustache_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-    Mustache_obj_handlers.clone_obj = NULL;
-
-    return SUCCESS;
-  } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
-    return FAILURE;
-  }
 }
 
 
@@ -518,9 +419,24 @@ PHP_METHOD(Mustache, setStopSequence)
 }
 /* }}} setStartSequence */
 
-/* {{{ proto MustacheTemplate compile(string template)
+
+/* {{{ proto MustacheCode compile(string template)
    */
 PHP_METHOD(Mustache, compile)
+{
+}
+/* }}} compile */
+
+/* {{{ proto string execute(MustacheCode code)
+   */
+PHP_METHOD(Mustache, execute)
+{
+}
+/* }}} execute */
+
+/* {{{ proto MustacheAST parse(string template)
+   */
+PHP_METHOD(Mustache, parse)
 {
   try {
     // Custom parameters
@@ -578,45 +494,7 @@ PHP_METHOD(Mustache, compile)
     mustache_exception_handler(TSRMLS_C);
   }
 }
-/* }}} compile */
-
-/* {{{ proto array tokenize(string template)
-   */
-PHP_METHOD(Mustache, tokenize)
-{
-  try {
-    // Custom parameters
-    char * template_str = NULL;
-    long template_len = 0;
-  
-    // Check parameters
-    zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "Os", 
-            &_this_zval, Mustache_ce_ptr, &template_str, &template_len) == FAILURE) {
-      throw PhpInvalidParameterException();
-    }
-
-    // Class parameters
-    _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
-    php_obj_Mustache * payload = 
-            (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
-    
-    // Assign template to string
-    std::string templateStr(template_str/*, template_len*/);
-    
-    // Tokenize template
-    mustache::Node root;
-    payload->mustache->tokenize(&templateStr, &root);
-    
-    // Convert to PHP array
-    mustache_node_to_zval(&root, return_value TSRMLS_CC);
-    
-  } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
-  }
-}
-/* }}} tokenize */
+/* }}} parse */
 
 /* {{{ proto string render(mixed template, array data, array partials)
    */
@@ -679,6 +557,44 @@ PHP_METHOD(Mustache, render)
 }
 /* }}} render */
 
+/* {{{ proto array tokenize(string template)
+   */
+PHP_METHOD(Mustache, tokenize)
+{
+  try {
+    // Custom parameters
+    char * template_str = NULL;
+    long template_len = 0;
+  
+    // Check parameters
+    zval * _this_zval = NULL;
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "Os", 
+            &_this_zval, Mustache_ce_ptr, &template_str, &template_len) == FAILURE) {
+      throw PhpInvalidParameterException();
+    }
+
+    // Class parameters
+    _this_zval = getThis();
+    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
+    php_obj_Mustache * payload = 
+            (php_obj_Mustache *) zend_object_store_get_object(_this_zval TSRMLS_CC);
+    
+    // Assign template to string
+    std::string templateStr(template_str/*, template_len*/);
+    
+    // Tokenize template
+    mustache::Node root;
+    payload->mustache->tokenize(&templateStr, &root);
+    
+    // Convert to PHP array
+    mustache_node_to_zval(&root, return_value TSRMLS_CC);
+    
+  } catch(...) {
+    mustache_exception_handler(TSRMLS_C);
+  }
+}
+/* }}} tokenize */
+
 /* {{{ proto array debugDataStructure(array data)
    */
 PHP_METHOD(Mustache, debugDataStructure)
@@ -712,3 +628,100 @@ PHP_METHOD(Mustache, debugDataStructure)
   }
 }
 /* }}} debugDataStructure */
+
+
+
+// Argument Info ---------------------------------------------------------------
+
+ZEND_BEGIN_ARG_INFO_EX(Mustache____construct_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(Mustache__getEscapeByDefault_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(Mustache__getStartSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(Mustache__getStopSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(Mustache__setEscapeByDefault_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, escapeByDefault)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(Mustache__setStartSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, startSequence)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(Mustache__setStopSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, stopSequence)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(Mustache__compile_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, tmpl)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(Mustache__execute_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, code)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(Mustache__parse_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, tmpl)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(Mustache__render_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 3)
+	ZEND_ARG_INFO(0, str)
+        ZEND_ARG_INFO(0, vars)
+        ZEND_ARG_INFO(0, partials)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(Mustache__tokenize_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, tmpl)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(Mustache__debugDataStructure_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+        ZEND_ARG_INFO(0, vars)
+ZEND_END_ARG_INFO()
+
+
+
+// Method Entries --------------------------------------------------------------
+
+static zend_function_entry Mustache_methods[] = {
+  PHP_ME(Mustache, __construct, Mustache____construct_args, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+  PHP_ME(Mustache, getEscapeByDefault, Mustache__getEscapeByDefault_args, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, getStartSequence, Mustache__getStartSequence_args, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, getStopSequence, Mustache__getStopSequence_args, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, setEscapeByDefault, Mustache__setEscapeByDefault_args, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, setStartSequence, Mustache__setStartSequence_args, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, setStopSequence, Mustache__setStopSequence_args, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, compile, Mustache__compile_args, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, execute, Mustache__execute_args, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, parse, Mustache__parse_args, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, render, Mustache__render_args, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, tokenize, Mustache__tokenize_args, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, debugDataStructure, Mustache__debugDataStructure_args, ZEND_ACC_PUBLIC)
+  { NULL, NULL, NULL }
+};
+
+
+
+// MINIT -----------------------------------------------------------------------
+
+PHP_MINIT_FUNCTION(mustache_mustache)
+{
+  try {
+    zend_class_entry ce;
+
+    INIT_CLASS_ENTRY(ce, "Mustache", Mustache_methods);
+    ce.create_object = Mustache_obj_create;
+    Mustache_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
+    memcpy(&Mustache_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+    Mustache_obj_handlers.clone_obj = NULL;
+
+    return SUCCESS;
+  } catch(...) {
+    mustache_exception_handler(TSRMLS_C);
+    return FAILURE;
+  }
+}

@@ -1,5 +1,5 @@
 --TEST--
-Mustache::render() member function - Accepts MustacheTemplate
+Mustache::render() member function - Accepts MustacheAST
 --SKIPIF--
 <?php 
 

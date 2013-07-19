@@ -1,5 +1,4 @@
 
-#include <stdint.h>
 #include "php_mustache.hpp"
 
 

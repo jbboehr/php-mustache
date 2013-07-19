@@ -53,22 +53,28 @@ class Mustache
   public function setStopSequence($stop) {}
   
   /**
-   * Compiles a template and returns a class representing it.
+   * Compiles a template to bytecode and returns a class representing it.
    * 
-   * @param string|MustacheTemplate $tmpl The input template
-   * @return MustacheTemplate|bool The compiled template if given a string, or 
-   *                               true if given an instance of MustacheTemplate
+   * @param string $tmpl The input template
+   * @return MustacheCode The compiled template
    */
   public function compile($tmpl) {}
   
   /**
-   * Compiles a template and returns an array representing the internal 
-   * structure.
+   * Executes compiled bytecode.
+   * 
+   * @param MustacheCode $code The input bytecode
+   * @return string The string output
+   */
+  public function execute(MustacheCode $code) {}
+  
+  /**
+   * Tokenizes and parses a template and returns a class representing it.
    * 
    * @param string $tmpl The input template
-   * @return array The compiled template structure
+   * @return MustacheAST The compiled template
    */
-  public function tokenize($tmpl) {}
+  public function parse($tmpl) {}
   
   /**
    * Renders a template
@@ -79,6 +85,15 @@ class Mustache
    * @return false|string The string output, or false on failure
    */
   public function render($tmpl, $data, $partials = null) {}
+  
+  /**
+   * Compiles a template and returns an array representing the internal 
+   * structure.
+   * 
+   * @param string $tmpl The input template
+   * @return array The compiled template structure
+   */
+  public function tokenize($tmpl) {}
   
   /**
    * Converts an array into the internal data structure and back. Used for
@@ -121,6 +136,42 @@ class MustacheAST
    * Gets the serialized binary AST
    * 
    * @return string The template string 
+   */
+  public function __toString() {}
+  
+  /**
+   * Restores the string properies to the internal C structure
+   * 
+   * @return void
+   */
+  public function __wakeup() {}
+}
+
+class MustacheCode
+{
+  /**
+   * Constructor
+   * 
+   * @param string $codeString
+   */
+  public function __construct($codeString) {}
+  
+  /**
+   * Returns a readable version of the bytecode
+   * 
+   * @return string
+   */
+  public function toReadableString() {}
+  
+  /**
+   * Stores the bytecode in a string property for serialization
+   * 
+   * @return array
+   */
+  public function __sleep() {}
+  
+  /**
+   * Converts the bytecode to a string
    */
   public function __toString() {}
   
