@@ -6,17 +6,17 @@ if( !extension_loaded('mustache') ) die('skip ');
  ?>
 --FILE--
 <?php
-$tmpl = new MustacheCode(pack("H*" , "000000020000000c00000014020022012921160003017465737400"));
+$tmpl = new MustacheCode(pack("H*" , "000000020000000c00000014020011011810080003017465737400"));
 var_dump($tmpl->toReadableString());
 ?>
 --EXPECT--
 string(287) "Symbol 000 @ 012
 Symbol 001 @ 020
 S012:      0x02 FUNCTION 0
-F014: 000: 0x22 DLOOKUPSYM 1
-F016: 001: 0x29 DPRINTE
-F017: 002: 0x21 DPOP
-F018: 003: 0x16 RETURN
+F014: 000: 0x11 DLOOKUPSYM 1
+F016: 001: 0x18 DPRINTE
+F017: 002: 0x10 DPOP
+F018: 003: 0x08 RETURN
 N019:      0x00
 S020:      0x03 STRING 1
 C022: 000: 0x74 t

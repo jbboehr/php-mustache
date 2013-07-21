@@ -10,12 +10,12 @@ if( !extension_loaded('apc') ) {
 --FILE--
 <?php
 ini_set('apc.enable_cli', 1);
-$tmpl = new MustacheCode(pack("H*" , "000000020000000c00000014020022012921160003017465737400"));
+$tmpl = new MustacheCode(pack("H*" , "000000020000000c00000014020011011810080003017465737400"));
 $ret = apc_store(md5(__FILE__), serialize($tmpl));
 $tmpl = unserialize(apc_fetch(md5(__FILE__)));
 var_dump(bin2hex($tmpl->binaryString));
 var_dump(bin2hex((string) $tmpl));
 ?>
 --EXPECT--
-string(54) "000000020000000c00000014020022012921160003017465737400"
-string(54) "000000020000000c00000014020022012921160003017465737400"
+string(54) "000000020000000c00000014020011011810080003017465737400"
+string(54) "000000020000000c00000014020011011810080003017465737400"
