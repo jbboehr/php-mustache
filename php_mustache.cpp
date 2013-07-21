@@ -14,7 +14,6 @@ static PHP_GINIT_FUNCTION(mustache);
 extern zend_class_entry * MustacheData_ce_ptr;
 extern zend_class_entry * MustacheException_ce_ptr;
 extern zend_class_entry * MustacheParserException_ce_ptr;
-extern zend_class_entry * MustacheTemplate_ce_ptr;
 
 extern PHP_MINIT_FUNCTION(mustache_ast);
 extern PHP_MINIT_FUNCTION(mustache_code);

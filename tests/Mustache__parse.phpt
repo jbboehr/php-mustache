@@ -11,4 +11,4 @@ $tmpl = $m->parse('{{test}}');
 var_dump(get_class($tmpl));
 ?>
 --EXPECT--
-string(16) "MustacheAST"
+string(11) "MustacheAST"

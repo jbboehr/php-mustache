@@ -14,7 +14,7 @@ $data = new MustacheData(array(
 ));
 $partials = array(
   'test1' => '{{var}}',
-  'test2' => new MustacheTemplate('{{var}}'),
+  'test2' => $m->parse('{{var}}'),
 );
 $r = $m->render($tmpl, $data, $partials);
 var_dump($r);

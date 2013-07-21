@@ -1,5 +1,5 @@
 --TEST--
-MustacheTemplate::__wakeup() member function with APC
+MustacheCode::__wakeup() member function with APC
 --SKIPIF--
 <?php 
 if( !extension_loaded('mustache') ) die('skip ');
@@ -10,18 +10,12 @@ if( !extension_loaded('apc') ) {
 --FILE--
 <?php
 ini_set('apc.enable_cli', 1);
-$m = new Mustache();
-$tmpl = new MustacheTemplate('{{test}}');
+$tmpl = new MustacheCode(pack("H*" , "000000020000000c00000014020022012921160003017465737400"));
 $ret = apc_store(md5(__FILE__), serialize($tmpl));
 $tmpl = unserialize(apc_fetch(md5(__FILE__)));
-var_dump($tmpl);
-var_dump($tmpl->__toString());
-var_dump($m->render($tmpl, array('test' => 'baz')));
+var_dump(bin2hex($tmpl->binaryString));
+var_dump(bin2hex((string) $tmpl));
 ?>
 --EXPECT--
-object(MustacheTemplate)#3 (1) {
-  ["template"]=>
-  string(8) "{{test}}"
-}
-string(8) "{{test}}"
-string(3) "baz"
+string(54) "000000020000000c00000014020022012921160003017465737400"
+string(54) "000000020000000c00000014020022012921160003017465737400"

@@ -50,7 +50,6 @@ typedef struct _php_obj_MustacheData {
 typedef struct _php_obj_MustacheTemplate {
     zend_object obj;
     std::string * tmpl;
-    mustache::Node * node;
 } php_obj_MustacheTemplate;
 
 void mustache_exception_handler(TSRMLS_D);
