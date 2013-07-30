@@ -4,7 +4,7 @@
 
 #include "php_mustache.h"
 
-#include <cstdint>
+#include <stdint.h>
 #include <exception>
 #include <stdexcept>
 #include <string>

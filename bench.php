@@ -7,6 +7,16 @@ $tmplStr = '{{test}}';
 $dataArr = array(
   'test' => 'val',
 );
+//$tmplStr = '{{#test}}{{var}}{{/test}}';
+//$dataArr = array(
+//  'test' => array(
+//    'val1',
+//    'val2',
+//    'val3',
+//    'val4',
+//    'val5',
+//  ),
+//);
 
 printf('%10s %10s %10s %10s %10s' . PHP_EOL, 'Type', 'Total (s)', 'Each (s)', 'Count', 'Memory Delta (B)');
 
@@ -23,6 +33,34 @@ $stopMemory = memory_get_usage(true);
 printf('%10s %10f %10f %10d %10s' . PHP_EOL, 
     $name, ($stop - $start), (($stop - $start) / $count), $count, number_format($stopMemory - $startMemory));
 
+// Parsed
+$name = 'Parsed';
+$startMemory = memory_get_usage(true);
+$start = microtime(true);
+$mustache = new Mustache();
+$ret = $mustache->parse($tmplStr);
+for( $i = 0; $i < $count; $i++ ) {
+  $out = $mustache->render($ret, $dataArr);
+}
+$stop = microtime(true);
+$stopMemory = memory_get_usage(true);
+printf('%10s %10f %10f %10d %10s' . PHP_EOL, 
+    $name, ($stop - $start), (($stop - $start) / $count), $count, number_format($stopMemory - $startMemory));
+
+// Parsed+Data
+$name = 'Parsed2';
+$startMemory = memory_get_usage(true);
+$start = microtime(true);
+$tmpl = $mustache->parse($tmplStr);
+$data = new MustacheData($dataArr);
+for( $i = 0; $i < $count; $i++ ) {
+  $out = $mustache->render($tmpl, $data);
+}
+$stop = microtime(true);
+$stopMemory = memory_get_usage(true);
+printf('%10s %10f %10f %10d %10s' . PHP_EOL, 
+    $name, ($stop - $start), (($stop - $start) / $count), $count, number_format($stopMemory - $startMemory));
+
 // Compiled
 $name = 'Compiled';
 $startMemory = memory_get_usage(true);
@@ -30,7 +68,7 @@ $start = microtime(true);
 $mustache = new Mustache();
 $ret = $mustache->compile($tmplStr);
 for( $i = 0; $i < $count; $i++ ) {
-  $out = $ret->render($dataArr);
+  $out = $mustache->execute($ret, $dataArr);
 }
 $stop = microtime(true);
 $stopMemory = memory_get_usage(true);
@@ -41,10 +79,10 @@ printf('%10s %10f %10f %10d %10s' . PHP_EOL,
 $name = 'Compiled2';
 $startMemory = memory_get_usage(true);
 $start = microtime(true);
-$tmpl = new MustacheTemplate($tmplStr);
+$tmpl = $mustache->compile($tmplStr);
 $data = new MustacheData($dataArr);
 for( $i = 0; $i < $count; $i++ ) {
-  $out = $tmpl->render($data);
+  $out = $mustache->execute($tmpl, $data);
 }
 $stop = microtime(true);
 $stopMemory = memory_get_usage(true);

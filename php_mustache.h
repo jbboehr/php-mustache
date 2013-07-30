@@ -30,6 +30,7 @@
 #include <Zend/zend_interfaces.h>
 #include <Zend/zend_exceptions.h>
 #include <Zend/zend_extensions.h>
+#include <Zend/zend_compile.h>
 
 #ifdef ZTS
 #include "TSRM.h"
