@@ -146,6 +146,8 @@ static void MustacheAST_obj_free(void *object TSRMLS_DC)
     if( payload->node != NULL ) {
       delete payload->node;
     }
+    
+    zend_object_std_dtor((zend_object *)object);
 
     efree(object);
     
@@ -203,6 +205,8 @@ PHP_MINIT_FUNCTION(mustache_ast)
     
     MustacheAST_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
     MustacheAST_ce_ptr->create_object = MustacheAST_obj_create;
+    
+    zend_declare_property_null(MustacheAST_ce_ptr, ZEND_STRL("binaryString"), ZEND_ACC_PROTECTED TSRMLS_CC);
     
     return SUCCESS;
   } catch(...) {
@@ -277,16 +281,12 @@ PHP_METHOD(MustacheAST, __sleep)
       char * str = NULL;
       int len = 0;
       mustache_node_to_binary_string(payload->node, &str, &len);
-      if( str != NULL && len > 0 ) {
-        add_property_stringl_ex(_this_zval, 
-                "binaryString", 
-                sizeof("binaryString"), 
-                str, 
-                len, 
-                0 TSRMLS_CC);
+      if( str != NULL ) {
+        zend_update_property_stringl(MustacheAST_ce_ptr, _this_zval, 
+              ZEND_STRL("binaryString"), str, len TSRMLS_CC);
+        add_next_index_string(return_value, "binaryString", 1);
+        efree(str);
       }
-      
-      add_next_index_string(return_value, "binaryString", 1);
     }
     
   } catch(...) {
@@ -385,6 +385,7 @@ PHP_METHOD(MustacheAST, __wakeup)
             (php_obj_MustacheAST *) zend_object_store_get_object(_this_zval TSRMLS_CC);
     
     // Get object properties
+    // @todo should be able to convert this to use zend_hash_find
     int key_type = 0;
     char * key_str = NULL;
     uint key_len = 0;

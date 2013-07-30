@@ -59,6 +59,8 @@ static void MustacheTemplate_obj_free(void *object TSRMLS_DC)
     if( payload->tmpl != NULL ) {
       delete payload->tmpl;
     }
+    
+    zend_object_std_dtor((zend_object *)object);
 
     efree(object);
     
@@ -116,6 +118,8 @@ PHP_MINIT_FUNCTION(mustache_template)
     
     MustacheTemplate_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
     MustacheTemplate_ce_ptr->create_object = MustacheTemplate_obj_create;
+    
+    zend_declare_property_null(MustacheTemplate_ce_ptr, ZEND_STRL("template"), ZEND_ACC_PROTECTED TSRMLS_CC);
     
     return SUCCESS;
   } catch(...) {
@@ -184,13 +188,11 @@ PHP_METHOD(MustacheTemplate, __sleep)
     
     if( payload->tmpl != NULL ) {
       // Store
-      add_property_stringl_ex(_this_zval, 
-              "template", 
-              sizeof("template"), 
-              (char *) payload->tmpl->c_str(), 
-              payload->tmpl->length(), 
-              1 TSRMLS_CC);
-      
+      zend_update_property_stringl(MustacheTemplate_ce_ptr, _this_zval, 
+              ZEND_STRL("template"), 
+            (char *) payload->tmpl->c_str(), 
+            payload->tmpl->length() TSRMLS_CC);
+        
       add_next_index_string(return_value, "template", 1);
     }
     
@@ -252,6 +254,7 @@ PHP_METHOD(MustacheTemplate, __wakeup)
             (php_obj_MustacheTemplate *) zend_object_store_get_object(_this_zval TSRMLS_CC);
     
     // Get object properties
+    // @todo should be able to convert this to use zend_hash_find
     int key_type = 0;
     char * key_str = NULL;
     uint key_len = 0;

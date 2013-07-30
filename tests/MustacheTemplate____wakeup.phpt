@@ -15,7 +15,7 @@ var_dump($m->render($tmpl, array('test' => 'baz')));
 ?>
 --EXPECT--
 object(MustacheTemplate)#3 (1) {
-  ["template"]=>
+  ["template":protected]=>
   string(8) "{{test}}"
 }
 string(8) "{{test}}"

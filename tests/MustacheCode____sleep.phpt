@@ -11,4 +11,4 @@ $serial = serialize($tmpl);
 var_dump(addslashes($serial));
 ?>
 --EXPECT--
-string(97) "O:12:\"MustacheCode\":1:{s:12:\"binaryString\";s:27:\"\0\0\0\0\0\0\0\0\0\0\0test\0\";}"
+string(102) "O:12:\"MustacheCode\":1:{s:15:\"\0*\0binaryString\";s:27:\"\0\0\0\0\0\0\0\0\0\0\0test\0\";}"

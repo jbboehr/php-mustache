@@ -218,6 +218,7 @@ bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
         return false;
       }
       *node = maPayload->node;
+      return true;
     } else {
       php_error(E_WARNING, "Object not an instance of MustacheTemplate or MustacheAST");
       return false;

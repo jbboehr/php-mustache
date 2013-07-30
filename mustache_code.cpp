@@ -21,6 +21,8 @@ static void MustacheCode_obj_free(void *object TSRMLS_DC)
     if( payload->codes != NULL ) {
       free(payload->codes);
     }
+    
+    zend_object_std_dtor((zend_object *)object);
 
     efree(object);
     
@@ -126,20 +128,13 @@ PHP_METHOD(MustacheCode, __sleep)
     // Check payload
     if( payload->codes != NULL ) {
       // Serialize and store
-      char * str = NULL;
-      int len = payload->length;
-      str = (char *) estrndup((const char *) payload->codes, payload->length);
-      
-      if( str != NULL && len > 0 ) {
-        add_property_stringl_ex(_this_zval, 
-                "binaryString", 
-                sizeof("binaryString"), 
-                str, 
-                len, 
-                0 TSRMLS_CC);
+      if( payload->codes != NULL ) {
+        zend_update_property_stringl(MustacheCode_ce_ptr, _this_zval, 
+              ZEND_STRL("binaryString"), (const char *) payload->codes, 
+              payload->length TSRMLS_CC);
+
+        add_next_index_string(return_value, "binaryString", 1);
       }
-      
-      add_next_index_string(return_value, "binaryString", 1);
     }
     
   } catch(...) {
@@ -243,6 +238,7 @@ PHP_METHOD(MustacheCode, __wakeup)
             (php_obj_MustacheCode *) zend_object_store_get_object(_this_zval TSRMLS_CC);
     
     // Get object properties
+    // @todo should be able to convert this to use zend_hash_find
     int key_type = 0;
     char * key_str = NULL;
     uint key_len = 0;
@@ -336,6 +332,8 @@ PHP_MINIT_FUNCTION(mustache_code)
     
     MustacheCode_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
     MustacheCode_ce_ptr->create_object = MustacheCode_obj_create;
+    
+    zend_declare_property_null(MustacheCode_ce_ptr, ZEND_STRL("binaryString"), ZEND_ACC_PROTECTED TSRMLS_CC);
     
     return SUCCESS;
   } catch(...) {

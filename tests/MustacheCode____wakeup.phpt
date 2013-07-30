@@ -8,9 +8,7 @@ if( !extension_loaded('mustache') ) die('skip ');
 <?php
 $tmpl = new MustacheCode(pack("H*" , "000000020000000c00000014020011011810080003017465737400"));
 $serial = unserialize(serialize($tmpl));
-var_dump(bin2hex($serial->binaryString));
 var_dump(bin2hex((string) $serial));
 ?>
 --EXPECT--
-string(54) "000000020000000c00000014020011011810080003017465737400"
 string(54) "000000020000000c00000014020011011810080003017465737400"
