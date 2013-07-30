@@ -82,7 +82,7 @@ $mustache = new Mustache();
 $tmpl = $mustache->compile('{{var}}');
 $data = new MustacheData(array('var' => 'val'));
 for( $i = 0; $i < 5; $i++ ) {
-  echo $mustache->render($tmpl, $data);
+  echo $mustache->execute($tmpl, $data);
 }
 ```
 
@@ -96,7 +96,6 @@ Todo
 --------------------------------------------------------------------------------
 * Fix whitespace non-conformity
 * Cache compiled templates in memory
-* Implement tr1::unordered_map or boost::unordered_map to see performance differences
 
 
 Compiling on Windows
