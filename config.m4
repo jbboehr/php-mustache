@@ -11,7 +11,7 @@ dnl C++11 ----------------------------------------------------------------------
 dnl Switch the includes if compiling into PHP
 dnl m4_include(ext/mustache/mustache/m4/ax_cxx_compile_stdcxx_11.m4)
 m4_include(mustache/m4/ax_cxx_compile_stdcxx_11.m4)
-AX_CXX_COMPILE_STDCXX_11()
+AX_CXX_COMPILE_STDCXX_11
 
 dnl MUSTACHE -------------------------------------------------------------------
 PHP_ARG_ENABLE(mustache, whether to enable mustache support,
