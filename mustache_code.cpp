@@ -22,7 +22,7 @@ static void MustacheCode_obj_free(void *object TSRMLS_DC)
       free(payload->codes);
     }
     
-    zend_object_std_dtor((zend_object *)object);
+    zend_object_std_dtor((zend_object *)object TSRMLS_CC);
 
     efree(object);
     

@@ -147,7 +147,7 @@ static void MustacheAST_obj_free(void *object TSRMLS_DC)
       delete payload->node;
     }
     
-    zend_object_std_dtor((zend_object *)object);
+    zend_object_std_dtor((zend_object *)object TSRMLS_CC);
 
     efree(object);
     

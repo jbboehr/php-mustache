@@ -60,7 +60,7 @@ static void MustacheTemplate_obj_free(void *object TSRMLS_DC)
       delete payload->tmpl;
     }
     
-    zend_object_std_dtor((zend_object *)object);
+    zend_object_std_dtor((zend_object *)object TSRMLS_CC);
 
     efree(object);
     
