@@ -2,12 +2,24 @@
 ARG_ENABLE("mustache", "Mustache", "no");
 
 if( PHP_MUSTACHE != "no" ) {
-  EXTENSION('mustache', "php_mustache.cpp mustache_data.cpp mustache_exceptions.cpp \
-                         mustache_mustache.cpp mustache_template.cpp", 
-                         PHP_MUSTACHE_SHARED, 
-                         "-I" + configure_module_dirname + "/mustache");
-  ADD_SOURCES(configure_module_dirname + "/mustache", "mustache.cpp data.cpp \
-                         node.cpp renderer.cpp \
-                         tokenizer.cpp utils.cpp", "mustache");
+  EXTENSION('mustache', "\
+                        php_mustache.cpp \
+                        mustache_ast.cpp \
+                        mustache_code.cpp \
+                        mustache_mustache.cpp \
+                        mustache_exceptions.cpp \
+                        mustache_data.cpp \
+                        mustache_template.cpp", 
+                        PHP_MUSTACHE_SHARED, 
+                        "-I" + configure_module_dirname + "/mustache/src");
+  ADD_SOURCES(configure_module_dirname + "/mustache/src", "\
+                         mustache.cpp \
+                         compiler.cpp \
+                         data.cpp \
+                         node.cpp \
+                         renderer.cpp \
+                         tokenizer.cpp \
+                         utils.cpp \
+                         vm.cpp", "mustache");
   AC_DEFINE('HAVE_MUSTACHE', 1);
 }
