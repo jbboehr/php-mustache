@@ -101,6 +101,7 @@ Todo
 Compiling on Windows
 --------------------------------------------------------------------------------
 
+* Need to add [msinttypes](https://code.google.com/p/msinttypes/) to your include directory.
 * See [Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild). 
 Note: SetEnv.cmd is not always in the path, mine was in 
 `C:\Program Files\Microsoft SDKs\Windows\v6.1\Bin\SetEnv.cmd` and needed to be modified
