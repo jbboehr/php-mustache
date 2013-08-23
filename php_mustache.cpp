@@ -90,6 +90,9 @@ static PHP_GINIT_FUNCTION(mustache)
 
 static PHP_MINFO_FUNCTION(mustache)
 {
+  char opsize[3];
+  snprintf(opsize, 3, "%d", _C_OP_SIZE);
+  
   php_info_print_table_start();
   php_info_print_table_row(2, "Version", PHP_MUSTACHE_VERSION);
   php_info_print_table_row(2, "Released", PHP_MUSTACHE_RELEASE);
@@ -97,6 +100,7 @@ static PHP_MINFO_FUNCTION(mustache)
   php_info_print_table_row(2, "Authors", PHP_MUSTACHE_AUTHORS);
   php_info_print_table_row(2, "Spec Version", PHP_MUSTACHE_SPEC);
   php_info_print_table_row(2, "Libmustache Version", mustache_version());
+  php_info_print_table_row(2, "Libmustache Operand Size", opsize);
 #if HAVE_TCMALLOC
   php_info_print_table_row(2, "tcmalloc support", "enabled");
 #else
