@@ -1,0 +1,16 @@
+Package: php5-mustache
+Version: 0.5.1
+Section: web 
+Priority: optional
+Architecture: all
+Essential: no
+Depends: 
+Pre-Depends: 
+Recommends: php5
+Suggests: 
+Installed-Size: 
+Maintainer: John Boehr [jbboehr@gmail.com]
+Conflicts: 
+Replaces: 
+Provides: php5-mustache
+Description: Mustache C++ extension for PHP5.
