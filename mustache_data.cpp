@@ -79,7 +79,6 @@ void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
           if( key_type == HASH_KEY_IS_LONG ) {
             if( node->type == mustache::Data::TypeNone ) {
               node->init(mustache::Data::TypeArray, data_count);
-              child = node->array;
             } else if( node->type != mustache::Data::TypeArray ) {
               php_error(E_WARNING, "Mixed numeric and associative arrays are not supported");
               return; // EXIT
@@ -95,14 +94,17 @@ void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
           
           // Store value
           if( node->type == mustache::Data::TypeArray ) {
+        	child = new mustache::Data();
             mustache_data_from_zval(child, *data_entry TSRMLS_CC);
-            child++;
+            node->array[ArrayPos++] = child;
+            node->length = ArrayPos;
           } else if( node->type == mustache::Data::TypeMap ) {
             child = new mustache::Data;
             mustache_data_from_zval(child, *data_entry TSRMLS_CC);
             ckey.assign(key_str);
             node->data.insert(std::pair<std::string,mustache::Data*>(ckey,child));
           } else {
+            php_error(E_WARNING, "Weird data conflict");
             // Whoops
           }
           zend_hash_move_forward_ex(data_hash, &data_pointer);
@@ -151,6 +153,7 @@ void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
 
 void mustache_data_to_zval(mustache::Data * node, zval * current TSRMLS_DC)
 {
+  mustache::Data::Array::iterator a_it;
   mustache::Data::List::iterator l_it;
   mustache::Data::Map::iterator m_it;
   mustache::Data::Array childNode;
@@ -166,6 +169,16 @@ void mustache_data_to_zval(mustache::Data * node, zval * current TSRMLS_DC)
       Z_STRLEN_P(current) = node->val->length();
       break;
     case mustache::Data::TypeArray:
+        array_init(current);
+        for( pos = 0; pos < node->length; pos++ ) {
+            zval * child = NULL;
+            ALLOC_INIT_ZVAL(child);
+            mustache_data_to_zval(node->array[pos], child TSRMLS_CC);
+            add_next_index_zval(current, child);
+        }
+        /*
+        for ( a_it = node->array.begin() ; a_it != node->array.end(); a_it++ ) {
+        }
       array_init(current);
       childNode = node->array;
       for( pos = 0; pos < node->length; pos++, childNode++ ) {
@@ -174,6 +187,7 @@ void mustache_data_to_zval(mustache::Data * node, zval * current TSRMLS_DC)
         mustache_data_to_zval(childNode, child TSRMLS_CC);
         add_next_index_zval(current, child);
       }
+      */
       break;
     case mustache::Data::TypeList:
       array_init(current);
