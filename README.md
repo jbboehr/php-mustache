@@ -17,18 +17,19 @@ All features of Mustache are supported EXCEPT:
 Installation
 --------------------------------------------------------------------------------
 
+Install [libmustache](https://github.com/jbboehr/libmustache)
+
 Ubuntu:
 
 ```bash
 sudo apt-get install git-core php5-dev
-git clone git://github.com/jbboehr/php-mustache.git
+git clone git://github.com/jbboehr/php-mustache.git --recursive
 cd php-mustache
-git submodule update --init --recursive
 phpize
 ./configure --enable-mustache
 make
 sudo make install
-sudo sh -c "echo extension=mustache.so > /etc/php5/conf.d/mustache.ini"
+echo extension=mustache.so | sudo tee /etc/php5/conf.d/mustache.ini
 ```
 
 Windows:
