@@ -99,19 +99,9 @@ static PHP_MINFO_FUNCTION(mustache)
   php_info_print_table_row(2, "Revision", PHP_MUSTACHE_BUILD);
   php_info_print_table_row(2, "Authors", PHP_MUSTACHE_AUTHORS);
   php_info_print_table_row(2, "Spec Version", PHP_MUSTACHE_SPEC);
-#ifdef HAVE_MUSTACHELIB
-  php_info_print_table_row(2, "Libmustache Support", "shared");
-#else
-  php_info_print_table_row(2, "Libmustache Support", "static");
-#endif
   php_info_print_table_row(2, "Libmustache Version", mustache_version());
   php_info_print_table_row(2, "Libmustache Operand Size", opsize);
-#if HAVE_TCMALLOC
-  php_info_print_table_row(2, "tcmalloc support", "enabled");
-#else
-  php_info_print_table_row(2, "tcmalloc support", "disabled");
-#endif
-#if HAVE_CXX11
+#if MUSTACHE_HAVE_CXX11
   php_info_print_table_row(2, "c++11 unordered map support", "enabled");
 #else
   php_info_print_table_row(2, "c++11 unordered map support", "disabled");
