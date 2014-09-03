@@ -42,3 +42,8 @@ mkinstalldirs
 run-tests.php
 tmp-php.ini
 specs
+
+debian/files
+debian/*substvars
+debian/php*-mustache/
+debian/php*-mustache.post*

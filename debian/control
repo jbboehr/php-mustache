@@ -1,0 +1,12 @@
+Source: php5-mustache
+Maintainer: John Boehr <jbboehr@gmail.com>
+Section: php
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9), php5-dev, pkg-php-tools, cdbs, libmustache-dev, ucf
+
+Package: php5-mustache
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${php:Depends}
+Description: Mustache templating extension for PHP5
+ Mustache templating extension for PHP5
