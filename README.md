@@ -17,11 +17,11 @@ All features of Mustache are supported EXCEPT:
 Installation
 --------------------------------------------------------------------------------
 
-Install [libmustache](https://github.com/jbboehr/libmustache)
-
 Ubuntu:
 
-```bash
+Install [libmustache](https://github.com/jbboehr/libmustache)
+
+``` sh
 sudo apt-get install git-core php5-dev
 git clone git://github.com/jbboehr/php-mustache.git --recursive
 cd php-mustache
@@ -32,22 +32,20 @@ sudo make install
 echo extension=mustache.so | sudo tee /etc/php5/conf.d/mustache.ini
 ```
 
-Windows:
-
-* Get a [Mustache Windows Build](https://jbboehr.github.com/php-mustache)
-* Place into your PHP extension directory and add `extension=php_mustache.dll` to your php.ini
-
-Note: these pass all of the tests, but may or may not be production safe.
-
 OSX:
 
 You can install the PHP Mustache extension & the libmustache dependancy on OSX using [Homebrew](http://brew.sh/)
 
-```
+``` sh
 brew install php56-mustache
 ```
 
-Homebrew has versions of Mustache available for PHP 5.3 - 5.6, just replace `56` above with the version you want; `libmustache` is a dependancy of the extension so you don't need to install it seperately.
+Homebrew has versions of Mustache available for PHP 5.3 - 5.6, just replace `56` above with the version you want; `libmustache` is a dependancy of the extension so you don't need to install it separately.
+
+Windows:
+
+See [Compiling on Windows](https://github.com/jbboehr/php-mustache#compiling-on-windows), or for older versions, grab a [release](https://github.com/jbboehr/php-mustache/releases), place into your PHP extension directory, and add `extension=php_mustache.dll` to your php.ini.
+
 
 Usage
 --------------------------------------------------------------------------------
@@ -101,11 +99,6 @@ Produces:
 ```text
 valvalvalvalval
 ```
-
-Todo
---------------------------------------------------------------------------------
-* Fix whitespace non-conformity
-* Cache compiled templates in memory
 
 
 Compiling on Windows
