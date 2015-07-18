@@ -17,7 +17,9 @@ All features of Mustache are supported EXCEPT:
 Installation
 --------------------------------------------------------------------------------
 
-Ubuntu:
+Linux:
+
+For Ubuntu LTS, the extension is available in a [PPA](https://launchpad.net/~jbboehr/+archive/ubuntu/mustache), or via source:
 
 Install [libmustache](https://github.com/jbboehr/libmustache)
 
