@@ -39,6 +39,15 @@ Windows:
 
 Note: these pass all of the tests, but may or may not be production safe.
 
+OSX:
+
+You can install the PHP Mustache extension & the libmustache dependancy on OSX using [Homebrew](http://brew.sh/)
+
+```
+brew install php57-mustache
+```
+
+Homebrew has versions of Mustache available for php 5.3, 5.4, 5.6 & 5.7, just replace `57` above with the version you want, `libmustache` is a dependancy of the extension so you don't need to install it seperately.
 
 Usage
 --------------------------------------------------------------------------------
