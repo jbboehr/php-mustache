@@ -53,8 +53,10 @@ ZEND_END_MODULE_GLOBALS(mustache)
 
 ZEND_EXTERN_MODULE_GLOBALS(mustache);
 
+
 #ifdef __cplusplus
   } // extern "C" 
 #endif
 
 #endif	/* PHP_MUSTACHE_H */
+

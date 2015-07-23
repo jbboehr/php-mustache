@@ -1,5 +1,15 @@
 language: php
 
+php:
+  - 5.3
+  - 5.4
+  - 5.5
+  - 5.6
+
+branches:
+  only:
+    - master
+
 before_install:
   - git submodule update --init --recursive
   - git clone git://github.com/jbboehr/libmustache.git libmustache
@@ -7,14 +17,9 @@ before_install:
   - autoreconf -i && ./configure && make && sudo make install
   - cd ..
 
-php:
-  - 5.3
-  - 5.4
-  - 5.5
-  - 5.6
-
 script:
   - phpize
   - ./configure --enable-mustache
   - make
   - echo n | make test
+
