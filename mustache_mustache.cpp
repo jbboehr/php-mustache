@@ -316,7 +316,7 @@ bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
             if( key_type != HASH_KEY_IS_STRING ) {
                 php_error(E_WARNING, "Partial array contains a non-string key");
             } else {
-                mustache_parse_partial_param(key_str, *data_entry, mustache, partials);
+                mustache_parse_partial_param(key_str, *data_entry, mustache, partials TSRMLS_CC);
             }
             zend_hash_move_forward_ex(data_hash, &data_pointer);
         }
@@ -330,7 +330,7 @@ bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
             if( !key ) {
                 php_error(E_WARNING, "Partial array contains a non-string key");
             } else {
-                mustache_parse_partial_param(key->val, data_entry, mustache, partials);
+                mustache_parse_partial_param(key->val, data_entry, mustache, partials TSRMLS_CC);
             }
         } ZEND_HASH_FOREACH_END();
     } while(0);
