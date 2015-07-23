@@ -22,5 +22,5 @@ script:
   - phpize
   - ./configure --enable-mustache
   - make
-  - echo n | make test
+  - make test NO_INTERACTION=1
 
