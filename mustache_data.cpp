@@ -364,9 +364,11 @@ static zend_always_inline void mustache_data_from_object_zval(mustache::Data * n
 /* {{{ mustache_data_from_zval */
 void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
 {
+#if PHP_MAJOR_VERSION >= 7
   if (Z_TYPE_P(current) == IS_INDIRECT) {
     current = Z_INDIRECT_P(current);
   }
+#endif
   switch( Z_TYPE_P(current) ) {
       case IS_NULL:
       case IS_LONG:
@@ -383,10 +385,10 @@ void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
           node->val = new std::string(Z_STRVAL_P(current)/*, (size_t) Z_STRLEN_P(current)*/);
           break;
       case IS_ARRAY:
-          mustache_data_from_array_zval(node, current);
+          mustache_data_from_array_zval(node, current TSRMLS_CC);
           break;
       case IS_OBJECT:
-          mustache_data_from_object_zval(node, current);
+          mustache_data_from_object_zval(node, current TSRMLS_CC);
           break;    
       default:
           php_error(E_WARNING, "Invalid data type: %d", Z_TYPE_P(current));

@@ -15,13 +15,13 @@ PHP_MINIT_FUNCTION(mustache_exceptions)
     // MustacheException
     zend_class_entry mustache_exception_ce;
     INIT_CLASS_ENTRY(mustache_exception_ce, "MustacheException", NULL);
-    MustacheException_ce_ptr = _zend_register_internal_class_ex(&mustache_exception_ce, exception_ce TSRMLS_CC);
+    MustacheException_ce_ptr = _zend_register_internal_class_ex(&mustache_exception_ce, exception_ce);
     MustacheException_ce_ptr->create_object = exception_ce->create_object;
     
     // MustacheParserException
     zend_class_entry mustache_parser_exception_ce;
     INIT_CLASS_ENTRY(mustache_parser_exception_ce, "MustacheParserException", NULL);
-    MustacheParserException_ce_ptr = _zend_register_internal_class_ex(&mustache_parser_exception_ce, MustacheException_ce_ptr TSRMLS_CC);
+    MustacheParserException_ce_ptr = _zend_register_internal_class_ex(&mustache_parser_exception_ce, MustacheException_ce_ptr);
     MustacheParserException_ce_ptr->create_object = MustacheException_ce_ptr->create_object;
     
     return SUCCESS;
