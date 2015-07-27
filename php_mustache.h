@@ -17,6 +17,10 @@
 #define PHP_MUSTACHE_THROW_EXCEPTIONS 0
 #endif
 
+#ifndef __STDC_LIMIT_MACROS
+#define __STDC_LIMIT_MACROS
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
