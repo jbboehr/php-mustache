@@ -17,6 +17,10 @@
 #define PHP_MUSTACHE_THROW_EXCEPTIONS 0
 #endif
 
+#ifndef __STDC_LIMIT_MACROS
+#define __STDC_LIMIT_MACROS
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -53,8 +57,10 @@ ZEND_END_MODULE_GLOBALS(mustache)
 
 ZEND_EXTERN_MODULE_GLOBALS(mustache);
 
+
 #ifdef __cplusplus
   } // extern "C" 
 #endif
 
 #endif	/* PHP_MUSTACHE_H */
+
