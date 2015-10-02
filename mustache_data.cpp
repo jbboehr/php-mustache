@@ -371,44 +371,44 @@ void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
 #endif
   switch( Z_TYPE_P(current) ) {
       case IS_NULL:
-        node->type = mustache::Data::TypeString;
-        node->val = new std::string();
-        break;
+          node->type = mustache::Data::TypeString;
+          node->val = new std::string();
+          break;
       case IS_LONG:
-        node->type = mustache::Data::TypeString;
-        node->val = new std::string(std::to_string(Z_LVAL_P(current)).c_str());
-        break;
+          node->type = mustache::Data::TypeString;
+          node->val = new std::string(std::to_string(Z_LVAL_P(current)).c_str());
+          break;
 #if PHP_MAJOR_VERSION < 7
       case IS_BOOL:
-        node->type = mustache::Data::TypeString;
+          node->type = mustache::Data::TypeString;
 
-        if( Z_LVAL_P(current) ) {
-          node->val = new std::string("1");
-        } else {
-          node->val = new std::string();
-        }
-        break;
+          if( Z_LVAL_P(current) ) {
+            node->val = new std::string("1");
+          } else {
+            node->val = new std::string();
+          }
+          break;
 #else
       case IS_TRUE:
-        node->type = mustache::Data::TypeString;
-        node->val = new std::string("1");
-        break;
+          node->type = mustache::Data::TypeString;
+          node->val = new std::string("1");
+          break;
       case IS_FALSE:
-        node->type = mustache::Data::TypeString;
-        node->val = new std::string();
-        break;
+          node->type = mustache::Data::TypeString;
+          node->val = new std::string();
+          break;
 #endif
       case IS_DOUBLE:
-        char * double_as_string;
+          char * double_as_string;
 
-        TSRMLS_FETCH();
-        spprintf(&double_as_string, 0, "%.*G", (int) EG(precision), Z_DVAL_P(current));
+          TSRMLS_FETCH();
+          spprintf(&double_as_string, 0, "%.*G", (int) EG(precision), Z_DVAL_P(current));
 
-        node->type = mustache::Data::TypeString;
-        node->val = new std::string(double_as_string);
+          node->type = mustache::Data::TypeString;
+          node->val = new std::string(double_as_string);
 
-        efree(double_as_string);
-        break;
+          efree(double_as_string);
+          break;
       case IS_STRING:
           node->type = mustache::Data::TypeString;
           node->val = new std::string(Z_STRVAL_P(current)/*, (size_t) Z_STRLEN_P(current)*/);
