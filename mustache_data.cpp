@@ -259,7 +259,6 @@ static zend_always_inline void mustache_data_from_double_zval(mustache::Data * n
 {
   char * double_as_string;
 
-  TSRMLS_FETCH();
   spprintf(&double_as_string, 0, "%.*G", (int) EG(precision), Z_DVAL_P(current));
 
   node->type = mustache::Data::TypeString;
