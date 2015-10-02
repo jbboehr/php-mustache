@@ -9,7 +9,7 @@ if(!extension_loaded('mustache') || (defined('PHP_VERSION_ID') && PHP_VERSION_ID
 --FILE--
 <?php
 $m = new Mustache();
-$data = [];
+$data = array();
 $data['var'] = &$data;
 $r = $m->render('{{var}}', $data);
 var_dump($r);
