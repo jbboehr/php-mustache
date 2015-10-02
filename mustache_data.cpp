@@ -254,6 +254,21 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
 #endif
 /* }}} mustache_data_from_array_zval */
 
+/* {{{ mustache_data_from_double_zval */
+static zend_always_inline void mustache_data_from_double_zval(mustache::Data * node, zval * current TSRMLS_DC)
+{
+  char * double_as_string;
+
+  TSRMLS_FETCH();
+  spprintf(&double_as_string, 0, "%.*G", (int) EG(precision), Z_DVAL_P(current));
+
+  node->type = mustache::Data::TypeString;
+  node->val = new std::string(double_as_string);
+
+  efree(double_as_string);
+}
+/* }}} */
+
 /* {{{ mustache_data_from_object_zval */
 #if PHP_MAJOR_VERSION < 7
 static zend_always_inline void mustache_data_from_object_zval(mustache::Data * node, zval * current TSRMLS_DC)
@@ -399,15 +414,7 @@ void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
           break;
 #endif
       case IS_DOUBLE:
-          char * double_as_string;
-
-          TSRMLS_FETCH();
-          spprintf(&double_as_string, 0, "%.*G", (int) EG(precision), Z_DVAL_P(current));
-
-          node->type = mustache::Data::TypeString;
-          node->val = new std::string(double_as_string);
-
-          efree(double_as_string);
+          mustache_data_from_double_zval(node, current TSRMLS_CC);
           break;
       case IS_STRING:
           node->type = mustache::Data::TypeString;
