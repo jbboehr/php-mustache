@@ -1,23 +1,22 @@
-Mustache
---------------------------------------------------------------------------------
+# php-mustache
 
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md)
 [![Build Status](https://travis-ci.org/jbboehr/php-mustache.png?branch=master)](https://travis-ci.org/jbboehr/php-mustache)
 
-C++ implementation of Mustache as a PHP extension.
-See [Mustache](http://mustache.github.com/)
+C++ implementation of [Mustache](http://mustache.github.com/) as a PHP extension.
 
-Features
---------------------------------------------------------------------------------
+
+## Features
 
 All features of Mustache are supported EXCEPT:
 
 * Lambda functions
 * Whitespace rules. All whitespace is kept as it is in the input template.
 
-Installation
---------------------------------------------------------------------------------
 
-Linux:
+## Installation
+
+#### Linux
 
 For Ubuntu LTS, the extension is available in a [PPA](https://launchpad.net/~jbboehr/+archive/ubuntu/mustache), or via source:
 
@@ -34,7 +33,7 @@ sudo make install
 echo extension=mustache.so | sudo tee /etc/php5/conf.d/mustache.ini
 ```
 
-OSX:
+#### OSX
 
 You can install the PHP Mustache extension & the libmustache dependancy on OSX using [Homebrew](http://brew.sh/)
 
@@ -44,13 +43,12 @@ brew install php56-mustache
 
 Homebrew has versions of Mustache available for PHP 5.3 - 5.6, just replace `56` above with the version you want; `libmustache` is a dependancy of the extension so you don't need to install it separately.
 
-Windows:
+#### Windows
 
-See [Compiling on Windows](https://github.com/jbboehr/php-mustache#compiling-on-windows), or for older versions, grab a [release](https://github.com/jbboehr/php-mustache/releases), place into your PHP extension directory, and add `extension=php_mustache.dll` to your php.ini.
+See [Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild). You may need to add [msinttypes](https://code.google.com/p/msinttypes/) ([export](https://github.com/jbboehr/msinttypes/)) to your include directory.
 
 
-Usage
---------------------------------------------------------------------------------
+## Usage
 
 Example:
 
@@ -103,20 +101,14 @@ valvalvalvalval
 ```
 
 
-Compiling on Windows
---------------------------------------------------------------------------------
+## Credits
 
-* Need to add [msinttypes](https://code.google.com/p/msinttypes/) to your include directory.
-* See [Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild). 
-Note: SetEnv.cmd is not always in the path, mine was in 
-`C:\Program Files\Microsoft SDKs\Windows\v6.1\Bin\SetEnv.cmd` and needed to be modified
-(modified version is in the win32 folder in this repository)
-* Place sources into the ext directory (e.g. `C:\php-sdk\php53dev\vc9\x86\php5.3-xyz\ext\mustache`)
-* `configure --enable-mustache=shared ...` or `configure --enable-mustache ...` to compile it into PHP.
-  If compiling it as shared, make sure --enable-zts matches the version you have installed.
-* `nmake`
+- [John Boehr](https://github.com/jbboehr)
+- [Adam Baratz](https://github.com/adambaratz)
+- [All Contributors](../../contributors)
 
-To run the tests for the shared extension, add 
-`extension=C:\php-sdk\php53\vc9\x86\php5.3-xyz\Release\php_mustache.dll` to 
-`C:\php-sdk\php53\vc9\x86\php5.3-xyz\Release\php.ini`
-then run `nmake test TESTS=ext\mustache\tests\*` (replace `Release` with `Release_TS` if thread safety is enabled)
+
+## License
+
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+
