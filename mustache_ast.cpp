@@ -394,87 +394,17 @@ PHP_METHOD(MustacheAST, __toString)
 /* }}} MustacheAST::__toString */
 
 /* {{{ proto void MustacheAST::__wakeup() */
-#if PHP_MAJOR_VERSION < 7
 static inline void php_mustache_ast_wakeup(zval * _this_zval, zval * return_value TSRMLS_DC)
 {
+    zval rv;
     zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(_this_zval TSRMLS_CC);
-    
-    // Get object properties
-    // @todo should be able to convert this to use zend_hash_find
-    int key_type = 0;
-    char * key_str = NULL;
-    uint key_len = 0;
-    ulong key_nindex = 0;
-    HashTable * data_hash = NULL;
-    HashPosition data_pointer = NULL;
-    zval **data_entry = NULL;
-    long data_count = 0;
-    char * prop_name;
-    char * class_name;
+    zval * value = _zend_read_property(Z_OBJCE_P(_this_zval), _this_zval, "binaryString", sizeof("binaryString")-1, 1, &rv);
 
-    if( Z_OBJ_HT_P(_this_zval)->get_properties == NULL ) {
-        return;
-    }
-
-    data_hash = Z_OBJ_HT_P(_this_zval)->get_properties(_this_zval TSRMLS_CC);
-    data_count = zend_hash_num_elements(data_hash);
-
-    if( data_hash == NULL ) {
-        return;
-    }
-
-    zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
-    while( zend_hash_get_current_data_ex(data_hash, (void**) &data_entry, &data_pointer) == SUCCESS ) {
-        if( zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, 
-                &key_nindex, false, &data_pointer) == HASH_KEY_IS_STRING ) {
-#if PHP_API_VERSION >= 20100412
-            zend_unmangle_property_name(key_str, key_len-1, (const char **) &class_name, (const char **) &prop_name);
-#else
-            zend_unmangle_property_name(key_str, key_len-1, &class_name, &prop_name);
-#endif
-            if( strcmp(prop_name, "binaryString") == 0 && Z_TYPE_PP(data_entry) == IS_STRING ) {
-            	mustache_node_from_binary_string(&payload->node, Z_STRVAL_PP(data_entry), Z_STRLEN_PP(data_entry));
-            }
-        }
-        zend_hash_move_forward_ex(data_hash, &data_pointer);
+    if( Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) > 0 ) {
+    	mustache_node_from_binary_string(&payload->node, Z_STRVAL_P(value), Z_STRLEN_P(value));
     }
 }
-#else
-static inline void php_mustache_ast_wakeup(zval * _this_zval, zval * return_value TSRMLS_DC)
-{
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
-    struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(_this_zval TSRMLS_CC);
-
-    HashTable * data_hash = NULL;
-    long data_count = 0;
-    ulong key_nindex = 0;
-    zend_string * key;
-    zval * data_entry = NULL;
-    const char * prop_name;
-    const char * class_name;
-
-    if( Z_OBJ_HT_P(_this_zval)->get_properties == NULL ) {
-        return;
-    }
-
-    data_hash = Z_OBJ_HT_P(_this_zval)->get_properties(_this_zval TSRMLS_CC);
-    data_count = zend_hash_num_elements(data_hash);
-
-    if( data_hash == NULL ) {
-        return;
-    }
-
-    ZEND_HASH_FOREACH_KEY_VAL(data_hash, key_nindex, key, data_entry) {
-        if( key ) {
-            zend_unmangle_property_name(key, &class_name, &prop_name);
-            if( strcmp(prop_name, "binaryString") == 0 && Z_TYPE_P(data_entry) == IS_STRING ) {
-            	mustache_node_from_binary_string(&payload->node, Z_STRVAL_P(data_entry), Z_STRLEN_P(data_entry));
-            }
-        }    
-    } ZEND_HASH_FOREACH_END();
-}
-#endif
 
 PHP_METHOD(MustacheAST, __wakeup)
 {
