@@ -159,6 +159,13 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
   node->type = mustache::Data::TypeNone;
 
   data_hash = HASH_OF(current);
+
+  if( ++data_hash->nApplyCount > 1 ) {
+    php_error(E_WARNING, "Data includes circular reference");
+    data_hash->nApplyCount--;
+    return;
+  }
+
   data_count = zend_hash_num_elements(data_hash);
   zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
   while( zend_hash_get_current_data_ex(data_hash, (void**) &data_entry, &data_pointer) == SUCCESS ) {
@@ -198,6 +205,8 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
     }
     zend_hash_move_forward_ex(data_hash, &data_pointer);
   }
+
+  data_hash->nApplyCount--;
 }
 #else
 static zend_always_inline void mustache_data_from_array_zval(mustache::Data * node, zval * current TSRMLS_DC)
@@ -216,6 +225,13 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
   node->type = mustache::Data::TypeNone;
 
   data_hash = HASH_OF(current);
+
+  if( ++data_hash->u.v.nApplyCount > 1 ) {
+    php_error(E_WARNING, "Data includes circular reference");
+    data_hash->u.v.nApplyCount--;
+    return;
+  }
+
   data_count = zend_hash_num_elements(data_hash);
   ZEND_HASH_FOREACH_KEY_VAL(data_hash, key_nindex, key, data_entry) {
     if( !key ) {
@@ -250,6 +266,8 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
       // Whoops
     }
   } ZEND_HASH_FOREACH_END();
+
+  data_hash->u.v.nApplyCount--;
 }
 #endif
 /* }}} mustache_data_from_array_zval */
@@ -299,6 +317,12 @@ static zend_always_inline void mustache_data_from_object_zval(mustache::Data * n
       data_count = zend_hash_num_elements(data_hash);
     }
     if( data_hash != NULL ) {
+      if( ++data_hash->nApplyCount > 1 ) {
+        php_error(E_WARNING, "Data includes circular reference");
+        data_hash->nApplyCount--;
+        return;
+      }
+
       char *prop_name, *class_name;
       node->type = mustache::Data::TypeMap;
       zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
@@ -317,6 +341,8 @@ static zend_always_inline void mustache_data_from_object_zval(mustache::Data * n
         }
         zend_hash_move_forward_ex(data_hash, &data_pointer);
       }
+
+      data_hash->nApplyCount--;
     }
   }
 }
@@ -337,6 +363,13 @@ static zend_always_inline void mustache_data_from_object_zval(mustache::Data * n
   node->type = mustache::Data::TypeNone;
 
   data_hash = Z_OBJ_HT_P(current)->get_properties(current TSRMLS_CC);
+
+  if( ++data_hash->u.v.nApplyCount > 1 ) {
+    php_error(E_WARNING, "Data includes circular reference");
+    data_hash->u.v.nApplyCount--;
+    return;
+  }
+
   data_count = zend_hash_num_elements(data_hash);
   ZEND_HASH_FOREACH_KEY_VAL(data_hash, key_nindex, key, data_entry) {
     if( !key ) {
@@ -371,6 +404,8 @@ static zend_always_inline void mustache_data_from_object_zval(mustache::Data * n
       // Whoops
     }
   } ZEND_HASH_FOREACH_END();
+
+  data_hash->u.v.nApplyCount--;
 }
 #endif
 /* }}} mustache_data_from_object_zval */
