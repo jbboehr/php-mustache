@@ -145,20 +145,7 @@ static zend_object_value Mustache_obj_create(zend_class_entry *class_type TSRMLS
     memset(payload, 0, sizeof(php_obj_Mustache));
     payload->std.ce = class_type;
 
-    payload->mustache = new mustache::Mustache;
-    
-    // Set ini settings
-    if( MUSTACHEG(default_escape_by_default) ) {
-      payload->mustache->setEscapeByDefault(true);
-    } else {
-      payload->mustache->setEscapeByDefault(false);
-    }
-    if( MUSTACHEG(default_start_sequence) ) {
-      payload->mustache->setStartSequence(MUSTACHEG(default_start_sequence), 0);
-    }
-    if( MUSTACHEG(default_stop_sequence) ) {
-      payload->mustache->setStopSequence(MUSTACHEG(default_stop_sequence), 0);
-    }
+    payload->mustache = mustache_new_Mustache(TSRMLS_C);
     
     retval.handle = zend_objects_store_put(payload, NULL, 
         (zend_objects_free_object_storage_t) Mustache_obj_free, NULL TSRMLS_CC);
@@ -180,20 +167,7 @@ static zend_object * Mustache_obj_create(zend_class_entry * ce TSRMLS_DC)
     zend_object_std_init(&intern->std, ce TSRMLS_CC);
     intern->std.handlers = &Mustache_obj_handlers;
 
-    intern->mustache = new mustache::Mustache;
-    
-    // Set ini settings
-    if( MUSTACHEG(default_escape_by_default) ) {
-      intern->mustache->setEscapeByDefault(true);
-    } else {
-      intern->mustache->setEscapeByDefault(false);
-    }
-    if( MUSTACHEG(default_start_sequence) ) {
-      intern->mustache->setStartSequence(MUSTACHEG(default_start_sequence), 0);
-    }
-    if( MUSTACHEG(default_stop_sequence) ) {
-      intern->mustache->setStopSequence(MUSTACHEG(default_stop_sequence), 0);
-    }
+    intern->mustache = mustache_new_Mustache(TSRMLS_C);
   } catch(...) {
     mustache_exception_handler(TSRMLS_C);
   }
@@ -224,6 +198,27 @@ PHP_MINIT_FUNCTION(mustache_mustache)
     mustache_exception_handler(TSRMLS_C);
     return FAILURE;
   }
+}
+/* }}} */
+
+/* {{{ mustache_new_Mustache */
+mustache::Mustache * mustache_new_Mustache(TSRMLS_D) {
+  mustache::Mustache * mustache = new mustache::Mustache();
+
+  // Set ini settings
+  if( MUSTACHEG(default_escape_by_default) ) {
+    mustache->setEscapeByDefault(true);
+  } else {
+    mustache->setEscapeByDefault(false);
+  }
+  if( MUSTACHEG(default_start_sequence) ) {
+    mustache->setStartSequence(MUSTACHEG(default_start_sequence), 0);
+  }
+  if( MUSTACHEG(default_stop_sequence) ) {
+    mustache->setStopSequence(MUSTACHEG(default_stop_sequence), 0);
+  }
+
+  return mustache;
 }
 /* }}} */
 
@@ -868,4 +863,3 @@ PHP_METHOD(Mustache, debugDataStructure)
   }
 }
 /* }}} Mustache::debugDataStructure */
-

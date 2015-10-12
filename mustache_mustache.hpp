@@ -22,6 +22,7 @@ php_obj_Mustache * php_mustache_mustache_object_fetch_object(zval * zv TSRMLS_DC
 
 PHP_MINIT_FUNCTION(mustache_mustache);
 
+mustache::Mustache * mustache_new_Mustache(TSRMLS_D);
 void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC);
 bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
     mustache::Data ** node TSRMLS_DC);
