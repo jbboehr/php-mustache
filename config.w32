@@ -9,13 +9,18 @@ if( PHP_MUSTACHE != "no" ) {
                         mustache_mustache.cpp \
                         mustache_exceptions.cpp \
                         mustache_data.cpp \
-                        mustache_template.cpp", 
-                        PHP_MUSTACHE_SHARED, 
+                        mustache_template.cpp \
+                        mustache_lambda.cpp \
+                        mustache_lambda_helper.cpp \
+                        mustache_class_method_lambda.cpp \
+                        mustache_zend_closure_lambda.cpp",
+                        PHP_MUSTACHE_SHARED,
                         "-I" + configure_module_dirname + "/mustache/src");
   ADD_SOURCES(configure_module_dirname + "/mustache/src", "\
                          mustache.cpp \
                          compiler.cpp \
                          data.cpp \
+                         lambda.cpp \
                          node.cpp \
                          renderer.cpp \
                          tokenizer.cpp \

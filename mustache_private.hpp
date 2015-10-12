@@ -52,6 +52,7 @@ typedef size_t strsize_t;
   } // extern "C" 
 #endif
 
+#include <algorithm>
 #include <exception>
 #include <stdexcept>
 #include <string>
@@ -60,10 +61,14 @@ typedef size_t strsize_t;
 
 #include "mustache_ast.hpp"
 #include "mustache_code.hpp"
+#include "mustache_class_method_lambda.hpp"
 #include "mustache_data.hpp"
 #include "mustache_exceptions.hpp"
+#include "mustache_lambda.hpp"
+#include "mustache_lambda_helper.hpp"
 #include "mustache_mustache.hpp"
 #include "mustache_template.hpp"
+#include "mustache_zend_closure_lambda.hpp"
 
 #endif /* PHP_MUSTACHE_PRIVATE_HPP */
 

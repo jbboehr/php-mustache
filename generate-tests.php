@@ -24,9 +24,6 @@ if( !empty($argv[1]) && is_dir($argv[1]) ) {
 $specs = array();
 $specData = array();
 foreach( scandir($specDir) as $file ) {
-  if( $file[0] == '~' ) {
-    continue;
-  }
   //if( strlen($file) > 5 && substr($file, -5) ==  '.json' ) {
   if( strlen($file) > 4 && substr($file, -4) == '.yml' ) {
     $spec = substr($file, 0, -4);
@@ -47,6 +44,16 @@ if( empty($specs) ) {
 foreach( $specData as $spec => $data ) {
   $tests = $data['tests'];
   foreach( $tests as $test ) {
+    $lambda = null;
+    if (isset($test['data']['lambda'])) {
+      if (!isset($test['data']['lambda']['php'])) {
+        continue;
+      }
+
+      $lambda = $test['data']['lambda']['php'];
+      $test['data']['lambda'] = true;
+    }
+
     $output = '';
     $output .= '--TEST--' . MY_EOL;
     $output .= $test['name'] . MY_EOL;
@@ -57,7 +64,7 @@ foreach( $specData as $spec => $data ) {
     $output .= '--FILE--' . MY_EOL;
     $output .= '<?php' . MY_EOL;
     // MAIN
-    $output .= '$test = ' . var_export($test, true) . ';' . MY_EOL;
+    $output .= '$test = ' . str_replace('\'lambda\' => true,', '\'lambda\' => function ($text = \'\') { ' . $lambda . ' },', var_export($test, true)) . ';' . MY_EOL;
     $output .= '$mustache = new Mustache();' . MY_EOL;
     if( !empty($test['partials']) && is_array($test['partials']) ) {
       $output .= 'echo $mustache->render($test["template"], $test["data"], $test["partials"]);' . MY_EOL;

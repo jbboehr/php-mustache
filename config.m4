@@ -58,6 +58,10 @@ if test "$PHP_MUSTACHE" != "no"; then
     mustache_exceptions.cpp
     mustache_data.cpp
     mustache_template.cpp
+    mustache_lambda.cpp
+    mustache_lambda_helper.cpp
+    mustache_class_method_lambda.cpp
+    mustache_zend_closure_lambda.cpp
   ])
 
   AC_DEFINE(HAVE_MUSTACHELIB,1,[ ])

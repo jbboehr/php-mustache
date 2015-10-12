@@ -10,7 +10,6 @@ C++ implementation of [Mustache](http://mustache.github.com/) as a PHP extension
 
 All features of Mustache are supported EXCEPT:
 
-* Lambda functions
 * Whitespace rules. All whitespace is kept as it is in the input template.
 
 
