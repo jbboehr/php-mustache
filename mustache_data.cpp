@@ -137,6 +137,26 @@ PHP_MINIT_FUNCTION(mustache_data)
 }
 /* }}} */
 
+/* {{{ is_valid_function */
+static zend_always_inline bool is_valid_function(const zend_function * f)
+{
+  return (f->common.fn_flags & ZEND_ACC_CTOR) == 0 &&
+          (f->common.fn_flags & ZEND_ACC_DTOR) == 0 &&
+          (f->common.fn_flags & ZEND_ACC_STATIC) == 0 &&
+          (f->common.fn_flags & ZEND_ACC_PROTECTED) == 0 &&
+          (f->common.fn_flags & ZEND_ACC_PRIVATE) == 0;
+}
+/* }}} */
+
+/* {{{ is_valid_property */
+static zend_always_inline bool is_valid_property(const zend_property_info * prop)
+{
+  return (prop->flags & ZEND_ACC_SHADOW) == 0 &&
+          (prop->flags & ZEND_ACC_PROTECTED) == 0 &&
+          (prop->flags & ZEND_ACC_PRIVATE) == 0;
+}
+/* }}} */
+
 /* {{{ mustache_data_from_array_zval */
 #if PHP_MAJOR_VERSION < 7
 static zend_always_inline void mustache_data_from_array_zval(mustache::Data * node, zval * current TSRMLS_DC)
@@ -154,7 +174,6 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
   
   int ArrayPos = 0;
   mustache::Data * child = NULL;
-  zend_class_entry * ce = NULL;
 
   node->type = mustache::Data::TypeNone;
 
@@ -187,10 +206,10 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
         return; // EXIT
       }
     }
-    
+
     // Store value
     if( node->type == mustache::Data::TypeArray ) {
-  	  child = new mustache::Data();
+      child = new mustache::Data();
       mustache_data_from_zval(child, *data_entry TSRMLS_CC);
       node->array[ArrayPos++] = child;
       node->length = ArrayPos;
@@ -259,7 +278,7 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
     } else if( node->type == mustache::Data::TypeMap ) {
       child = new mustache::Data;
       mustache_data_from_zval(child, data_entry TSRMLS_CC);
-      ckey.assign(key->val);
+      ckey.assign(ZSTR_VAL(key));
       node->data.insert(std::pair<std::string,mustache::Data*>(ckey, child));
     } else {
       php_error(E_WARNING, "Weird data conflict");
@@ -286,68 +305,72 @@ static zend_always_inline void mustache_data_from_double_zval(mustache::Data * n
 }
 /* }}} */
 
-/* {{{ mustache_data_from_object_zval */
+/* {{{ mustache_data_from_object_properties_zval */
 #if PHP_MAJOR_VERSION < 7
-static zend_always_inline void mustache_data_from_object_zval(mustache::Data * node, zval * current TSRMLS_DC)
+static zend_always_inline void mustache_data_from_object_properties_zval(mustache::Data * node, zval * current TSRMLS_DC)
 {
   HashTable * data_hash = NULL;
   HashPosition data_pointer = NULL;
-  zval **data_entry = NULL;
-  long data_count = 0;
-  
-  int key_type = 0;
+  zval ** data_entry = NULL;
+
   char * key_str = NULL;
   uint key_len = 0;
   ulong key_nindex = 0;
   std::string ckey;
-  
-  int ArrayPos = 0;
+
+  zend_class_entry * ce = Z_OBJCE_P(current);
   mustache::Data * child = NULL;
-  zend_class_entry * ce = NULL;
 
-  node->type = mustache::Data::TypeNone;
-  
-  if( Z_OBJCE_P(current) == MustacheData_ce_ptr ) {
-    // @todo
-    php_error(E_WARNING, "MustacheData not implemented here");
-  } else {
-    // Get object properties
-    if( Z_OBJ_HT_P(current)->get_properties != NULL ) {
-      data_hash = Z_OBJ_HT_P(current)->get_properties(current TSRMLS_CC);
-      data_count = zend_hash_num_elements(data_hash);
-    }
-    if( data_hash != NULL ) {
-      if( ++data_hash->nApplyCount > 1 ) {
-        php_error(E_WARNING, "Data includes circular reference");
-        data_hash->nApplyCount--;
-        return;
-      }
+  zend_property_info * prop;
+  char * prop_name, * class_name;
 
-      char *prop_name, *class_name;
-      node->type = mustache::Data::TypeMap;
-      zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
-      while( zend_hash_get_current_data_ex(data_hash, (void**) &data_entry, &data_pointer) == SUCCESS ) {
-        if( zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, 
-                &key_nindex, false, &data_pointer) == HASH_KEY_IS_STRING ) {
-#if PHP_API_VERSION >= 20100412
-          zend_unmangle_property_name(key_str, key_len-1, (const char **) &class_name, (const char **) &prop_name);
-#else
-          zend_unmangle_property_name(key_str, key_len-1, &class_name, &prop_name);
-#endif
-          child = new mustache::Data;
-          mustache_data_from_zval(child, *data_entry TSRMLS_CC);
-          ckey.assign(prop_name);
-          node->data.insert(std::pair<std::string,mustache::Data*>(ckey,child));
-        }
-        zend_hash_move_forward_ex(data_hash, &data_pointer);
-      }
-
+  if( Z_OBJ_HT_P(current)->get_properties != NULL ) {
+    data_hash = Z_OBJ_HT_P(current)->get_properties(current TSRMLS_CC);
+  }
+  if( data_hash != NULL && zend_hash_num_elements(data_hash) > 0 ) {
+    if( ++data_hash->nApplyCount > 1 ) {
+      php_error(E_WARNING, "Data includes circular reference");
       data_hash->nApplyCount--;
+      return;
     }
+
+    zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
+    while( zend_hash_get_current_data_ex(data_hash, (void **) &data_entry, &data_pointer) == SUCCESS ) {
+      if( zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, &key_nindex, false, &data_pointer) == HASH_KEY_IS_STRING ) {
+        if( key_len && key_str[0] ) { // skip private/protected
+          prop_name = key_str;
+
+          // defined properties must be public
+          // implicit properties won't be in properties_info, so they'll be assumed to be visible
+          bool is_visible = true;
+          if( ce != NULL && zend_hash_find(&ce->properties_info, key_str, key_len, (void **) &prop) == SUCCESS ) {
+            is_visible = is_valid_property(prop);
+
+#if PHP_API_VERSION >= 20100412
+            zend_unmangle_property_name(key_str, key_len-1, (const char **) &class_name, (const char **) &prop_name);
+#else
+            zend_unmangle_property_name(key_str, key_len-1, &class_name, &prop_name);
+#endif
+          }
+
+          if( is_visible ) {
+            node->type = mustache::Data::TypeMap;
+
+            child = new mustache::Data();
+            mustache_data_from_zval(child, *data_entry TSRMLS_CC);
+            ckey.assign(prop_name);
+            node->data.insert(std::pair<std::string,mustache::Data*>(ckey,child));
+          }
+        }
+      }
+      zend_hash_move_forward_ex(data_hash, &data_pointer);
+    }
+
+    data_hash->nApplyCount--;
   }
 }
 #else
-static zend_always_inline void mustache_data_from_object_zval(mustache::Data * node, zval * current TSRMLS_DC)
+static zend_always_inline void mustache_data_from_object_properties_zval(mustache::Data * node, zval * current TSRMLS_DC)
 {
   HashTable * data_hash = NULL;
   long data_count = 0;
@@ -355,59 +378,166 @@ static zend_always_inline void mustache_data_from_object_zval(mustache::Data * n
   zend_string * key;
   std::string ckey;
   zval * data_entry = NULL;
-  
-  int ArrayPos = 0;
+
+  zend_class_entry * ce = Z_OBJCE_P(current);
   mustache::Data * child = NULL;
-  zend_class_entry * ce = NULL;
+
+  zval * prop_zv;
+  zend_property_info * prop;
+  char * prop_name;
+  const char * class_name;
 
   node->type = mustache::Data::TypeNone;
 
-  data_hash = Z_OBJ_HT_P(current)->get_properties(current TSRMLS_CC);
-
-  if( ++data_hash->u.v.nApplyCount > 1 ) {
-    php_error(E_WARNING, "Data includes circular reference");
-    data_hash->u.v.nApplyCount--;
-    return;
+  if( Z_OBJ_HT_P(current)->get_properties != NULL ) {
+    data_hash = Z_OBJ_HT_P(current)->get_properties(current TSRMLS_CC);
   }
-
-  data_count = zend_hash_num_elements(data_hash);
-  ZEND_HASH_FOREACH_KEY_VAL(data_hash, key_nindex, key, data_entry) {
-    if( !key ) {
-      if( node->type == mustache::Data::TypeNone ) {
-        node->init(mustache::Data::TypeArray, data_count);
-      } else if( node->type != mustache::Data::TypeArray ) {
-        php_error(E_WARNING, "Mixed numeric and associative arrays are not supported");
-        return; // EXIT
-      }
-    } else {
-      if( node->type == mustache::Data::TypeNone ) {
-        node->type = mustache::Data::TypeMap;
-      } else if( node->type != mustache::Data::TypeMap ) {
-        php_error(E_WARNING, "Mixed numeric and associative arrays are not supported");
-        return; // EXIT
-      }
+  if( data_hash != NULL && zend_hash_num_elements(data_hash) > 0 ) {
+    if( ++data_hash->u.v.nApplyCount > 1 ) {
+      php_error(E_WARNING, "Data includes circular reference");
+      data_hash->u.v.nApplyCount--;
+      return;
     }
 
-    // Store value
-    if( node->type == mustache::Data::TypeArray ) {
-  	  child = new mustache::Data();
-      mustache_data_from_zval(child, data_entry TSRMLS_CC);
-      node->array[ArrayPos++] = child;
-      node->length = ArrayPos;
-    } else if( node->type == mustache::Data::TypeMap ) {
-      child = new mustache::Data;
-      mustache_data_from_zval(child, data_entry TSRMLS_CC);
-      ckey.assign(key->val);
-      node->data.insert(std::pair<std::string,mustache::Data*>(ckey, child));
-    } else {
-      php_error(E_WARNING, "Weird data conflict");
-      // Whoops
-    }
-  } ZEND_HASH_FOREACH_END();
+    ZEND_HASH_FOREACH_KEY_VAL(data_hash, key_nindex, key, data_entry) {
+      if( key && ZSTR_LEN(key) && ZSTR_VAL(key)[0] ) { // skip private/protected
+        prop_name = ZSTR_VAL(key);
 
-  data_hash->u.v.nApplyCount--;
+        // defined properties must be public
+        // implicit properties won't be in properties_info, so they'll be assumed to be visible
+        bool is_visible = true;
+        if( ce != NULL && &ce->properties_info != NULL ) {
+          prop_zv = zend_hash_find(&ce->properties_info, key);
+          if( prop_zv != NULL ) {
+            prop = (zend_property_info *) Z_PTR_P(prop_zv);
+            is_visible = is_valid_property(prop);
+            zend_unmangle_property_name(prop->name, &class_name, (const char **) &prop_name);
+          }
+        }
+
+        if( is_visible ) {
+          node->type = mustache::Data::TypeMap;
+
+          child = new mustache::Data;
+          mustache_data_from_zval(child, data_entry TSRMLS_CC);
+          ckey.assign(prop_name);
+          node->data.insert(std::pair<std::string,mustache::Data*>(ckey, child));
+        }
+      }
+    } ZEND_HASH_FOREACH_END();
+
+    data_hash->u.v.nApplyCount--;
+  }
 }
 #endif
+/* }}} mustache_data_from_object_properties_zval */
+
+/* {{{ mustache_data_from_object_functions_zval */
+#if PHP_MAJOR_VERSION < 7
+static zend_always_inline void mustache_data_from_object_functions_zval(mustache::Data * node, zval * current TSRMLS_DC)
+{
+  zend_class_entry * ce = Z_OBJCE_P(current);
+
+  HashTable * data_hash = NULL;
+  HashPosition data_pointer = NULL;
+  zend_function * function_entry = NULL;
+
+  std::string ckey;
+
+  mustache::Data * child = NULL;
+
+  if( ce != NULL ) {
+    data_hash = &ce->function_table;
+  }
+  if( data_hash != NULL && zend_hash_num_elements(data_hash) > 0 ) {
+    if( ++data_hash->nApplyCount > 1 ) {
+      php_error(E_WARNING, "Data includes circular reference");
+      data_hash->nApplyCount--;
+      return;
+    }
+
+    zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
+    while( zend_hash_get_current_data_ex(data_hash, (void**) &function_entry, &data_pointer) == SUCCESS ) {
+      if( is_valid_function(function_entry) ) {
+        node->type = mustache::Data::TypeMap;
+
+        ckey.assign(function_entry->common.function_name);
+
+        child = new mustache::Data();
+        child->type = mustache::Data::TypeLambda;
+        child->lambda = new ClassMethodLambda(current, function_entry->common.function_name);
+
+        node->data.insert(std::pair<std::string,mustache::Data*>(ckey,child));
+      }
+      zend_hash_move_forward_ex(data_hash, &data_pointer);
+    }
+
+    data_hash->nApplyCount--;
+  }
+}
+#else
+static zend_always_inline void mustache_data_from_object_functions_zval(mustache::Data * node, zval * current TSRMLS_DC)
+{
+  HashTable * data_hash = NULL;
+  ulong key_nindex = 0;
+  zend_string * key;
+  std::string ckey;
+  zval * data_entry = NULL;
+  zend_function * function_entry = NULL;
+
+  zend_class_entry * ce = Z_OBJCE_P(current);
+  mustache::Data * child = NULL;
+
+  if( ce != NULL ) {
+    data_hash = &ce->function_table;
+  }
+  if( data_hash != NULL && zend_hash_num_elements(data_hash) > 0 ) {
+    if( ++data_hash->u.v.nApplyCount > 1 ) {
+      php_error(E_WARNING, "Data includes circular reference");
+      data_hash->u.v.nApplyCount--;
+      return;
+    }
+
+    ZEND_HASH_FOREACH_KEY_VAL(data_hash, key_nindex, key, data_entry) {
+      function_entry = (zend_function *) Z_PTR_P(data_entry);
+      if( is_valid_function(function_entry) ) {
+        node->type = mustache::Data::TypeMap;
+
+        ckey.assign(ZSTR_VAL(function_entry->common.function_name));
+
+        child = new mustache::Data();
+        child->type = mustache::Data::TypeLambda;
+        child->lambda = new ClassMethodLambda(current, ZSTR_VAL(function_entry->common.function_name));
+
+        node->data.insert(std::pair<std::string,mustache::Data*>(ckey,child));
+      }
+    } ZEND_HASH_FOREACH_END();
+
+    data_hash->u.v.nApplyCount--;
+  }
+}
+#endif
+/* }}} mustache_data_from_object_functions_zval */
+
+/* {{{ mustache_data_from_object_zval */
+static zend_always_inline void mustache_data_from_object_zval(mustache::Data * node, zval * current TSRMLS_DC)
+{
+  zend_class_entry * ce = Z_OBJCE_P(current);
+
+  node->type = mustache::Data::TypeNone;
+
+  if( ce == MustacheData_ce_ptr ) {
+    // @todo
+    php_error(E_WARNING, "MustacheData not implemented here");
+  } else if( ce == zend_ce_closure ) {
+    node->type = mustache::Data::TypeLambda;
+    node->lambda = new ZendClosureLambda(current);
+  } else {
+    // functions should take precendence over properties
+    mustache_data_from_object_properties_zval(node, current TSRMLS_CC);
+    mustache_data_from_object_functions_zval(node, current TSRMLS_CC);
+  }
+}
 /* }}} mustache_data_from_object_zval */
 
 /* {{{ mustache_data_from_zval */

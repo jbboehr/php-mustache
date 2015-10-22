@@ -24,6 +24,7 @@ static PHP_MINIT_FUNCTION(mustache)
   PHP_MINIT(mustache_data)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_template)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_exceptions)(INIT_FUNC_ARGS_PASSTHRU);
+  PHP_MINIT(mustache_lambda_helper)(INIT_FUNC_ARGS_PASSTHRU);
   
   return SUCCESS;
 }
