@@ -21,17 +21,7 @@ int ZendClosureLambda::getUserFunctionParamCount()
 #if PHP_MAJOR_VERSION >= 7
 int ZendClosureLambda::invokeUserFunction(zval *retval_ptr, int param_count, zval params[])
 {
-  int status = call_user_function_ex(CG(function_table), NULL, closure, retval_ptr, param_count, params, 1, NULL);
-
-  zend_class_entry * ce;
-  zend_function * func;
-  zend_object * obj;
-
-  if( status == SUCCESS && Z_OBJ_HANDLER_P(closure, get_closure)(closure, &ce, &func, &obj) == SUCCESS ) {
-    zend_string_release(func->internal_function.function_name);
-  }
-
-  return status;
+  return call_user_function_ex(CG(function_table), NULL, closure, retval_ptr, param_count, params, 1, NULL);
 }
 #else
 int ZendClosureLambda::invokeUserFunction(zval **retval_ptr_ptr, int param_count, zval **params[] TSRMLS_DC)

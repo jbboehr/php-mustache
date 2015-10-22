@@ -44,24 +44,18 @@ std::string Lambda::invoke(std::string * text, mustache::Renderer * renderer)
   int param_count = 0;
   zval * params = NULL;
 
-  zval text_param, lambda_helper_param;
-
   param_count = std::min(getUserFunctionParamCount(), 2);
   if( param_count >= 0 ) {
-    params = (zval *) safe_emalloc(sizeof(zval *), param_count, 0);
+    params = (zval *) safe_emalloc(sizeof(zval), param_count, 0);
   }
   if( param_count >= 1 ) {
-    ZVAL_STRING(&text_param, text->c_str());
-
-    params[0] = text_param;
+    ZVAL_STRING(&params[0], text->c_str());
   }
   if( param_count >= 2 ) {
-    object_init_ex(&lambda_helper_param, MustacheLambdaHelper_ce_ptr);
+    object_init_ex(&params[1], MustacheLambdaHelper_ce_ptr);
 
-    struct php_obj_MustacheLambdaHelper * payload = php_mustache_lambda_helper_object_fetch_object(&lambda_helper_param TSRMLS_CC);
+    struct php_obj_MustacheLambdaHelper * payload = php_mustache_lambda_helper_object_fetch_object(&params[1] TSRMLS_CC);
     payload->renderer = renderer;
-
-    params[1] = lambda_helper_param;
   }
 
   if( invokeUserFunction(&closure_result, param_count, params) == SUCCESS ) {
@@ -70,10 +64,11 @@ std::string Lambda::invoke(std::string * text, mustache::Renderer * renderer)
   }
   zval_dtor(&closure_result);
 
-  zval_dtor(&text_param);
-  zval_dtor(&lambda_helper_param);
-
   if( params != NULL ) {
+    for( param_count = param_count - 1; param_count >= 0; param_count-- ) {
+      zval_dtor(&params[param_count]);
+    }
+
     efree(params);
   }
 
