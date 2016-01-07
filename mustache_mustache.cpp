@@ -139,7 +139,6 @@ static zend_object_value Mustache_obj_create(zend_class_entry *class_type TSRMLS
   
   try {
     struct php_obj_Mustache * payload = NULL;
-    zval * tmp = NULL;
 
     payload = (struct php_obj_Mustache *) emalloc(sizeof(php_obj_Mustache));
     memset(payload, 0, sizeof(php_obj_Mustache));
@@ -696,7 +695,6 @@ PHP_METHOD(Mustache, parse)
 
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
     
     // Check template parameter
