@@ -137,6 +137,19 @@ PHP_MINIT_FUNCTION(mustache_data)
 }
 /* }}} */
 
+/* {{{ is_invokable_object */
+static zend_always_inline bool is_invokable_object(const zend_class_entry * ce)
+{
+  const HashTable * function_table = ce != NULL ? &ce->function_table : NULL;
+
+#if PHP_MAJOR_VERSION < 7
+  return function_table != NULL && zend_hash_exists(function_table, "__invoke", strlen("__invoke") + 1);
+#else
+  return function_table != NULL && zend_hash_str_exists(function_table, "__invoke", strlen("__invoke"));
+#endif
+}
+/* }}} is_invokable_object */
+
 /* {{{ is_valid_function */
 static zend_always_inline bool is_valid_function(const zend_function * f)
 {
@@ -532,6 +545,9 @@ static zend_always_inline void mustache_data_from_object_zval(mustache::Data * n
   } else if( ce == zend_ce_closure ) {
     node->type = mustache::Data::TypeLambda;
     node->lambda = new ZendClosureLambda(current);
+  } else if( is_invokable_object(ce) ) {
+    node->type = mustache::Data::TypeLambda;
+    node->lambda = new ClassMethodLambda(current, "__invoke");
   } else {
     // functions should take precendence over properties
     mustache_data_from_object_properties_zval(node, current TSRMLS_CC);
