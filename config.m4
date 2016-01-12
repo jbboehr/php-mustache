@@ -71,3 +71,4 @@ if test "$PHP_MUSTACHE" != "no"; then
   PHP_SUBST(MUSTACHE_SHARED_LIBADD)
   PHP_NEW_EXTENSION(mustache, $PHP_MUSTACHE_SOURCES, $ext_shared, , $PHP_MUSTACHE_FLAGS)
 fi
+
