@@ -2,6 +2,7 @@
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md)
 [![Build Status](https://travis-ci.org/jbboehr/php-mustache.png?branch=master)](https://travis-ci.org/jbboehr/php-mustache)
+[![Coverage Status](https://coveralls.io/repos/jbboehr/php-mustache/badge.svg?branch=travis&service=github)](https://coveralls.io/github/jbboehr/php-mustache?branch=travis)
 
 C++ implementation of [Mustache](http://mustache.github.com/) as a PHP extension.
 

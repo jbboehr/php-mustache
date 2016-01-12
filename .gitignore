@@ -4,6 +4,7 @@
 .dirstamp
 .libs
 autom4te.cache
+coverage.info
 gmon*
 *.a
 *.la
@@ -15,6 +16,7 @@ nbproject
 build
 modules
 test.php
+test_coverage
 tests/*.diff
 tests/*.exp
 tests/*.php
