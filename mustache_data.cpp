@@ -185,7 +185,7 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
   ulong key_nindex = 0;
   std::string ckey;
   
-  int ArrayPos = 0;
+  int length = 0;
   mustache::Data * child = NULL;
 
   node->type = mustache::Data::TypeNone;
@@ -224,8 +224,8 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
     if( node->type == mustache::Data::TypeArray ) {
       child = new mustache::Data();
       mustache_data_from_zval(child, *data_entry TSRMLS_CC);
-      node->array[ArrayPos++] = child;
-      node->length = ArrayPos;
+      node->array.push_back(child);
+      node->length = ++length;
     } else if( node->type == mustache::Data::TypeMap ) {
       child = new mustache::Data;
       mustache_data_from_zval(child, *data_entry TSRMLS_CC);
@@ -250,7 +250,7 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
   std::string ckey;
   zval * data_entry = NULL;
   
-  int ArrayPos = 0;
+  int length = 0;
   mustache::Data * child = NULL;
   zend_class_entry * ce = NULL;
 
@@ -286,8 +286,8 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
     if( node->type == mustache::Data::TypeArray ) {
   	  child = new mustache::Data();
       mustache_data_from_zval(child, data_entry TSRMLS_CC);
-      node->array[ArrayPos++] = child;
-      node->length = ArrayPos;
+      node->array.push_back(child);
+      node->length = ++length;
     } else if( node->type == mustache::Data::TypeMap ) {
       child = new mustache::Data;
       mustache_data_from_zval(child, data_entry TSRMLS_CC);
