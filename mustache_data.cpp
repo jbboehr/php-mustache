@@ -560,14 +560,10 @@ static zend_always_inline void mustache_data_from_object_zval(mustache::Data * n
 void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC)
 {
 #if PHP_MAJOR_VERSION >= 7
-  switch( Z_TYPE_P(current) ) {
-    case IS_INDIRECT:
-      current = Z_INDIRECT_P(current);
-      break;
-    case IS_REFERENCE:
-      current = Z_REFVAL_P(current);
-      break;
+  if( Z_TYPE_P(current) == IS_INDIRECT ) {
+    current = Z_INDIRECT_P(current);
   }
+  ZVAL_DEREF(current);
 #endif
   switch( Z_TYPE_P(current) ) {
       case IS_NULL:
