@@ -1,7 +1,8 @@
 language: php
 
 php:
-  - 5.3
+# TravisCI doesn't support 5.3 on Trusty
+#  - 5.3
   - 5.4
   - 5.5
   - 5.6
@@ -12,7 +13,8 @@ branches:
     - master
     - travis
 
-sudo: false
+sudo: required
+dist: trusty
 
 addons:
   apt:
