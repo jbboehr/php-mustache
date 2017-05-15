@@ -41,7 +41,7 @@ You can install the PHP Mustache extension & the libmustache dependancy on OSX u
 brew install php56-mustache
 ```
 
-Homebrew has versions of Mustache available for PHP 5.3 - 5.6, just replace `56` above with the version you want; `libmustache` is a dependancy of the extension so you don't need to install it separately.
+Homebrew has versions of Mustache available for PHP 5.4 - 7.1, just replace `56` above with the version you want; `libmustache` is a dependancy of the extension so you don't need to install it separately.
 
 #### Windows
 
