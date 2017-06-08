@@ -57,7 +57,7 @@ typedef size_t strsize_t;
 #include <stdexcept>
 #include <string>
 
-#include "mustache.hpp"
+#include "mustache/mustache.hpp"
 
 #include "mustache_ast.hpp"
 #include "mustache_code.hpp"
