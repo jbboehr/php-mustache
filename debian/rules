@@ -1,0 +1,44 @@
+#!/usr/bin/make -f
+
+#DEB_SRCDIR := $(shell basename imagick-*)
+DEB_SRCDIR := .
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+
+PHP_EX5=$(shell /usr/bin/php-config5 --extension-dir)
+
+# don't link against unnecessary libraries such as libX11
+export LDFLAGS += -Wl,--as-needed
+
+#
+# local hacks
+#
+
+clean::
+	rm -f debian/php5-*.postrm \
+		debian/php5-*.postinst
+	-cd $(DEB_SRCDIR) && phpize5 --clean
+
+configure_for_php5::
+	# Hack here because:
+	# - we don't want the module linked against some libx* (unused symbols)
+	# We want to link with just needed libraries
+	# - "-Wl,--as-needed" is ignored if not the first argument of the linker
+	# We have to patch the linker call script ltmain.sh
+	cd $(DEB_SRCDIR) && phpize5 && \
+	    ./configure --enable-mustache --with-php-config=/usr/bin/php-config5
+	sed -e 's/phpX/php5/g' < debian/phpX-mustache.postinst > debian/php5-mustache.postinst
+	sed -e 's/phpX/php5/g' < debian/phpX-mustache.postrm   > debian/php5-mustache.postrm
+
+#
+# cdbs things
+#
+
+install/php5-mustache:: configure_for_php5
+	$(MAKE) -C $(DEB_SRCDIR)
+	mkdir -p debian/php5-mustache$(PHP_EX5)
+	install -m 644 -o root -g root $(DEB_SRCDIR)/modules/mustache.so debian/php5-mustache$(PHP_EX5)/mustache.so
+	echo "php5:Depends=phpapi-`php-config5 --phpapi`, php5-common" >> debian/php5-mustache.substvars
+	mkdir -p debian/php5-mustache/usr/share/php5-mustache
+	cp debian/mustache.ini debian/php5-mustache/usr/share/php5-mustache/mustache.ini-dist
+

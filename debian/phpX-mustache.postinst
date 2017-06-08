@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+
+# uncomment module loading (install after remove case)
+if test -e /etc/phpX/conf.d/mustache.ini
+then
+	sed -i s/\;extension/extension/g /etc/phpX/conf.d/mustache.ini
+fi
+
+if test "$1" = "configure"
+then
+	ucf /usr/share/phpX-mustache/mustache.ini-dist /etc/phpX/conf.d/mustache.ini
+fi
+
+#DEBHELPER#
+
+exit 0
+

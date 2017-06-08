@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+
+# if just removing the package, comment out the module loading
+if test "$1" = "remove"
+then
+	sed -i s/extension/\;extension/g /etc/phpX/conf.d/mustache.ini
+fi
+
+if test "$1" = "purge"
+then
+	if which ucf >/dev/null 2>&1
+	then
+		ucf --purge /etc/phpX/conf.d/mustache.ini
+	fi
+	rm -f /etc/phpX/conf.d/mustache.ini
+fi
+
+#DEBHELPER#
+
+exit 0
+

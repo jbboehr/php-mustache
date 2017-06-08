@@ -1,0 +1,5 @@
+php5-mustache (0.6.0) precise; urgency=low
+
+  * Initial release
+
+ -- John Boehr <jbboehr@gmail.com>  Wed, 03 Sep 2014 05:18:17 +0000
