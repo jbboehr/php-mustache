@@ -69,6 +69,6 @@ if test "$PHP_MUSTACHE" != "no"; then
   PHP_ADD_INCLUDE($LIBMUSTACHE_DIR/include/mustache)
   
   PHP_SUBST(MUSTACHE_SHARED_LIBADD)
-  PHP_NEW_EXTENSION(mustache, $PHP_MUSTACHE_SOURCES, $ext_shared, , $PHP_MUSTACHE_FLAGS)
+  PHP_NEW_EXTENSION(mustache, $PHP_MUSTACHE_SOURCES, $ext_shared, , $PHP_MUSTACHE_FLAGS, cxx)
 fi
 
