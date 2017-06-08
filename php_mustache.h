@@ -7,8 +7,8 @@
 #endif
 
 #define PHP_MUSTACHE_NAME "mustache"
-#define PHP_MUSTACHE_VERSION "0.7.3"
-#define PHP_MUSTACHE_RELEASE "2017-05-18"
+#define PHP_MUSTACHE_VERSION "0.7.4RC1"
+#define PHP_MUSTACHE_RELEASE "2017-06-07"
 #define PHP_MUSTACHE_BUILD "master"
 #define PHP_MUSTACHE_AUTHORS "John Boehr <jbboehr@gmail.com> (lead)"
 #define PHP_MUSTACHE_SPEC "1.1.2"
@@ -60,7 +60,7 @@ ZEND_EXTERN_MODULE_GLOBALS(mustache);
 
 
 #ifdef __cplusplus
-  } // extern "C" 
+  } // extern "C"
 #endif
 
 #endif	/* PHP_MUSTACHE_H */

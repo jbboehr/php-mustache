@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.10.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+ <name>mustache</name>
+ <channel>pecl.php.net</channel>
+ <summary>Mustache templating language</summary>
+ <description>This extension embeds a Mustache interpreter into PHP, allowing the execution of Mustache templates.</description>
+ <lead>
+  <name>John Boehr</name>
+  <user>jbboehr</user>
+  <email>jbboehr@php.net</email>
+  <active>yes</active>
+ </lead>
+ <date>2017-06-08</date>
+ <version>
+  <release>0.7.4RC1</release>
+  <api>0.7.4RC1</api>
+ </version>
+ <stability>
+  <release>beta</release>
+  <api>beta</api>
+ </stability>
+ <license uri="https://opensource.org/licenses/MIT">MIT</license>
+ <notes>
+Initial PECL release
+ </notes>
+ <contents>
+  <dir name="/">
+   <file name="LICENSE.md" role="doc" />
+   <file name="README.md" role="doc" />
+   <file name="ax_cxx_compile_stdcxx_11.m4" role="src" />
+   <file name="config.m4" role="src" />
+   <file name="mustache_ast.cpp" role="src" />
+   <file name="mustache_ast.hpp" role="src" />
+   <file name="mustache_class_method_lambda.cpp" role="src" />
+   <file name="mustache_class_method_lambda.hpp" role="src" />
+   <file name="mustache_code.cpp" role="src" />
+   <file name="mustache_code.hpp" role="src" />
+   <file name="mustache_data.cpp" role="src" />
+   <file name="mustache_data.hpp" role="src" />
+   <file name="mustache_exceptions.cpp" role="src" />
+   <file name="mustache_exceptions.hpp" role="src" />
+   <file name="mustache_lambda.cpp" role="src" />
+   <file name="mustache_lambda.hpp" role="src" />
+   <file name="mustache_lambda_helper.cpp" role="src" />
+   <file name="mustache_lambda_helper.hpp" role="src" />
+   <file name="mustache_mustache.cpp" role="src" />
+   <file name="mustache_mustache.hpp" role="src" />
+   <file name="mustache_private.hpp" role="src" />
+   <file name="mustache_template.cpp" role="src" />
+   <file name="mustache_template.hpp" role="src" />
+   <file name="mustache_zend_closure_lambda.cpp" role="src" />
+   <file name="mustache_zend_closure_lambda.hpp" role="src" />
+   <file name="php_mustache.cpp" role="src" />
+   <file name="php_mustache.h" role="src" />
+   <file name="php_mustache.hpp" role="src" />
+   <file name="tests/MustacheAST____construct.phpt" role="test" />
+   <file name="tests/MustacheAST____sleep.phpt" role="test" />
+   <file name="tests/MustacheAST__toArray.phpt" role="test" />
+   <file name="tests/MustacheAST____toString.phpt" role="test" />
+   <file name="tests/MustacheAST____wakeup-apc.phpt" role="test" />
+   <file name="tests/MustacheAST____wakeup.phpt" role="test" />
+   <file name="tests/MustacheCode____construct.phpt" role="test" />
+   <file name="tests/MustacheCode____sleep.phpt" role="test" />
+   <file name="tests/MustacheCode__toReadableString.phpt" role="test" />
+   <file name="tests/MustacheCode____toString.phpt" role="test" />
+   <file name="tests/MustacheCode____wakeup-apc.phpt" role="test" />
+   <file name="tests/MustacheCode____wakeup.phpt" role="test" />
+   <file name="tests/Mustache__compile-accepts-MustacheAST.phpt" role="test" />
+   <file name="tests/Mustache__compile-accepts-MustacheTemplate.phpt" role="test" />
+   <file name="tests/Mustache__compile.phpt" role="test" />
+   <file name="tests/Mustache__compile-with-partials.phpt" role="test" />
+   <file name="tests/Mustache____construct.phpt" role="test" />
+   <file name="tests/MustacheData____construct.phpt" role="test" />
+   <file name="tests/MustacheData__toValue.phpt" role="test" />
+   <file name="tests/Mustache__debugDataStructure.phpt" role="test" />
+   <file name="tests/Mustache__execute-accepts-MustacheData.phpt" role="test" />
+   <file name="tests/Mustache__execute.phpt" role="test" />
+   <file name="tests/Mustache__execute-with-partials.phpt" role="test" />
+   <file name="tests/Mustache__getEscapeByDefault.phpt" role="test" />
+   <file name="tests/Mustache__getStartSequence.phpt" role="test" />
+   <file name="tests/Mustache__getStopSequence.phpt" role="test" />
+   <file name="tests/MustacheLambdaHelper__render-closure.phpt" role="test" />
+   <file name="tests/MustacheLambdaHelper__render-object.phpt" role="test" />
+   <file name="tests/Mustache__parse.phpt" role="test" />
+   <file name="tests/Mustache__render-accepts-class-instance.phpt" role="test" />
+   <file name="tests/Mustache__render-accepts-MustacheAST.phpt" role="test" />
+   <file name="tests/Mustache__render-accepts-MustacheData.phpt" role="test" />
+   <file name="tests/Mustache__render-accepts-MustacheTemplate.phpt" role="test" />
+   <file name="tests/Mustache__render-accepts-object.phpt" role="test" />
+   <file name="tests/Mustache__render-accepts-object-with-properties.phpt" role="test" />
+   <file name="tests/Mustache__render-does-not-mutate-double.phpt" role="test" />
+   <file name="tests/Mustache__render-does-not-mutate-false.phpt" role="test" />
+   <file name="tests/Mustache__render-does-not-mutate-int.phpt" role="test" />
+   <file name="tests/Mustache__render-does-not-mutate-null.phpt" role="test" />
+   <file name="tests/Mustache__render-does-not-mutate-true.phpt" role="test" />
+   <file name="tests/Mustache__render-empty-string-empty-data.phpt" role="test" />
+   <file name="tests/Mustache__render-empty-string-with-data.phpt" role="test" />
+   <file name="tests/Mustache__render-lambda-closure-section.phpt" role="test" />
+   <file name="tests/Mustache__render-lambda-closure-variable.phpt" role="test" />
+   <file name="tests/Mustache__render-lambda-invokable-array.phpt" role="test" />
+   <file name="tests/Mustache__render-lambda-invokable-section.phpt" role="test" />
+   <file name="tests/Mustache__render-lambda-invokable-variable.phpt" role="test" />
+   <file name="tests/Mustache__render-lambda-object-method-invisible.phpt" role="test" />
+   <file name="tests/Mustache__render-lambda-object-method.phpt" role="test" />
+   <file name="tests/Mustache__render-partial-accepts-MustacheAST.phpt" role="test" />
+   <file name="tests/Mustache__render-partial-accepts-MustacheTemplate.phpt" role="test" />
+   <file name="tests/Mustache__render-recursive-array.phpt" role="test" />
+   <file name="tests/Mustache__render-recursive-object.phpt" role="test" />
+   <file name="tests/Mustache__render-references.phpt" role="test" />
+   <file name="tests/Mustache__render-tag.phpt" role="test" />
+   <file name="tests/Mustache__setEscapeByDefault.phpt" role="test" />
+   <file name="tests/Mustache__setStartSequence.phpt" role="test" />
+   <file name="tests/Mustache__setStopSequence.phpt" role="test" />
+   <file name="tests/mustache-spec-comments-indented-inline.phpt" role="test" />
+   <file name="tests/mustache-spec-comments-indented-multiline-standalone.phpt" role="test" />
+   <file name="tests/mustache-spec-comments-indented-standalone.phpt" role="test" />
+   <file name="tests/mustache-spec-comments-inline.phpt" role="test" />
+   <file name="tests/mustache-spec-comments-multiline.phpt" role="test" />
+   <file name="tests/mustache-spec-comments-multiline-standalone.phpt" role="test" />
+   <file name="tests/mustache-spec-comments-standalone-line-endings.phpt" role="test" />
+   <file name="tests/mustache-spec-comments-standalone.phpt" role="test" />
+   <file name="tests/mustache-spec-comments-standalone-without-newline.phpt" role="test" />
+   <file name="tests/mustache-spec-comments-standalone-without-previous-line.phpt" role="test" />
+   <file name="tests/mustache-spec-comments-surrounding-whitespace.phpt" role="test" />
+   <file name="tests/mustache-spec-delimiters-indented-standalone-tag.phpt" role="test" />
+   <file name="tests/mustache-spec-delimiters-inverted-sections.phpt" role="test" />
+   <file name="tests/mustache-spec-delimiters-outlying-whitespace-inline.phpt" role="test" />
+   <file name="tests/mustache-spec-delimiters-pair-behavior.phpt" role="test" />
+   <file name="tests/mustache-spec-delimiters-pair-with-padding.phpt" role="test" />
+   <file name="tests/mustache-spec-delimiters-partial-inheritence.phpt" role="test" />
+   <file name="tests/mustache-spec-delimiters-post-partial-behavior.phpt" role="test" />
+   <file name="tests/mustache-spec-delimiters-sections.phpt" role="test" />
+   <file name="tests/mustache-spec-delimiters-special-characters.phpt" role="test" />
+   <file name="tests/mustache-spec-delimiters-standalone-line-endings.phpt" role="test" />
+   <file name="tests/mustache-spec-delimiters-standalone-tag.phpt" role="test" />
+   <file name="tests/mustache-spec-delimiters-standalone-without-newline.phpt" role="test" />
+   <file name="tests/mustache-spec-delimiters-standalone-without-previous-line.phpt" role="test" />
+   <file name="tests/mustache-spec-delimiters-surrounding-whitespace.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-ampersand-context-miss-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-ampersand-decimal-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-ampersand-integer-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-ampersand.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-ampersand-standalone.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-ampersand-surrounding-whitespace.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-ampersand-with-padding.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-basic-context-miss-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-basic-decimal-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-basic-integer-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-basic-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-dotted-names-ampersand-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-dotted-names-arbitrary-depth.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-dotted-names-basic-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-dotted-names-broken-chain-resolution.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-dotted-names-broken-chains.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-dotted-names-context-precedence.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-dotted-names-initial-resolution.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-dotted-names-triple-mustache-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-html-escaping.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-interpolation-standalone.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-interpolation-surrounding-whitespace.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-interpolation-with-padding.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-no-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-triple-mustache-context-miss-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-triple-mustache-decimal-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-triple-mustache-integer-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-triple-mustache.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-triple-mustache-standalone.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-triple-mustache-surrounding-whitespace.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-triple-mustache-with-padding.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-context-misses.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-context.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-dotted-names-broken-chains.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-dotted-names-falsey.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-dotted-names-truthy.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-doubled.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-empty-list.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-falsey.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-indented-inline-sections.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-internal-whitespace.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-list.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-nested-falsey.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-nested-truthy.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-padding.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-standalone-indented-lines.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-standalone-line-endings.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-standalone-lines.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-standalone-without-newline.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-standalone-without-previous-line.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-surrounding-whitespace.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-truthy.phpt" role="test" />
+   <file name="tests/mustache-spec-~lambdas-escaping.phpt" role="test" />
+   <file name="tests/mustache-spec-~lambdas-interpolation-alternate-delimiters.phpt" role="test" />
+   <file name="tests/mustache-spec-~lambdas-interpolation-expansion.phpt" role="test" />
+   <file name="tests/mustache-spec-~lambdas-interpolation-multiple-calls.phpt" role="test" />
+   <file name="tests/mustache-spec-~lambdas-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-~lambdas-inverted-section.phpt" role="test" />
+   <file name="tests/mustache-spec-~lambdas-section-alternate-delimiters.phpt" role="test" />
+   <file name="tests/mustache-spec-~lambdas-section-expansion.phpt" role="test" />
+   <file name="tests/mustache-spec-~lambdas-section-multiple-calls.phpt" role="test" />
+   <file name="tests/mustache-spec-~lambdas-section.phpt" role="test" />
+   <file name="tests/mustache-spec-partials-basic-behavior.phpt" role="test" />
+   <file name="tests/mustache-spec-partials-context.phpt" role="test" />
+   <file name="tests/mustache-spec-partials-failed-lookup.phpt" role="test" />
+   <file name="tests/mustache-spec-partials-inline-indentation.phpt" role="test" />
+   <file name="tests/mustache-spec-partials-padding-whitespace.phpt" role="test" />
+   <file name="tests/mustache-spec-partials-recursion.phpt" role="test" />
+   <file name="tests/mustache-spec-partials-standalone-indentation.phpt" role="test" />
+   <file name="tests/mustache-spec-partials-standalone-line-endings.phpt" role="test" />
+   <file name="tests/mustache-spec-partials-standalone-without-newline.phpt" role="test" />
+   <file name="tests/mustache-spec-partials-standalone-without-previous-line.phpt" role="test" />
+   <file name="tests/mustache-spec-partials-surrounding-whitespace.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-context-misses.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-context.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-deeply-nested-contexts.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-dotted-names-broken-chains.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-dotted-names-falsey.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-dotted-names-truthy.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-doubled.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-empty-list.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-falsey.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-implicit-iterator-decimal.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-implicit-iterator-integer.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-implicit-iterator-string.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-indented-inline-sections.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-indented-standalone-lines.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-internal-whitespace.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-list.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-nested-falsey.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-nested-truthy.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-padding.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-standalone-line-endings.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-standalone-lines.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-standalone-without-newline.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-standalone-without-previous-line.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-surrounding-whitespace.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-truthy.phpt" role="test" />
+   <file name="tests/mustache-spec-utf8-bird.phpt" role="test" />
+   <file name="tests/mustache-spec-utf8-lotus.phpt" role="test" />
+   <file name="tests/mustache-spec-utf8-red-bean.phpt" role="test" />
+   <file name="tests/MustacheTemplate____construct.phpt" role="test" />
+   <file name="tests/MustacheTemplate____sleep.phpt" role="test" />
+   <file name="tests/MustacheTemplate____toString.phpt" role="test" />
+   <file name="tests/MustacheTemplate____wakeup-apc.phpt" role="test" />
+   <file name="tests/MustacheTemplate____wakeup.phpt" role="test" />
+   <file name="tests/Mustache__tokenize.phpt" role="test" />
+  </dir>
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.6.0</min>
+    <max>7.1.99</max>
+   </php>
+   <pearinstaller>
+    <min>1.4.1</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>mustache</providesextension>
+ <extsrcrelease />
+</package>
