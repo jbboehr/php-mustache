@@ -35,7 +35,7 @@ before_install:
 
 install:
   - phpize
-  - ./configure --enable-mustache --with-libmustache=$HOME/libmustache CXXFLAGS="--coverage -fprofile-arcs -ftest-coverage" LDFLAGS="--coverage"
+  - ./configure --enable-mustache --with-libmustache=$HOME/libmustache CXXFLAGS="--coverage -fprofile-arcs -ftest-coverage" LDFLAGS="--coverage -lgcov"
   - make clean all
 
 script:
