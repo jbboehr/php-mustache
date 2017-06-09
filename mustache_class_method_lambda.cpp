@@ -15,7 +15,6 @@ ClassMethodLambda::~ClassMethodLambda()
 int ClassMethodLambda::getUserFunctionParamCount()
 {
   zend_class_entry * ce = Z_OBJCE_P(object);
-  HashTable * function_table = NULL;
   zval * zv = NULL;
   zend_function * function_entry = NULL;
 
