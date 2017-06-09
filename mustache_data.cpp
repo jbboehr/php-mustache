@@ -109,11 +109,12 @@ static zend_object * MustacheData_obj_create(zend_class_entry * ce TSRMLS_DC)
     intern = (struct php_obj_MustacheData *) ecalloc(1, sizeof(struct php_obj_MustacheData) + zend_object_properties_size(ce));
     zend_object_std_init(&intern->std, ce TSRMLS_CC);
     intern->std.handlers = &MustacheData_obj_handlers;
+    return &intern->std;
   } catch(...) {
     mustache_exception_handler(TSRMLS_C);
   }
-  
-  return &intern->std;
+
+  return NULL;
 }
 #endif
 /* }}} */
@@ -252,7 +253,6 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
   
   int length = 0;
   mustache::Data * child = NULL;
-  zend_class_entry * ce = NULL;
 
   node->type = mustache::Data::TypeNone;
 
@@ -266,6 +266,7 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
 
   data_count = zend_hash_num_elements(data_hash);
   ZEND_HASH_FOREACH_KEY_VAL_IND(data_hash, key_nindex, key, data_entry) {
+    (void)key_nindex; /* avoid [-Wunused-but-set-variable] */
     if( !key ) {
       if( node->type == mustache::Data::TypeNone ) {
         node->init(mustache::Data::TypeArray, data_count);
@@ -388,7 +389,6 @@ static zend_always_inline void mustache_data_from_object_properties_zval(mustach
 static zend_always_inline void mustache_data_from_object_properties_zval(mustache::Data * node, zval * current TSRMLS_DC)
 {
   HashTable * data_hash = NULL;
-  long data_count = 0;
   ulong key_nindex = 0;
   zend_string * key;
   std::string ckey;
@@ -415,6 +415,7 @@ static zend_always_inline void mustache_data_from_object_properties_zval(mustach
     }
 
     ZEND_HASH_FOREACH_KEY_VAL_IND(data_hash, key_nindex, key, data_entry) {
+      (void)key_nindex; /* avoid [-Wunused-but-set-variable] */
       if( key && ZSTR_LEN(key) && ZSTR_VAL(key)[0] ) { // skip private/protected
         prop_name = ZSTR_VAL(key);
 
@@ -517,6 +518,8 @@ static zend_always_inline void mustache_data_from_object_functions_zval(mustache
 
     ZEND_HASH_FOREACH_KEY_VAL_IND(data_hash, key_nindex, key, data_entry) {
       function_entry = (zend_function *) Z_PTR_P(data_entry);
+      (void)key; /* avoid [-Wunused-but-set-variable] */
+      (void)key_nindex;
       if( is_valid_function(function_entry) ) {
         node->type = mustache::Data::TypeMap;
 

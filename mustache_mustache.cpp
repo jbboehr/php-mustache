@@ -167,11 +167,12 @@ static zend_object * Mustache_obj_create(zend_class_entry * ce TSRMLS_DC)
     intern->std.handlers = &Mustache_obj_handlers;
 
     intern->mustache = mustache_new_Mustache(TSRMLS_C);
+    return &intern->std;
   } catch(...) {
     mustache_exception_handler(TSRMLS_C);
   }
   
-  return &intern->std;
+  return NULL;
 }
 #endif
 /* }}} */
@@ -321,6 +322,7 @@ bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
         zend_string * key = NULL;
 
         ZEND_HASH_FOREACH_KEY_VAL(data_hash, key_nindex, key, data_entry) {
+            (void)key_nindex;
             if( !key ) {
                 php_error(E_WARNING, "Partial array contains a non-string key");
             } else {
@@ -329,6 +331,7 @@ bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
         } ZEND_HASH_FOREACH_END();
     } while(0);
 #endif
+  return true;
 }
 /* }}} */
 
@@ -405,8 +408,6 @@ PHP_METHOD(Mustache, __construct)
 
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
-    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
     
   } catch(...) {
     mustache_exception_handler(TSRMLS_C);
@@ -427,7 +428,6 @@ PHP_METHOD(Mustache, getEscapeByDefault)
 
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
     
     // Main
@@ -456,7 +456,6 @@ PHP_METHOD(Mustache, getStartSequence)
 
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
     
     // Main
@@ -482,7 +481,6 @@ PHP_METHOD(Mustache, getStopSequence)
 
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
     
     // Main
@@ -511,7 +509,6 @@ PHP_METHOD(Mustache, setEscapeByDefault)
 
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
   
     // Main
@@ -541,7 +538,6 @@ PHP_METHOD(Mustache, setStartSequence)
 
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
     
     // Main
@@ -571,7 +567,6 @@ PHP_METHOD(Mustache, setStopSequence)
 
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
     
     // Main
@@ -601,7 +596,6 @@ PHP_METHOD(Mustache, compile)
 
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
     
     // Prepare template tree
@@ -649,7 +643,6 @@ PHP_METHOD(Mustache, execute)
 
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
     
     // Prepare code
@@ -753,7 +746,6 @@ PHP_METHOD(Mustache, render)
 
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
     
     // Prepare template tree
@@ -811,7 +803,6 @@ PHP_METHOD(Mustache, tokenize)
 
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
     
     // Assign template to string
@@ -846,8 +837,6 @@ PHP_METHOD(Mustache, debugDataStructure)
 
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
-    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
     
     // Prepare template data
     mustache::Data templateData;

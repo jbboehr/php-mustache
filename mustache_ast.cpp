@@ -216,11 +216,12 @@ static zend_object * MustacheAST_obj_create(zend_class_entry * ce TSRMLS_DC)
     zend_object_std_init(&intern->std, ce TSRMLS_CC);
     intern->std.handlers = &MustacheAST_obj_handlers;
     intern->node = NULL;
+    return &intern->std;
   } catch(...) {
     mustache_exception_handler(TSRMLS_C);
   }
-  
-  return &intern->std;
+
+  return NULL;
 }
 #endif
 /* }}} */
@@ -271,7 +272,6 @@ PHP_METHOD(MustacheAST, __construct)
     
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(_this_zval TSRMLS_CC);
     
     // Check payload
@@ -301,7 +301,6 @@ PHP_METHOD(MustacheAST, __sleep)
     
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(_this_zval TSRMLS_CC);
     
     array_init(return_value);
@@ -339,7 +338,6 @@ PHP_METHOD(MustacheAST, toArray)
     
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(_this_zval TSRMLS_CC);
     
     // Check payload
@@ -369,7 +367,6 @@ PHP_METHOD(MustacheAST, __toString)
     
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(_this_zval TSRMLS_CC);
     
     // Check payload
@@ -397,7 +394,6 @@ PHP_METHOD(MustacheAST, __toString)
 static inline void php_mustache_ast_wakeup(zval * _this_zval, zval * return_value TSRMLS_DC)
 {
     zval rv;
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(_this_zval TSRMLS_CC);
     zval * value = _zend_read_property(Z_OBJCE_P(_this_zval), _this_zval, "binaryString", sizeof("binaryString")-1, 1, &rv);
 

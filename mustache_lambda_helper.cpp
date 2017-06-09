@@ -97,11 +97,11 @@ static zend_object * MustacheLambdaHelper_obj_create(zend_class_entry * ce TSRML
     intern = (struct php_obj_MustacheLambdaHelper *) ecalloc(1, sizeof(struct php_obj_MustacheLambdaHelper) + zend_object_properties_size(ce));
     zend_object_std_init(&intern->std, ce TSRMLS_CC);
     intern->std.handlers = &MustacheLambdaHelper_obj_handlers;
+    return &intern->std;
   } catch(...) {
     mustache_exception_handler(TSRMLS_C);
   }
-
-  return &intern->std;
+  return NULL;
 }
 #endif
 /* }}} */
@@ -149,7 +149,6 @@ PHP_METHOD(MustacheLambdaHelper, render)
 
     // Class parameters
     _this_zval = getThis();
-    zend_class_entry * _this_ce = Z_OBJCE_P(_this_zval);
     struct php_obj_MustacheLambdaHelper * payload = php_mustache_lambda_helper_object_fetch_object(_this_zval TSRMLS_CC);
 
     std::string templateStr(template_str/*, (size_t) Z_STRLEN_P(template_str)*/);
