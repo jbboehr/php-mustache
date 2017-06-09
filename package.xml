@@ -10,10 +10,10 @@
   <email>jbboehr@php.net</email>
   <active>yes</active>
  </lead>
- <date>2017-06-08</date>
+ <date>2017-06-09</date>
  <version>
-  <release>0.7.4RC1</release>
-  <api>0.7.4RC1</api>
+  <release>0.7.4RC2</release>
+  <api>0.7.4RC2</api>
  </version>
  <stability>
   <release>beta</release>
@@ -21,7 +21,10 @@
  </stability>
  <license uri="https://opensource.org/licenses/MIT">MIT</license>
  <notes>
-Initial PECL release
+- Use pkg-config when available to locate libmustache
+- Use proper arguments to PHP_NEW_EXTENSION
+- Allow PHP 7.2
+- Fix build warnings
  </notes>
  <contents>
   <dir name="/">
