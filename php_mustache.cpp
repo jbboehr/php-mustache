@@ -79,7 +79,7 @@ zend_module_entry mustache_module_entry = {
   (char *) PHP_MUSTACHE_NAME,    /* Name */
   NULL,                          /* Functions */
   PHP_MINIT(mustache),           /* MINIT */
-  NULL,                          /* MSHUTDOWN */
+  PHP_MSHUTDOWN(mustache),       /* MSHUTDOWN */
   NULL,                          /* RINIT */
   NULL,                          /* RSHUTDOWN */
   PHP_MINFO(mustache),           /* MINFO */
