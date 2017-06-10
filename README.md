@@ -18,7 +18,7 @@ All features of Mustache are supported EXCEPT:
 
 #### Linux
 
-For Ubuntu LTS, the extension is available in a [PPA](https://launchpad.net/~jbboehr/+archive/ubuntu/mustache), or via source:
+For **Ubuntu LTS**, the extension is available in a [PPA](https://launchpad.net/~jbboehr/+archive/ubuntu/mustache), or via source:
 
 Install [libmustache](https://github.com/jbboehr/libmustache)
 
@@ -32,6 +32,14 @@ make
 sudo make install
 echo extension=mustache.so | sudo tee /etc/php5/conf.d/mustache.ini
 ```
+
+For **Fedora**, the extension is available in [Remi's repository](https://rpms.remirepo.net/) (change 24 to match your Fedora version)
+
+``` sh
+dnf install https://rpms.remirepo.net/fedora/remi-release-24.rpm
+dnf install --enablerepo=remi php-pecl-mustache
+```
+
 
 #### OSX
 
