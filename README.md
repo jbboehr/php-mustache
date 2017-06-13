@@ -33,13 +33,21 @@ sudo make install
 echo extension=mustache.so | sudo tee /etc/php5/conf.d/mustache.ini
 ```
 
-For **Fedora**, the extension is available in [Remi's repository](https://rpms.remirepo.net/) (change 24 to match your Fedora version)
+RPM packages of the extension are available in [Remi's repository](https://rpms.remirepo.net/).
+
+**Fedora** (change 24 to match your Fedora version)
 
 ``` sh
 dnf install https://rpms.remirepo.net/fedora/remi-release-24.rpm
 dnf install --enablerepo=remi php-pecl-mustache
 ```
 
+**RHEL/CentOS** (for default PHP in base repository)
+
+``` sh
+yum install https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+yum install php-pecl-mustache
+```
 
 #### OSX
 
