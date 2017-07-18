@@ -7,8 +7,8 @@
 #endif
 
 #define PHP_MUSTACHE_NAME "mustache"
-#define PHP_MUSTACHE_VERSION "0.7.4RC2"
-#define PHP_MUSTACHE_RELEASE "2017-06-09"
+#define PHP_MUSTACHE_VERSION "0.7.4"
+#define PHP_MUSTACHE_RELEASE "2017-07-18"
 #define PHP_MUSTACHE_BUILD "master"
 #define PHP_MUSTACHE_AUTHORS "John Boehr <jbboehr@gmail.com> (lead)"
 #define PHP_MUSTACHE_SPEC "1.1.2"
