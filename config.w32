@@ -1,30 +1,13 @@
 
 ARG_ENABLE("mustache", "Mustache", "no");
+ARG_WITH("libmustache", "libmustache location", "no");
 
 if( PHP_MUSTACHE != "no" ) {
-  EXTENSION('mustache', "\
-                        php_mustache.cpp \
-                        mustache_ast.cpp \
-                        mustache_code.cpp \
-                        mustache_mustache.cpp \
-                        mustache_exceptions.cpp \
-                        mustache_data.cpp \
-                        mustache_template.cpp \
-                        mustache_lambda.cpp \
-                        mustache_lambda_helper.cpp \
-                        mustache_class_method_lambda.cpp \
-                        mustache_zend_closure_lambda.cpp",
-                        PHP_MUSTACHE_SHARED,
-                        "-I" + configure_module_dirname + "/mustache/src");
-  ADD_SOURCES(configure_module_dirname + "/mustache/src", "\
-                         mustache.cpp \
-                         compiler.cpp \
-                         data.cpp \
-                         lambda.cpp \
-                         node.cpp \
-                         renderer.cpp \
-                         tokenizer.cpp \
-                         utils.cpp \
-                         vm.cpp", "mustache");
-  AC_DEFINE('HAVE_MUSTACHE', 1);
+	if (CHECK_LIB("mustache_static.lib", "mustache", PHP_LIBMUSTACHE + "\\lib") &&
+		CHECK_HEADER_ADD_INCLUDE("mustache_config.h", "CFLAGS_MUSTACHE", PHP_LIBMUSTACHE + "\\include\\mustache" + ";" + PHP_PHP_BUILD + "\\include")) {
+		EXTENSION('mustache', "php_mustache.cpp mustache_ast.cpp mustache_code.cpp mustache_mustache.cpp mustache_exceptions.cpp mustache_data.cpp mustache_template.cpp mustache_lambda.cpp mustache_lambda_helper.cpp mustache_class_method_lambda.cpp mustache_zend_closure_lambda.cpp", PHP_MUSTACHE_SHARED, "/EHsc /I \"" + PHP_LIBMUSTACHE + "\\include\\mustache" + "\"" + " " + "/I \"" + PHP_LIBMUSTACHE + "\\include" + "\"");
+		AC_DEFINE('HAVE_MUSTACHE', 1);
+	} else {
+		WARNING("mustache not enabled; libraries and headers not found");
+	}
 }

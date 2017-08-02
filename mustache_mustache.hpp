@@ -2,6 +2,8 @@
 #ifndef PHP_MUSTACHE_MUSTACHE_HPP
 #define PHP_MUSTACHE_MUSTACHE_HPP
 
+#include "mustache/mustache.hpp"
+
 #ifdef __cplusplus
    extern "C" {
 #endif

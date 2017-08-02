@@ -1,5 +1,18 @@
 
-#include "mustache_private.hpp"
+#include <string>
+#include <php.h>
+#include <php_ini.h>
+#include <ext/standard/info.h>
+#include "php_mustache.h"
+#include "php5to7.h"
+#include "mustache_ast.hpp"
+#include "mustache_code.hpp"
+#include "mustache_exceptions.hpp"
+#include "mustache_mustache.hpp"
+#include "mustache_data.hpp"
+#include "mustache_template.hpp"
+#include "mustache_lambda_helper.hpp"
+
 
 /* {{{ prototypes */
 ZEND_DECLARE_MODULE_GLOBALS(mustache)

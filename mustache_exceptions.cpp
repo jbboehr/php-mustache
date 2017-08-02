@@ -1,5 +1,9 @@
 
+#include "php_mustache.h"
+#include <Zend/zend_exceptions.h>
+#include "php5to7.h"
 #include "mustache_private.hpp"
+#include "mustache_exceptions.hpp"
 
 /* {{{ ZE2 OO definitions */
 zend_class_entry * MustacheException_ce_ptr;

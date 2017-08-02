@@ -3,12 +3,7 @@
 #define PHP_MUSTACHE_ZEND_CLOSURE_LAMBDA_HPP
 
 #include <Zend/zend_closures.h>
-
 #include "mustache_lambda.hpp"
-
-#ifdef __cplusplus
-   extern "C" {
-#endif
 
 class ZendClosureLambda : public Lambda {
   private:
@@ -28,10 +23,6 @@ class ZendClosureLambda : public Lambda {
     };
     ~ZendClosureLambda();
 };
-
-#ifdef __cplusplus
-  } // extern "C"
-#endif
 
 #endif /* PHP_MUSTACHE_ZEND_CLOSURE_LAMBDA_HPP */
 
