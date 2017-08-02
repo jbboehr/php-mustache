@@ -76,6 +76,10 @@ build_script:
     copy /Y dirent\include\dirent.h output\include
 # libmustache
 - cmd: >-
+    cd C:\projects\
+    
+    git clone https://github.com/jbboehr/libmustache.git
+    
     cd C:\projects\libmustache
     
     git submodule update --init
