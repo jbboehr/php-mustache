@@ -12,10 +12,10 @@ environment:
   matrix:
     - PHP_VER: 7.2
       VC_VER: vc15
-	  ARCH: x86
+      ARCH: x86
     - PHP_VER: 7.2
       VC_VER: vc15
-	  ARCH: x64
+      ARCH: x64
 
 install:
 - cmd: cinst wget
@@ -93,8 +93,8 @@ build_script:
     
     nmake install
 - cmd: >-
-	cd C:\projects\php-mustache
-	
+    cd C:\projects\php-mustache
+    
     wget https://github.com/OSTC/php-sdk-binary-tools/archive/%PHP_SDK_BINARY_TOOLS_VER%.zip --no-check-certificate -q -O php-sdk-binary-tools-%PHP_SDK_BINARY_TOOLS_VER%.zip
 
     7z x -y php-sdk-binary-tools-%PHP_SDK_BINARY_TOOLS_VER%.zip -oC:\projects
