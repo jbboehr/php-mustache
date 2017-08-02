@@ -4,6 +4,7 @@ branches:
   - master
   - appveyor
   - w32
+  - windows
 
 image: Visual Studio 2017
 
