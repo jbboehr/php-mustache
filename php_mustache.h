@@ -2,6 +2,8 @@
 #ifndef PHP_MUSTACHE_H
 #define PHP_MUSTACHE_H
 
+#include <string>
+
 #define PHP_MUSTACHE_NAME "mustache"
 #define PHP_MUSTACHE_VERSION "0.7.4"
 #define PHP_MUSTACHE_RELEASE "2017-07-18"
@@ -17,7 +19,9 @@
 #define __STDC_LIMIT_MACROS
 #endif
 
-#include <string>
+#ifdef __cplusplus
+   extern "C" {
+#endif
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -33,10 +37,6 @@
 #define MUSTACHEG(v) TSRMG(mustache_globals_id, zend_mustache_globals *, v)
 #else
 #define MUSTACHEG(v) (mustache_globals.v)
-#endif
-
-#ifdef __cplusplus
-   extern "C" {
 #endif
 
 extern zend_module_entry mustache_module_entry;
