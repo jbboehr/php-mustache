@@ -1,5 +1,11 @@
 
+#include "php_mustache.h"
+
+#include <Zend/zend_closures.h>
+
+#include "php5to7.h"
 #include "mustache_private.hpp"
+#include "mustache_zend_closure_lambda.hpp"
 
 ZendClosureLambda::~ZendClosureLambda()
 {

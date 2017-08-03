@@ -2,9 +2,7 @@
 #ifndef PHP_MUSTACHE_H
 #define PHP_MUSTACHE_H
 
-#ifdef __cplusplus
-   extern "C" {
-#endif
+#include <string>
 
 #define PHP_MUSTACHE_NAME "mustache"
 #define PHP_MUSTACHE_VERSION "0.7.4"
@@ -21,21 +19,15 @@
 #define __STDC_LIMIT_MACROS
 #endif
 
+#ifdef __cplusplus
+   extern "C" {
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include <php.h>
-#include <php_ini.h>
-#include <php_variables.h>
-#include <php_globals.h>
-#include <SAPI.h>
-#include <ext/standard/info.h>
-#include <Zend/zend_interfaces.h>
-#include <Zend/zend_exceptions.h>
-#include <Zend/zend_extensions.h>
-#include <Zend/zend_compile.h>
-#include <Zend/zend_closures.h>
 
 #ifdef ZTS
 #include "TSRM.h"
@@ -58,10 +50,8 @@ ZEND_END_MODULE_GLOBALS(mustache)
 
 ZEND_EXTERN_MODULE_GLOBALS(mustache);
 
-
 #ifdef __cplusplus
   } // extern "C"
 #endif
 
 #endif	/* PHP_MUSTACHE_H */
-

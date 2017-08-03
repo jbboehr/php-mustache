@@ -1,5 +1,13 @@
 
-#include "mustache_private.hpp"
+#define NOMINMAX
+
+#include "php_mustache.h"
+#include <algorithm>
+#include "php5to7.h"
+#include "mustache_lambda_helper.hpp"
+#include "mustache_lambda.hpp"
+
+#undef min
 
 #if PHP_MAJOR_VERSION >= 7
 std::string Lambda::invoke()

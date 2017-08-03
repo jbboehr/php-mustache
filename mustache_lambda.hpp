@@ -2,9 +2,7 @@
 #ifndef PHP_MUSTACHE_LAMBDA_HPP
 #define PHP_MUSTACHE_LAMBDA_HPP
 
-#ifdef __cplusplus
-   extern "C" {
-#endif
+#include <mustache/lambda.hpp>
 
 class Lambda : public mustache::Lambda {
   protected:
@@ -18,10 +16,6 @@ class Lambda : public mustache::Lambda {
     std::string invoke();
     std::string invoke(std::string * text, mustache::Renderer * renderer);
 };
-
-#ifdef __cplusplus
-  } // extern "C"
-#endif
 
 #endif /* PHP_MUSTACHE_LAMBDA_HPP */
 

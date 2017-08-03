@@ -2,6 +2,9 @@
 #ifndef PHP_MUSTACHE_EXCEPTIONS_HPP
 #define PHP_MUSTACHE_EXCEPTIONS_HPP
 
+#include <exception>
+#include <stdexcept>
+
 #ifdef __cplusplus
    extern "C" {
 #endif
@@ -23,7 +26,7 @@ class PhpInvalidParameterException : public std::exception {
 
 class InvalidParameterException : public std::runtime_error {
   public:
-      InvalidParameterException(const std::string& desc) : std::runtime_error(desc) { }
+      explicit InvalidParameterException(const std::string& desc) : std::runtime_error(desc) { }
 };
 
 #endif /* PHP_MUSTACHE_EXCEPTIONS_HPP */

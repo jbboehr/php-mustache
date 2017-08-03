@@ -1,5 +1,14 @@
 
-#include "mustache_private.hpp"
+#include <mustache/mustache.hpp>
+#include <mustache/lambda.hpp>
+#include "php_mustache.h"
+#include "php5to7.h"
+#include <Zend/zend_closures.h>
+#include "mustache_class_method_lambda.hpp"
+#include "mustache_exceptions.hpp"
+#include "mustache_lambda.hpp"
+#include "mustache_zend_closure_lambda.hpp"
+#include "mustache_data.hpp"
 
 /* {{{ ZE2 OO definitions */
 zend_class_entry * MustacheData_ce_ptr;
