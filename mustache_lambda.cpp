@@ -1,9 +1,8 @@
 
 #define NOMINMAX
 
-#include <algorithm>
-
 #include "php_mustache.h"
+#include <algorithm>
 #include "php5to7.h"
 #include "mustache_lambda_helper.hpp"
 #include "mustache_lambda.hpp"
