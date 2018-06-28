@@ -267,10 +267,19 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
 
   data_hash = HASH_OF(current);
 
+#if PHP_VERSION_ID < 70300
   if( ZEND_HASH_APPLY_PROTECTION(data_hash) && ++data_hash->u.v.nApplyCount > 1 ) {
     php_error(E_WARNING, "Data includes circular reference");
     data_hash->u.v.nApplyCount--;
     return;
+#else
+  if (!(GC_FLAGS(data_hash) & GC_IMMUTABLE)) {
+    if (GC_IS_RECURSIVE(data_hash)) {
+      php_error(E_WARNING, "Data includes circular reference");
+      return;
+    }
+    GC_PROTECT_RECURSION(data_hash);
+#endif
   }
 
   data_count = zend_hash_num_elements(data_hash);
@@ -309,8 +318,13 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
     }
   } ZEND_HASH_FOREACH_END();
 
+#if PHP_VERSION_ID < 70300
   if( ZEND_HASH_APPLY_PROTECTION(data_hash) ) {
     data_hash->u.v.nApplyCount--;
+#else
+  if (!(GC_FLAGS(data_hash) & GC_IMMUTABLE)) {
+    GC_UNPROTECT_RECURSION(data_hash);
+#endif
   }
 }
 #endif
@@ -417,11 +431,21 @@ static zend_always_inline void mustache_data_from_object_properties_zval(mustach
     data_hash = Z_OBJ_HT_P(current)->get_properties(current TSRMLS_CC);
   }
   if( data_hash != NULL && zend_hash_num_elements(data_hash) > 0 ) {
+#if PHP_VERSION_ID < 70300
     if( ZEND_HASH_APPLY_PROTECTION(data_hash) && ++data_hash->u.v.nApplyCount > 1 ) {
       php_error(E_WARNING, "Data includes circular reference");
       data_hash->u.v.nApplyCount--;
       return;
+#else
+    if (!(GC_FLAGS(data_hash) & GC_IMMUTABLE)) {
+      if (GC_IS_RECURSIVE(data_hash)) {
+        php_error(E_WARNING, "Data includes circular reference");
+        return;
+      }
+      GC_PROTECT_RECURSION(data_hash);
+#endif
     }
+
 
     ZEND_HASH_FOREACH_KEY_VAL_IND(data_hash, key_nindex, key, data_entry) {
       (void)key_nindex; /* avoid [-Wunused-but-set-variable] */
@@ -451,8 +475,13 @@ static zend_always_inline void mustache_data_from_object_properties_zval(mustach
       }
     } ZEND_HASH_FOREACH_END();
 
+#if PHP_VERSION_ID < 70300
     if( ZEND_HASH_APPLY_PROTECTION(data_hash) ) {
       data_hash->u.v.nApplyCount--;
+#else
+    if (!(GC_FLAGS(data_hash) & GC_IMMUTABLE)) {
+      GC_UNPROTECT_RECURSION(data_hash);
+#endif
     }
   }
 }
@@ -519,10 +548,19 @@ static zend_always_inline void mustache_data_from_object_functions_zval(mustache
     data_hash = &ce->function_table;
   }
   if( data_hash != NULL && zend_hash_num_elements(data_hash) > 0 ) {
+#if PHP_VERSION_ID < 70300
     if( ZEND_HASH_APPLY_PROTECTION(data_hash) && ++data_hash->u.v.nApplyCount > 1 ) {
       php_error(E_WARNING, "Data includes circular reference");
       data_hash->u.v.nApplyCount--;
       return;
+#else
+    if (!(GC_FLAGS(data_hash) & GC_IMMUTABLE)) {
+      if (GC_IS_RECURSIVE(data_hash)) {
+        php_error(E_WARNING, "Data includes circular reference");
+        return;
+      }
+      GC_PROTECT_RECURSION(data_hash);
+#endif
     }
 
     ZEND_HASH_FOREACH_KEY_VAL_IND(data_hash, key_nindex, key, data_entry) {
@@ -542,8 +580,13 @@ static zend_always_inline void mustache_data_from_object_functions_zval(mustache
       }
     } ZEND_HASH_FOREACH_END();
 
+#if PHP_VERSION_ID < 70300
     if( ZEND_HASH_APPLY_PROTECTION(data_hash) ) {
       data_hash->u.v.nApplyCount--;
+#else
+    if (!(GC_FLAGS(data_hash) & GC_IMMUTABLE)) {
+      GC_UNPROTECT_RECURSION(data_hash);
+#endif
     }
   }
 }
