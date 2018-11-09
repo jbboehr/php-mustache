@@ -40,8 +40,6 @@ PHP_METHOD(Mustache, getStopSequence);
 PHP_METHOD(Mustache, setEscapeByDefault);
 PHP_METHOD(Mustache, setStartSequence);
 PHP_METHOD(Mustache, setStopSequence);
-PHP_METHOD(Mustache, compile);
-PHP_METHOD(Mustache, execute);
 PHP_METHOD(Mustache, parse);
 PHP_METHOD(Mustache, render);
 PHP_METHOD(Mustache, tokenize);

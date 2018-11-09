@@ -6,7 +6,6 @@
 #include "php_mustache.h"
 #include "php5to7.h"
 #include "mustache_ast.hpp"
-#include "mustache_code.hpp"
 #include "mustache_exceptions.hpp"
 #include "mustache_mustache.hpp"
 #include "mustache_data.hpp"
@@ -32,7 +31,6 @@ static PHP_MINIT_FUNCTION(mustache)
   REGISTER_INI_ENTRIES();
   
   PHP_MINIT(mustache_ast)(INIT_FUNC_ARGS_PASSTHRU);
-  PHP_MINIT(mustache_code)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_mustache)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_data)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_template)(INIT_FUNC_ARGS_PASSTHRU);
@@ -55,9 +53,6 @@ static PHP_MSHUTDOWN_FUNCTION(mustache)
 /* {{{ PHP_MINFO_FUNCTION */
 static PHP_MINFO_FUNCTION(mustache)
 {
-  char opsize[3];
-  snprintf(opsize, 3, "%d", _C_OP_SIZE);
-  
   php_info_print_table_start();
   php_info_print_table_row(2, "Version", PHP_MUSTACHE_VERSION);
   php_info_print_table_row(2, "Released", PHP_MUSTACHE_RELEASE);
@@ -65,7 +60,6 @@ static PHP_MINFO_FUNCTION(mustache)
   php_info_print_table_row(2, "Authors", PHP_MUSTACHE_AUTHORS);
   php_info_print_table_row(2, "Spec Version", PHP_MUSTACHE_SPEC);
   php_info_print_table_row(2, "Libmustache Version", mustache_version());
-  php_info_print_table_row(2, "Libmustache Operand Size", opsize);
 #if MUSTACHE_HAVE_CXX11
   php_info_print_table_row(2, "c++11 unordered map support", "enabled");
 #else

@@ -53,28 +53,6 @@ class Mustache
   public function setStopSequence($stop) {}
   
   /**
-   * Compiles a template to bytecode and returns a class representing it.
-   * 
-   * @param mixed $tmpl The input template maybe be a string or an 
-   *                    instance of MustacheTemplate or MustacheAST
-   * @param mixed $partials (Optional) The template partials. Must be an array
-   *                        with each value either a string, or an instance of
-   *                        MustacheTemplate or MustacheAST
-   * @return MustacheCode The compiled template
-   */
-  public function compile($tmpl, $partials = null) {}
-  
-  /**
-   * Executes compiled bytecode.
-   * 
-   * @param MustacheCode $code The input bytecode
-   * @param mixed $data The input data. May be any array, scalar, or object, 
-   *                    or an instance of MustacheData
-   * @return string The string output
-   */
-  public function execute(MustacheCode $code, $data) {}
-  
-  /**
    * Tokenizes and parses a template and returns a class representing it.
    * 
    * @param mixed $tmpl The input template. May be a string or an instance 
