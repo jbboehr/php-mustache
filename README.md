@@ -17,22 +17,35 @@ All features of Mustache are supported EXCEPT:
 
 ## Installation
 
-#### Linux
+### Linux/OSX
 
-For **Ubuntu LTS**, the extension is available in a [PPA](https://launchpad.net/~jbboehr/+archive/ubuntu/mustache), or via source:
+#### Source
 
-Install [libmustache](https://github.com/jbboehr/libmustache)
+Prerequisite packages are:
+
+* PHP development headers and tools
+* `gcc` >= 4.4 | `clang` >= 3.x | `vc` >= 11
+* GNU `make` >= 3.81
+* `automake`
+* `autoconf`
+* [`libmustache`](https://github.com/jbboehr/libmustache)
 
 ``` sh
-sudo apt-get install git-core php5-dev
 git clone git://github.com/jbboehr/php-mustache.git --recursive
 cd php-mustache
 phpize
 ./configure --enable-mustache
 make
 sudo make install
-echo extension=mustache.so | sudo tee /etc/php5/conf.d/mustache.ini
 ```
+
+Add the extension to your *php.ini*:
+
+```ini
+echo extension=psr.so | tee -a /path/to/your/php.ini
+```
+
+### Fedora/RHEL/CentOS
 
 RPM packages of the extension are available in [Remi's repository](https://rpms.remirepo.net/).
 
@@ -50,17 +63,7 @@ yum install https://rpms.remirepo.net/enterprise/remi-release-7.rpm
 yum install php-pecl-mustache
 ```
 
-#### OSX
-
-You can install the PHP Mustache extension & the libmustache dependancy on OSX using [Homebrew](http://brew.sh/)
-
-``` sh
-brew install php56-mustache
-```
-
-Homebrew has versions of Mustache available for PHP 5.4 - 7.1, just replace `56` above with the version you want; `libmustache` is a dependancy of the extension so you don't need to install it separately.
-
-#### Windows
+### Windows
 
 See [Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild). You may need to add [msinttypes](https://code.google.com/p/msinttypes/) ([export](https://github.com/jbboehr/msinttypes/)) to your include directory.
 
