@@ -2,7 +2,6 @@
 #include "php_mustache.h"
 #include "php5to7.h"
 #include "mustache_ast.hpp"
-#include "mustache_code.hpp"
 #include "mustache_data.hpp"
 #include "mustache_exceptions.hpp"
 #include "mustache_template.hpp"
@@ -38,14 +37,6 @@ ZEND_BEGIN_ARG_INFO_EX(Mustache__setStopSequence_args, ZEND_SEND_BY_VAL, ZEND_RE
 	ZEND_ARG_INFO(0, stopSequence)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(Mustache__compile_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, tmpl)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__execute_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, code)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(Mustache__parse_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, tmpl)
 ZEND_END_ARG_INFO()
@@ -74,8 +65,6 @@ static zend_function_entry Mustache_methods[] = {
   PHP_ME(Mustache, setEscapeByDefault, Mustache__setEscapeByDefault_args, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, setStartSequence, Mustache__setStartSequence_args, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, setStopSequence, Mustache__setStopSequence_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, compile, Mustache__compile_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, execute, Mustache__execute_args, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, parse, Mustache__parse_args, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, render, Mustache__render_args, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, tokenize, Mustache__tokenize_args, ZEND_ACC_PUBLIC)
@@ -585,99 +574,6 @@ PHP_METHOD(Mustache, setStopSequence)
   }
 }
 /* }}} Mustache::setStartSequence */
-
-/* {{{ proto MustacheCode Mustache::compile(string template) */
-PHP_METHOD(Mustache, compile)
-{
-  try {
-    // Custom parameters
-    zval * tmpl = NULL;
-    zval * partials = NULL;
-  
-    // Check parameters
-    zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "Oz|z", 
-            &_this_zval, Mustache_ce_ptr, &tmpl, &partials) == FAILURE) {
-      throw PhpInvalidParameterException();
-    }
-
-    // Class parameters
-    _this_zval = getThis();
-    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
-    
-    // Prepare template tree
-    mustache::Node templateNode;
-    mustache::Node * templateNodePtr = &templateNode;
-    if( !mustache_parse_template_param(tmpl, payload->mustache, &templateNodePtr TSRMLS_CC) ) {
-      RETURN_FALSE;
-      return;
-    }
-    
-    // Prepare partials
-    mustache::Node::Partials templatePartials;
-    mustache_parse_partials_param(partials, payload->mustache, &templatePartials TSRMLS_CC);
-    
-    // Compile
-    uint8_t * codes;
-    size_t codes_length;
-    payload->mustache->compile(templateNodePtr, &templatePartials, &codes, &codes_length);
-    
-    // Initialize new object
-    object_init_ex(return_value, MustacheCode_ce_ptr);
-    zend_update_property_stringl(MustacheCode_ce_ptr, return_value, 
-        "binaryString", sizeof("binaryString") - 1, (char *) codes, codes_length TSRMLS_CC);
-    
-  } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
-  }
-}
-/* }}} Mustache::compile */
-
-/* {{{ proto string Mustache::execute(MustacheCode code) */
-PHP_METHOD(Mustache, execute)
-{
-  try {
-    // Custom parameters
-    zval * code = NULL;
-    zval * data = NULL;
-    
-    // Check parameters
-    zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "OOz", 
-            &_this_zval, Mustache_ce_ptr, &code, MustacheCode_ce_ptr, &data) == FAILURE) {
-      throw PhpInvalidParameterException();
-    }
-
-    // Class parameters
-    _this_zval = getThis();
-    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
-    
-    // Prepare code
-    zval rv;
-    zval * value = _zend_read_property(Z_OBJCE_P(code), code, "binaryString", sizeof("binaryString")-1, 1, &rv);
-    if( !value || Z_TYPE_P(value) != IS_STRING ) {
-        throw PhpInvalidParameterException();
-    }
-
-    // Prepare template data
-    mustache::Data templateData;
-    mustache::Data * templateDataPtr = &templateData;
-    if( !mustache_parse_data_param(data, payload->mustache, &templateDataPtr TSRMLS_CC) ) {
-      RETURN_FALSE;
-    }
-    
-    // Execute bytecode
-    std::string output;
-    payload->mustache->execute((uint8_t *) Z_STRVAL_P(value), Z_STRLEN_P(value), templateDataPtr, &output);
-    
-    // Output
-    _RETVAL_STRINGL(output.c_str(), output.length());
-    
-  } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
-  }
-}
-/* }}} Mustache::execute */
 
 /* {{{ proto MustacheAST Mustache::parse(string template) */
 PHP_METHOD(Mustache, parse)
