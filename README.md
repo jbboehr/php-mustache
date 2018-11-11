@@ -63,6 +63,12 @@ yum install https://rpms.remirepo.net/enterprise/remi-release-7.rpm
 yum install php-pecl-mustache
 ```
 
+### Nix/NixOS
+
+``` sh
+nix-env -i -f https://github.com/jbboehr/php-mustache/archive/master.tar.gz
+```
+
 ### Windows
 
 See [Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild). You may need to add [msinttypes](https://code.google.com/p/msinttypes/) ([export](https://github.com/jbboehr/msinttypes/)) to your include directory.
