@@ -12,11 +12,36 @@ matrix:
   fast_finish: true
   allow_failures:
     - php: 'master'
+  include:
+    - language: nix
+      php:
+      before_install: nix-env -iA cachix -f https://github.com/NixOS/nixpkgs/tarball/889c72032f8595fcd7542c6032c208f6b8033db6
+      install:
+      script: nix-build --argstr phpMustacheVersion $TRAVIS_BRANCH --arg phpMustacheSrc `pwd` --arg php "(import <nixpkgs> {}).$NIX_PHP_ATTR" | tee result.txt
+      after_success: cat result.txt | cachix push jbboehr-ci
+      env:
+        - NIX_PHP_ATTR=php71
+    - language: nix
+      php:
+      before_install: nix-env -iA cachix -f https://github.com/NixOS/nixpkgs/tarball/889c72032f8595fcd7542c6032c208f6b8033db6
+      install:
+      script: nix-build --argstr phpMustacheVersion $TRAVIS_BRANCH --arg phpMustacheSrc `pwd` --arg php "(import <nixpkgs> {}).$NIX_PHP_ATTR" | tee result.txt
+      after_success: cat result.txt | cachix push jbboehr-ci
+      env:
+        - NIX_PHP_ATTR=php72
+
+env:
+  global:
+    - secure: "IRf7Rmrh7x4k5PVsYKkiogLiX94wsIQoABhBkvwqXLw7MruuBlm4S9w8iecb71U7Cd4uNfG2KX4GXNZF9E8s7UIkUsUHU++W0vm+ctEBqPtj6ArWH2cuzzqzUuDdxYFtKWocJt0QmVKp/WMSX0ZA32BTxIkEw2KhVof0+idU2eQ="
+    - LIBMUSTACHE_VERSION: v0.5.0
+    - NO_INTERACTION: 1
+    - REPORT_EXIT_STATUS: 1
 
 branches:
   only:
     - master
     - travis
+    - ci
 
 addons:
   apt:

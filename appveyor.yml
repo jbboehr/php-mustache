@@ -6,6 +6,7 @@ branches:
   - appveyor
   - w32
   - windows
+  - ci
 
 platform:
   - x86
@@ -19,6 +20,7 @@ environment:
   NO_INTERACTION: 1
   REPORT_EXIT_STATUS: 1
   TEST_PHP_EXECUTABLE: C:\projects\php\php.exe
+  LIBMUSTACHE_VERSION: v0.5.0
 
   matrix:
 # note: json-c is currently failing to compile on < vc15
@@ -107,7 +109,7 @@ install:
 - cmd: >-
     cd C:\projects\
     
-    git clone https://github.com/jbboehr/libmustache.git
+    git clone -b %LIBMUSTACHE_VERSION% https://github.com/jbboehr/libmustache.git
     
     cd C:\projects\libmustache
     
