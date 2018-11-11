@@ -10,10 +10,10 @@
   <email>jbboehr@php.net</email>
   <active>yes</active>
  </lead>
- <date>2017-07-18</date>
+ <date>2018-11-11</date>
  <version>
-  <release>0.7.4</release>
-  <api>0.7.4</api>
+  <release>0.8.0</release>
+  <api>0.8.0</api>
  </version>
  <stability>
   <release>stable</release>
@@ -21,8 +21,10 @@
  </stability>
  <license uri="https://opensource.org/licenses/MIT">MIT</license>
  <notes>
-- Mark release as stable
-- Change minimum version to 5.4.0
+- Require libmustache >= 0.5.0
+- Remove old deprecated experimental compiler
+- Change minimum PHP version to 5.6
+- Allow installation on PHP 7.3
  </notes>
  <contents>
   <dir name="/">
@@ -34,8 +36,6 @@
    <file name="mustache_ast.hpp" role="src" />
    <file name="mustache_class_method_lambda.cpp" role="src" />
    <file name="mustache_class_method_lambda.hpp" role="src" />
-   <file name="mustache_code.cpp" role="src" />
-   <file name="mustache_code.hpp" role="src" />
    <file name="mustache_data.cpp" role="src" />
    <file name="mustache_data.hpp" role="src" />
    <file name="mustache_exceptions.cpp" role="src" />
@@ -53,30 +53,16 @@
    <file name="mustache_zend_closure_lambda.hpp" role="src" />
    <file name="php_mustache.cpp" role="src" />
    <file name="php_mustache.h" role="src" />
-   <file name="php_mustache.hpp" role="src" />
    <file name="tests/MustacheAST____construct.phpt" role="test" />
    <file name="tests/MustacheAST____sleep.phpt" role="test" />
    <file name="tests/MustacheAST__toArray.phpt" role="test" />
    <file name="tests/MustacheAST____toString.phpt" role="test" />
    <file name="tests/MustacheAST____wakeup-apc.phpt" role="test" />
    <file name="tests/MustacheAST____wakeup.phpt" role="test" />
-   <file name="tests/MustacheCode____construct.phpt" role="test" />
-   <file name="tests/MustacheCode____sleep.phpt" role="test" />
-   <file name="tests/MustacheCode__toReadableString.phpt" role="test" />
-   <file name="tests/MustacheCode____toString.phpt" role="test" />
-   <file name="tests/MustacheCode____wakeup-apc.phpt" role="test" />
-   <file name="tests/MustacheCode____wakeup.phpt" role="test" />
-   <file name="tests/Mustache__compile-accepts-MustacheAST.phpt" role="test" />
-   <file name="tests/Mustache__compile-accepts-MustacheTemplate.phpt" role="test" />
-   <file name="tests/Mustache__compile.phpt" role="test" />
-   <file name="tests/Mustache__compile-with-partials.phpt" role="test" />
    <file name="tests/Mustache____construct.phpt" role="test" />
    <file name="tests/MustacheData____construct.phpt" role="test" />
    <file name="tests/MustacheData__toValue.phpt" role="test" />
    <file name="tests/Mustache__debugDataStructure.phpt" role="test" />
-   <file name="tests/Mustache__execute-accepts-MustacheData.phpt" role="test" />
-   <file name="tests/Mustache__execute.phpt" role="test" />
-   <file name="tests/Mustache__execute-with-partials.phpt" role="test" />
    <file name="tests/Mustache__getEscapeByDefault.phpt" role="test" />
    <file name="tests/Mustache__getStartSequence.phpt" role="test" />
    <file name="tests/Mustache__getStopSequence.phpt" role="test" />
@@ -249,8 +235,8 @@
  <dependencies>
   <required>
    <php>
-    <min>5.4.0</min>
-    <max>7.2.99</max>
+    <min>5.6.0</min>
+    <max>7.3.99</max>
    </php>
    <pearinstaller>
     <min>1.4.1</min>
