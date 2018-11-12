@@ -108,24 +108,6 @@ Well, 6000 dollars, after taxes.
 
 ```
 
-Example 2:
-
-```php
-<?php
-$mustache = new Mustache();
-$tmpl = $mustache->compile('{{var}}');
-$data = new MustacheData(array('var' => 'val'));
-for( $i = 0; $i < 5; $i++ ) {
-  echo $mustache->execute($tmpl, $data);
-}
-```
-
-Produces:
-
-```text
-valvalvalvalval
-```
-
 
 ## Credits
 
