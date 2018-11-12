@@ -53,6 +53,7 @@
    <file name="mustache_zend_closure_lambda.hpp" role="src" />
    <file name="php_mustache.cpp" role="src" />
    <file name="php_mustache.h" role="src" />
+   <file name="php5to7.h" role="src" />
    <file name="tests/MustacheAST____construct.phpt" role="test" />
    <file name="tests/MustacheAST____sleep.phpt" role="test" />
    <file name="tests/MustacheAST__toArray.phpt" role="test" />
