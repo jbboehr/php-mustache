@@ -51,7 +51,7 @@ environment:
 
 install:
 - cmd: cinst wget
-- ps: Import-Module .\appveyor.psm1
+- ps: Import-Module .\.ci\appveyor.psm1
 - ps: InitializeBuildVars
 - '"%VSCOMNTOOLS%\VsDevCmd" %PLATFORM%'
 - '"%VSCOMNTOOLS%\..\..\VC\vcvarsall.bat" %ARCH%'

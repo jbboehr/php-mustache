@@ -1,41 +1,47 @@
-language: php
-
-php:
-  - 5.6
-  - 7.0
-  - 7.1
-  - 7.2
-  - 7.3
-  - master
+sudo: false
 
 matrix:
   fast_finish: true
   allow_failures:
-    - php: 'master'
+  - php: 'master'
   include:
-    - language: nix
-      php:
-      before_install: nix-env -iA cachix -f https://github.com/NixOS/nixpkgs/tarball/889c72032f8595fcd7542c6032c208f6b8033db6
-      install:
-      script: nix-build --argstr phpMustacheVersion $TRAVIS_BRANCH --arg phpMustacheSrc `pwd` --arg php "(import <nixpkgs> {}).$NIX_PHP_ATTR" | tee result.txt
-      after_success: cat result.txt | cachix push jbboehr-ci
-      env:
-        - NIX_PHP_ATTR=php71
-    - language: nix
-      php:
-      before_install: nix-env -iA cachix -f https://github.com/NixOS/nixpkgs/tarball/889c72032f8595fcd7542c6032c208f6b8033db6
-      install:
-      script: nix-build --argstr phpMustacheVersion $TRAVIS_BRANCH --arg phpMustacheSrc `pwd` --arg php "(import <nixpkgs> {}).$NIX_PHP_ATTR" | tee result.txt
-      after_success: cat result.txt | cachix push jbboehr-ci
-      env:
-        - NIX_PHP_ATTR=php72
+  - language: php
+    php: '5.6'
+  - language: php
+    php: '7.0'
+  - language: php
+    php: '7.1'
+  - language: php
+    php: '7.2'
+  - language: php
+    php: '7.3'
+  - language: php
+    php: 'master'
+  - language: nix
+    env:
+    - NIX_CHANNEL=18.03
+    - NIX_PHP_ATTR=php56
+  - language: nix
+    env:
+    - NIX_CHANNEL=18.03
+    - NIX_PHP_ATTR=php70
+  - language: nix
+    env:
+    - NIX_CHANNEL=18.09
+    - NIX_PHP_ATTR=php71
+  - language: nix
+    env:
+    - NIX_CHANNEL=18.09
+    - NIX_PHP_ATTR=php72
+  - language: nix
+    env:
+    - NIX_CHANNEL=unstable
+    - NIX_PHP_ATTR=php
 
 env:
   global:
-    - secure: "IRf7Rmrh7x4k5PVsYKkiogLiX94wsIQoABhBkvwqXLw7MruuBlm4S9w8iecb71U7Cd4uNfG2KX4GXNZF9E8s7UIkUsUHU++W0vm+ctEBqPtj6ArWH2cuzzqzUuDdxYFtKWocJt0QmVKp/WMSX0ZA32BTxIkEw2KhVof0+idU2eQ="
     - LIBMUSTACHE_VERSION: v0.5.0
-    - NO_INTERACTION: 1
-    - REPORT_EXIT_STATUS: 1
+    - secure: "IRf7Rmrh7x4k5PVsYKkiogLiX94wsIQoABhBkvwqXLw7MruuBlm4S9w8iecb71U7Cd4uNfG2KX4GXNZF9E8s7UIkUsUHU++W0vm+ctEBqPtj6ArWH2cuzzqzUuDdxYFtKWocJt0QmVKp/WMSX0ZA32BTxIkEw2KhVof0+idU2eQ="
 
 branches:
   only:
@@ -43,38 +49,19 @@ branches:
     - travis
     - ci
 
+cache: ccache
+
 addons:
   apt:
     packages:
       - lcov
 
 before_install:
-  - travis_retry gem install coveralls-lcov
-  - travis_retry git submodule update --init --recursive
-  - travis_retry git clone git://github.com/jbboehr/libmustache.git libmustache
-  - cd libmustache
-  - autoreconf -fiv
-  - ./configure --prefix=$HOME/libmustache --without-mustache-spec
-  - make
-  - make install
-  - cd ..
-
-install:
-  - phpize
-  - ./configure --enable-mustache --with-libmustache=$HOME/libmustache CXXFLAGS="-fprofile-arcs -ftest-coverage" LDFLAGS="--coverage -lgcov"
-  - make clean all
-
-script:
-  - export NO_INTERACTION=1
-  - export REPORT_EXIT_STATUS=1
-  - export TEST_PHP_EXECUTABLE=`which php`
-  - lcov --directory . --zerocounters
-  - lcov --directory . --capture --initial --compat-libtool --output-file coverage.info
-  - php run-tests.php -d extension=mustache.so -d extension_dir=modules -n ./tests/*.phpt
-  - for i in `ls tests/*.out 2>/dev/null`; do echo "-- START ${i}"; cat $i; echo "-- END"; done
-  - lcov --no-checksum --directory . --capture --compat-libtool --output-file coverage.info
-  - lcov --remove coverage.info "/usr*" --remove coverage.info "*/libmustache/*" --remove coverage.info "*/.phpenv/*" --compat-libtool --output-file coverage.info
-
-after_success:
-  - coveralls-lcov coverage.info
-
+- travis_retry git submodule update --init --recursive
+- source ./.ci/travis_env.sh
+- before_install
+install: install
+before_script: before_script
+script: script
+after_success: after_success
+after_failure: after_failure

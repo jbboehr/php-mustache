@@ -42,7 +42,7 @@ sudo make install
 Add the extension to your *php.ini*:
 
 ```ini
-echo extension=psr.so | tee -a /path/to/your/php.ini
+echo extension=mustache.so | tee -a /path/to/your/php.ini
 ```
 
 ### Fedora/RHEL/CentOS
