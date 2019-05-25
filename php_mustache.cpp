@@ -4,7 +4,6 @@
 #include <php_ini.h>
 #include <ext/standard/info.h>
 #include "php_mustache.h"
-#include "php5to7.h"
 #include "mustache_ast.hpp"
 #include "mustache_exceptions.hpp"
 #include "mustache_mustache.hpp"

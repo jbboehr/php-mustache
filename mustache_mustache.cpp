@@ -1,6 +1,5 @@
 
 #include "php_mustache.h"
-#include "php5to7.h"
 #include "mustache_ast.hpp"
 #include "mustache_data.hpp"
 #include "mustache_exceptions.hpp"
@@ -74,103 +73,52 @@ static zend_function_entry Mustache_methods[] = {
 /* }}} */
 
 /* {{{ php_mustache_mustache_object_fetch_object */
-#if PHP_MAJOR_VERSION < 7
-struct php_obj_Mustache * php_mustache_mustache_object_fetch_object(zval * zv TSRMLS_DC)
-{
-  return (struct php_obj_Mustache *) zend_object_store_get_object(zv TSRMLS_CC);
-}
-#else
-static inline struct php_obj_Mustache * php_mustache_mustache_fetch_object(zend_object * obj TSRMLS_DC)
+static inline struct php_obj_Mustache * php_mustache_mustache_fetch_object(zend_object * obj)
 {
   return (struct php_obj_Mustache *) ((char *)(obj) - XtOffsetOf(struct php_obj_Mustache, std));
 }
 
-struct php_obj_Mustache * php_mustache_mustache_object_fetch_object(zval * zv TSRMLS_DC)
+struct php_obj_Mustache * php_mustache_mustache_object_fetch_object(zval * zv)
 {
-  return php_mustache_mustache_fetch_object(Z_OBJ_P(zv) TSRMLS_CC);
+  return php_mustache_mustache_fetch_object(Z_OBJ_P(zv));
 }
-#endif
 /* }}} */
 
 /* {{{ Mustache_obj_free */
-#if PHP_MAJOR_VERSION < 7
-static void Mustache_obj_free(void *object TSRMLS_DC)
+static void Mustache_obj_free(zend_object * object)
 {
   try {
-    struct php_obj_Mustache * payload = (struct php_obj_Mustache *) object;
-
-    if( payload->mustache != NULL ) {
-      delete payload->mustache;
-    }
-    
-    efree(object);
-    
-  } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
-  }
-}
-#else
-static void Mustache_obj_free(zend_object * object TSRMLS_DC)
-{
-  try {
-    struct php_obj_Mustache * payload = php_mustache_mustache_fetch_object(object TSRMLS_CC);
+    struct php_obj_Mustache * payload = php_mustache_mustache_fetch_object(object);
     
     if( payload->mustache != NULL ) {
       delete payload->mustache;
     }
     
-    zend_object_std_dtor((zend_object *) object TSRMLS_CC);
+    zend_object_std_dtor((zend_object *) object);
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
-#endif
 /* }}} */
 
 /* {{{ Mustache_obj_create */
-#if PHP_MAJOR_VERSION < 7
-static zend_object_value Mustache_obj_create(zend_class_entry *class_type TSRMLS_DC)
-{
-  zend_object_value retval;
-  
-  try {
-    struct php_obj_Mustache * payload = NULL;
-
-    payload = (struct php_obj_Mustache *) emalloc(sizeof(php_obj_Mustache));
-    memset(payload, 0, sizeof(php_obj_Mustache));
-    payload->std.ce = class_type;
-
-    payload->mustache = mustache_new_Mustache(TSRMLS_C);
-    
-    retval.handle = zend_objects_store_put(payload, NULL, 
-        (zend_objects_free_object_storage_t) Mustache_obj_free, NULL TSRMLS_CC);
-    retval.handlers = &Mustache_obj_handlers;
-    
-  } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
-  }
-
-  return retval;
-}
-#else
-static zend_object * Mustache_obj_create(zend_class_entry * ce TSRMLS_DC)
+static zend_object * Mustache_obj_create(zend_class_entry * ce)
 {
   struct php_obj_Mustache * intern;
   
   try {
     intern = (struct php_obj_Mustache *) ecalloc(1, sizeof(php_obj_Mustache) + zend_object_properties_size(ce));
-    zend_object_std_init(&intern->std, ce TSRMLS_CC);
+    zend_object_std_init(&intern->std, ce);
     intern->std.handlers = &Mustache_obj_handlers;
 
-    intern->mustache = mustache_new_Mustache(TSRMLS_C);
+    intern->mustache = mustache_new_Mustache();
     return &intern->std;
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
   
   return NULL;
 }
-#endif
 /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION */
@@ -181,24 +129,22 @@ PHP_MINIT_FUNCTION(mustache_mustache)
 
     INIT_CLASS_ENTRY(ce, "Mustache", Mustache_methods);
     ce.create_object = Mustache_obj_create;
-    Mustache_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
+    Mustache_ce_ptr = zend_register_internal_class(&ce);
     memcpy(&Mustache_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-#if PHP_MAJOR_VERSION >= 7
     Mustache_obj_handlers.offset = XtOffsetOf(php_obj_Mustache, std);
     Mustache_obj_handlers.free_obj = Mustache_obj_free;
-#endif
     Mustache_obj_handlers.clone_obj = NULL;
 
     return SUCCESS;
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
     return FAILURE;
   }
 }
 /* }}} */
 
 /* {{{ mustache_new_Mustache */
-mustache::Mustache * mustache_new_Mustache(TSRMLS_D) {
+mustache::Mustache * mustache_new_Mustache() {
   mustache::Mustache * mustache = new mustache::Mustache();
 
   // Set ini settings
@@ -219,21 +165,21 @@ mustache::Mustache * mustache_new_Mustache(TSRMLS_D) {
 /* }}} */
 
 /* {{{ mustache_parse_data_param */
-bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache, mustache::Data ** node TSRMLS_DC)
+bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache, mustache::Data ** node)
 {
   struct php_obj_MustacheData * mdPayload = NULL;
   
   if( Z_TYPE_P(data) == IS_OBJECT ) {
     if( Z_OBJCE_P(data) == MustacheData_ce_ptr ) {
-      mdPayload = php_mustache_data_object_fetch_object(data TSRMLS_CC);
+      mdPayload = php_mustache_data_object_fetch_object(data);
       *node = mdPayload->data;
       return true;
     } else {
-      mustache_data_from_zval(*node, data TSRMLS_CC);
+      mustache_data_from_zval(*node, data);
       return true;
     }
   } else {
-    mustache_data_from_zval(*node, data TSRMLS_CC);
+    mustache_data_from_zval(*node, data);
     return true;
   }
 }
@@ -241,7 +187,7 @@ bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache, musta
 
 /* {{{ mustache_parse_partials_param */
 static inline void mustache_parse_partial_param(char * key, zval * data,
-        mustache::Mustache * mustache, mustache::Node::Partials * partials TSRMLS_DC)
+        mustache::Mustache * mustache, mustache::Node::Partials * partials)
 {
     std::string ckey;
     std::string tmpl;
@@ -259,7 +205,7 @@ static inline void mustache_parse_partial_param(char * key, zval * data,
         // String key, object value
         if( Z_OBJCE_P(data) == MustacheTemplate_ce_ptr ) {
             zval rv;
-            zval * value = _zend_read_property(Z_OBJCE_P(data), data, "template", sizeof("template")-1, 1, &rv);
+            zval * value = zend_read_property(Z_OBJCE_P(data), data, "template", sizeof("template")-1, 1, &rv);
             convert_to_string(value);
             std::string tmpstr(Z_STRVAL_P(value));
             ckey.assign(key);
@@ -267,7 +213,7 @@ static inline void mustache_parse_partial_param(char * key, zval * data,
             mustache->tokenize(&tmpstr, &(*partials)[ckey]);
         } else if( Z_OBJCE_P(data) == MustacheAST_ce_ptr ) {
             ckey.assign(key);
-            maPayload = php_mustache_ast_object_fetch_object(data TSRMLS_CC);
+            maPayload = php_mustache_ast_object_fetch_object(data);
             partials->insert(std::make_pair(ckey, node));
             nodePtr = &(*partials)[ckey];
             nodePtr->type = mustache::Node::TypeContainer;
@@ -281,7 +227,7 @@ static inline void mustache_parse_partial_param(char * key, zval * data,
 }
 
 bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
-        mustache::Node::Partials * partials TSRMLS_DC)
+        mustache::Node::Partials * partials)
 {
     HashTable * data_hash = NULL;
     ulong key_nindex = 0;
@@ -293,47 +239,25 @@ bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
 
     data_hash = HASH_OF(array);
 
-#if PHP_MAJOR_VERSION < 7
-    do {
-        HashPosition data_pointer = NULL;
-        zval ** data_entry = NULL;
-        int key_type = 0;
-        char * key_str = NULL;
-        uint key_len = 0;
+    zval * data_entry = NULL;
+    zend_string * key = NULL;
 
-        zend_hash_internal_pointer_reset_ex(data_hash, &data_pointer);
-        while( zend_hash_get_current_data_ex(data_hash, (void**) &data_entry, &data_pointer) == SUCCESS ) {
-            key_type = zend_hash_get_current_key_ex(data_hash, &key_str, &key_len, &key_nindex, false, &data_pointer);
-            if( key_type != HASH_KEY_IS_STRING ) {
-                php_error(E_WARNING, "Partial array contains a non-string key");
-            } else {
-                mustache_parse_partial_param(key_str, *data_entry, mustache, partials TSRMLS_CC);
-            }
-            zend_hash_move_forward_ex(data_hash, &data_pointer);
+    ZEND_HASH_FOREACH_KEY_VAL(data_hash, key_nindex, key, data_entry) {
+        (void)key_nindex;
+        if( !key ) {
+            php_error(E_WARNING, "Partial array contains a non-string key");
+        } else {
+            mustache_parse_partial_param(key->val, data_entry, mustache, partials);
         }
-    } while(0);
-#else
-    do {
-        zval * data_entry = NULL;
-        zend_string * key = NULL;
+    } ZEND_HASH_FOREACH_END();
 
-        ZEND_HASH_FOREACH_KEY_VAL(data_hash, key_nindex, key, data_entry) {
-            (void)key_nindex;
-            if( !key ) {
-                php_error(E_WARNING, "Partial array contains a non-string key");
-            } else {
-                mustache_parse_partial_param(key->val, data_entry, mustache, partials TSRMLS_CC);
-            }
-        } ZEND_HASH_FOREACH_END();
-    } while(0);
-#endif
   return true;
 }
 /* }}} */
 
 /* {{{ mustache_parse_template_param */
 bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
-        mustache::Node ** node TSRMLS_DC)
+        mustache::Node ** node)
 {
   // Prepare template string
   if( Z_TYPE_P(tmpl) == IS_STRING ) {
@@ -354,7 +278,7 @@ bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
     // Use compiled template
     if( Z_OBJCE_P(tmpl) == MustacheTemplate_ce_ptr ) {
         zval rv;
-        zval * value = _zend_read_property(Z_OBJCE_P(tmpl), tmpl, "template", sizeof("template")-1, 1, &rv);
+        zval * value = zend_read_property(Z_OBJCE_P(tmpl), tmpl, "template", sizeof("template")-1, 1, &rv);
         convert_to_string(value);
         std::string tmpstr(Z_STRVAL_P(value));
       
@@ -373,7 +297,7 @@ bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
       }
       return true;
     } else if( Z_OBJCE_P(tmpl) == MustacheAST_ce_ptr ) {
-      struct php_obj_MustacheAST * maPayload = php_mustache_ast_object_fetch_object(tmpl TSRMLS_CC);
+      struct php_obj_MustacheAST * maPayload = php_mustache_ast_object_fetch_object(tmpl);
       if( maPayload->node == NULL ) {
         php_error(E_WARNING, "Empty MustacheAST");
         return false;
@@ -397,7 +321,7 @@ PHP_METHOD(Mustache, __construct)
   try {
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "O", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "O",
             &_this_zval, Mustache_ce_ptr) == FAILURE) {
       throw PhpInvalidParameterException();
     }
@@ -406,7 +330,7 @@ PHP_METHOD(Mustache, __construct)
     _this_zval = getThis();
     
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
 /* }}} Mustache::__construct */
@@ -417,14 +341,14 @@ PHP_METHOD(Mustache, getEscapeByDefault)
   try {
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "O", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "O",
             &_this_zval, Mustache_ce_ptr) == FAILURE) {
       throw PhpInvalidParameterException();
     }
 
     // Class parameters
     _this_zval = getThis();
-    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
+    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
     
     // Main
     if( payload->mustache->getEscapeByDefault() ) {
@@ -434,7 +358,7 @@ PHP_METHOD(Mustache, getEscapeByDefault)
     }
     
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
 /* }}} Mustache::getEscapeByDefault */
@@ -445,21 +369,21 @@ PHP_METHOD(Mustache, getStartSequence)
   try {
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "O", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "O",
             &_this_zval, Mustache_ce_ptr) == FAILURE) {
       throw PhpInvalidParameterException();
     }
 
     // Class parameters
     _this_zval = getThis();
-    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
+    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
     
     // Main
     const std::string & str = payload->mustache->getStartSequence();
-    _RETVAL_STRINGL(str.c_str(), str.length());
+    RETVAL_STRINGL(str.c_str(), str.length());
     
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
 /* }}} Mustache::getStartSequence */
@@ -470,21 +394,21 @@ PHP_METHOD(Mustache, getStopSequence)
   try {
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "O", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "O",
             &_this_zval, Mustache_ce_ptr) == FAILURE) {
       throw PhpInvalidParameterException();
     }
 
     // Class parameters
     _this_zval = getThis();
-    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
+    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
     
     // Main
     const std::string & str = payload->mustache->getStopSequence();
-    _RETVAL_STRINGL(str.c_str(), str.length());
+    RETVAL_STRINGL(str.c_str(), str.length());
     
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
 /* }}} Mustache::getStopSequence */
@@ -498,21 +422,21 @@ PHP_METHOD(Mustache, setEscapeByDefault)
   
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "Ol", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "Ol",
             &_this_zval, Mustache_ce_ptr, &flag) == FAILURE) {
       throw PhpInvalidParameterException();
     }
 
     // Class parameters
     _this_zval = getThis();
-    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
+    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
   
     // Main
     payload->mustache->setEscapeByDefault((bool) flag != 0);
     RETURN_TRUE;
     
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
 /* }}} Mustache::setEscapeByDefault */
@@ -527,21 +451,21 @@ PHP_METHOD(Mustache, setStartSequence)
     
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "Os", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "Os",
             &_this_zval, Mustache_ce_ptr, &str, &str_len) == FAILURE) {
       throw PhpInvalidParameterException();
     }
 
     // Class parameters
     _this_zval = getThis();
-    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
+    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
     
     // Main
     payload->mustache->setStartSequence(str/*, str_len*/);
     RETURN_TRUE;
     
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
 /* }}} Mustache::setStartSequence */
@@ -556,21 +480,21 @@ PHP_METHOD(Mustache, setStopSequence)
     
     // Check parameters
     zval * _this_zval;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "Os", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "Os",
             &_this_zval, Mustache_ce_ptr, &str, &str_len) == FAILURE) {
       throw PhpInvalidParameterException();
     }
 
     // Class parameters
     _this_zval = getThis();
-    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
+    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
     
     // Main
     payload->mustache->setStopSequence(str/*, str_len*/);
     RETURN_TRUE;
     
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
 /* }}} Mustache::setStartSequence */
@@ -584,18 +508,18 @@ PHP_METHOD(Mustache, parse)
   
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "Oz", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "Oz",
             &_this_zval, Mustache_ce_ptr, &tmpl) == FAILURE) {
       throw PhpInvalidParameterException();
     }
 
     // Class parameters
     _this_zval = getThis();
-    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
+    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
     
     // Check template parameter
     mustache::Node * templateNodePtr = NULL;
-    if( !mustache_parse_template_param(tmpl, payload->mustache, &templateNodePtr TSRMLS_CC) ) {
+    if( !mustache_parse_template_param(tmpl, payload->mustache, &templateNodePtr) ) {
       delete templateNodePtr;
       RETURN_FALSE;
       return;
@@ -605,14 +529,14 @@ PHP_METHOD(Mustache, parse)
     if( Z_TYPE_P(tmpl) == IS_STRING ) {
       if( MustacheAST_ce_ptr == NULL ) {
         delete templateNodePtr;
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Class MustacheAST does not exist");
+        php_error_docref(NULL, E_WARNING, "Class MustacheAST does not exist");
         RETURN_FALSE;
         return;
       }
       
       // Initialize new object
       object_init_ex(return_value, MustacheAST_ce_ptr);
-      struct php_obj_MustacheAST * intern = php_mustache_ast_object_fetch_object(return_value TSRMLS_CC);
+      struct php_obj_MustacheAST * intern = php_mustache_ast_object_fetch_object(return_value);
       intern->node = templateNodePtr;
       
     // Ref - not sure if this is required
@@ -626,7 +550,7 @@ PHP_METHOD(Mustache, parse)
     }
     
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
 /* }}} Mustache::parse */
@@ -642,19 +566,19 @@ PHP_METHOD(Mustache, render)
     
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "Ozz|a/", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "Ozz|a/",
             &_this_zval, Mustache_ce_ptr, &tmpl, &data, &partials) == FAILURE) {
       throw PhpInvalidParameterException();
     }
 
     // Class parameters
     _this_zval = getThis();
-    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
+    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
     
     // Prepare template tree
     mustache::Node templateNode;
     mustache::Node * templateNodePtr = &templateNode;
-    if( !mustache_parse_template_param(tmpl, payload->mustache, &templateNodePtr TSRMLS_CC) ) {
+    if( !mustache_parse_template_param(tmpl, payload->mustache, &templateNodePtr) ) {
       RETURN_FALSE;
       return;
     }
@@ -662,14 +586,14 @@ PHP_METHOD(Mustache, render)
     // Prepare template data
     mustache::Data templateData;
     mustache::Data * templateDataPtr = &templateData;
-    if( !mustache_parse_data_param(data, payload->mustache, &templateDataPtr TSRMLS_CC) ) {
+    if( !mustache_parse_data_param(data, payload->mustache, &templateDataPtr) ) {
       RETURN_FALSE;
       return;
     }
     
     // Tokenize partials
     mustache::Node::Partials templatePartials;
-    mustache_parse_partials_param(partials, payload->mustache, &templatePartials TSRMLS_CC);
+    mustache_parse_partials_param(partials, payload->mustache, &templatePartials);
     
     // Reserve length of template
     std::string output;
@@ -681,10 +605,10 @@ PHP_METHOD(Mustache, render)
     payload->mustache->render(templateNodePtr, templateDataPtr, &templatePartials, &output);
     
     // Output
-    _RETVAL_STRINGL(output.c_str(), output.length());
+    RETVAL_STRINGL(output.c_str(), output.length());
     
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
 /* }}} Mustache::render */
@@ -699,14 +623,14 @@ PHP_METHOD(Mustache, tokenize)
   
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "Os", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "Os",
             &_this_zval, Mustache_ce_ptr, &template_str, &template_len) == FAILURE) {
       throw PhpInvalidParameterException();
     }
 
     // Class parameters
     _this_zval = getThis();
-    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval TSRMLS_CC);
+    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
     
     // Assign template to string
     std::string templateStr(template_str/*, template_len*/);
@@ -716,10 +640,10 @@ PHP_METHOD(Mustache, tokenize)
     payload->mustache->tokenize(&templateStr, &root);
     
     // Convert to PHP array
-    mustache_node_to_zval(&root, return_value TSRMLS_CC);
+    mustache_node_to_zval(&root, return_value);
     
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
 /* }}} Mustache::tokenize */
@@ -733,7 +657,7 @@ PHP_METHOD(Mustache, debugDataStructure)
     
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "Oz", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "Oz",
             &_this_zval, Mustache_ce_ptr, &data) == FAILURE) {
       throw PhpInvalidParameterException();
     }
@@ -743,13 +667,13 @@ PHP_METHOD(Mustache, debugDataStructure)
     
     // Prepare template data
     mustache::Data templateData;
-    mustache_data_from_zval(&templateData, data TSRMLS_CC);
+    mustache_data_from_zval(&templateData, data);
 
     // Reverse template data
-    mustache_data_to_zval(&templateData, return_value TSRMLS_CC);
+    mustache_data_to_zval(&templateData, return_value);
   
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
 /* }}} Mustache::debugDataStructure */

@@ -11,11 +11,7 @@ class ZendClosureLambda : public Lambda {
 
   protected:
     int getUserFunctionParamCount();
-#if PHP_MAJOR_VERSION >= 7
     int invokeUserFunction(zval *retval_ptr, int param_count, zval params[]);
-#else
-    int invokeUserFunction(zval **retval_ptr_ptr, int param_count, zval **params[] TSRMLS_DC);
-#endif
 
   public:
     ZendClosureLambda(zval * closure) : closure(closure) {
