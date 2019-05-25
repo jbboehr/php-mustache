@@ -1,6 +1,5 @@
 
 #include "php_mustache.h"
-#include "php5to7.h"
 #include "mustache_exceptions.hpp"
 #include "mustache_lambda_helper.hpp"
 
@@ -27,86 +26,43 @@ static zend_function_entry MustacheLambdaHelper_methods[] = {
 /* }}} */
 
 /* {{{ php_mustache_lambda_helper_object_fetch_object */
-#if PHP_MAJOR_VERSION < 7
-struct php_obj_MustacheLambdaHelper * php_mustache_lambda_helper_object_fetch_object(zval * zv TSRMLS_DC)
-{
-  return (struct php_obj_MustacheLambdaHelper *) zend_object_store_get_object(zv TSRMLS_CC);
-}
-#else
-static inline struct php_obj_MustacheLambdaHelper * php_mustache_lambda_helper_fetch_object(zend_object * obj TSRMLS_DC)
+static inline struct php_obj_MustacheLambdaHelper * php_mustache_lambda_helper_fetch_object(zend_object * obj)
 {
   return (struct php_obj_MustacheLambdaHelper *)((char*)(obj) - XtOffsetOf(struct php_obj_MustacheLambdaHelper, std));
 }
 
-struct php_obj_MustacheLambdaHelper * php_mustache_lambda_helper_object_fetch_object(zval * zv TSRMLS_DC)
+struct php_obj_MustacheLambdaHelper * php_mustache_lambda_helper_object_fetch_object(zval * zv)
 {
-  return php_mustache_lambda_helper_fetch_object(Z_OBJ_P(zv) TSRMLS_CC);
+  return php_mustache_lambda_helper_fetch_object(Z_OBJ_P(zv));
 }
-#endif
 /* }}} */
 
 /* {{{ MustacheLambdaHelper_obj_free */
-#if PHP_MAJOR_VERSION < 7
-static void MustacheLambdaHelper_obj_free(void *object TSRMLS_DC)
+static void MustacheLambdaHelper_obj_free(zend_object *object)
 {
   try {
-    efree(object);
+    zend_object_std_dtor((zend_object *)object);
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
-#else
-static void MustacheLambdaHelper_obj_free(zend_object *object TSRMLS_DC)
-{
-  try {
-    zend_object_std_dtor((zend_object *)object TSRMLS_CC);
-  } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
-  }
-}
-#endif
 /* }}} */
 
 /* {{{ MustacheLambdaHelper_obj_create */
-#if PHP_MAJOR_VERSION < 7
-static zend_object_value MustacheLambdaHelper_obj_create(zend_class_entry *class_type TSRMLS_DC)
-{
-  zend_object_value retval;
-
-  try {
-    struct php_obj_MustacheLambdaHelper * payload;
-
-    payload = (struct php_obj_MustacheLambdaHelper *) emalloc(sizeof(struct php_obj_MustacheLambdaHelper));
-    memset(payload, 0, sizeof(struct php_obj_MustacheLambdaHelper));
-    payload->std.ce = class_type;
-
-    payload->renderer = NULL;
-
-    retval.handle = zend_objects_store_put(payload, NULL, (zend_objects_free_object_storage_t) MustacheLambdaHelper_obj_free, NULL TSRMLS_CC);
-    retval.handlers = &MustacheLambdaHelper_obj_handlers;
-
-  } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
-  }
-
-  return retval;
-}
-#else
-static zend_object * MustacheLambdaHelper_obj_create(zend_class_entry * ce TSRMLS_DC)
+static zend_object * MustacheLambdaHelper_obj_create(zend_class_entry * ce)
 {
   struct php_obj_MustacheLambdaHelper * intern;
 
   try {
     intern = (struct php_obj_MustacheLambdaHelper *) ecalloc(1, sizeof(struct php_obj_MustacheLambdaHelper) + zend_object_properties_size(ce));
-    zend_object_std_init(&intern->std, ce TSRMLS_CC);
+    zend_object_std_init(&intern->std, ce);
     intern->std.handlers = &MustacheLambdaHelper_obj_handlers;
     return &intern->std;
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
   return NULL;
 }
-#endif
 /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION */
@@ -116,12 +72,10 @@ PHP_MINIT_FUNCTION(mustache_lambda_helper)
 
   INIT_CLASS_ENTRY(ce, "MustacheLambdaHelper", MustacheLambdaHelper_methods);
   ce.create_object = MustacheLambdaHelper_obj_create;
-  MustacheLambdaHelper_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
+  MustacheLambdaHelper_ce_ptr = zend_register_internal_class(&ce);
   memcpy(&MustacheLambdaHelper_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-#if PHP_MAJOR_VERSION >= 7
-    MustacheLambdaHelper_obj_handlers.offset = XtOffsetOf(struct php_obj_MustacheLambdaHelper, std);
-    MustacheLambdaHelper_obj_handlers.free_obj = MustacheLambdaHelper_obj_free;
-#endif
+  MustacheLambdaHelper_obj_handlers.offset = XtOffsetOf(struct php_obj_MustacheLambdaHelper, std);
+  MustacheLambdaHelper_obj_handlers.free_obj = MustacheLambdaHelper_obj_free;
   MustacheLambdaHelper_obj_handlers.clone_obj = NULL;
 
   return SUCCESS;
@@ -145,14 +99,14 @@ PHP_METHOD(MustacheLambdaHelper, render)
 
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "Os",
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "Os",
             &_this_zval, MustacheLambdaHelper_ce_ptr, &template_str, &template_len) == FAILURE) {
       throw PhpInvalidParameterException();
     }
 
     // Class parameters
     _this_zval = getThis();
-    struct php_obj_MustacheLambdaHelper * payload = php_mustache_lambda_helper_object_fetch_object(_this_zval TSRMLS_CC);
+    struct php_obj_MustacheLambdaHelper * payload = php_mustache_lambda_helper_object_fetch_object(_this_zval);
 
     std::string templateStr(template_str/*, (size_t) Z_STRLEN_P(template_str)*/);
 
@@ -165,14 +119,9 @@ PHP_METHOD(MustacheLambdaHelper, render)
 
     payload->renderer->renderForLambda(&node, &output);
 
-#if PHP_MAJOR_VERSION >= 7
     RETURN_STRING(output.c_str());
-#else
-    RETURN_STRING(output.c_str(), 1);
-#endif
-
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
 /* }}} MustacheLambdaHelper::render */

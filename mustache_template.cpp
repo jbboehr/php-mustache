@@ -1,6 +1,5 @@
 
 #include "php_mustache.h"
-#include "php5to7.h"
 #include "mustache_exceptions.hpp"
 #include "mustache_template.hpp"
 
@@ -32,13 +31,13 @@ PHP_MINIT_FUNCTION(mustache_template)
     zend_class_entry ce;
 
     INIT_CLASS_ENTRY(ce, "MustacheTemplate", MustacheTemplate_methods);
-    MustacheTemplate_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
+    MustacheTemplate_ce_ptr = zend_register_internal_class(&ce);
     
-    zend_declare_property_null(MustacheTemplate_ce_ptr, "template", sizeof("template") - 1, ZEND_ACC_PROTECTED TSRMLS_CC);
+    zend_declare_property_null(MustacheTemplate_ce_ptr, "template", sizeof("template") - 1, ZEND_ACC_PROTECTED);
     
     return SUCCESS;
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
     return FAILURE;
   }
 }
@@ -54,7 +53,7 @@ PHP_METHOD(MustacheTemplate, __construct)
     
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "O|s", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "O|s",
             &_this_zval, MustacheTemplate_ce_ptr, &template_str, &template_len) == FAILURE) {
       throw PhpInvalidParameterException();
     }
@@ -65,11 +64,11 @@ PHP_METHOD(MustacheTemplate, __construct)
     // Check if data was null
     if( template_len > 0 && template_str != NULL ) {
       zend_update_property_stringl(MustacheTemplate_ce_ptr, _this_zval, 
-            "template", sizeof("template") - 1, template_str, template_len TSRMLS_CC);
+            "template", sizeof("template") - 1, template_str, template_len);
     }
     
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
 /* }}} MustacheTemplate::__construct */
@@ -80,7 +79,7 @@ PHP_METHOD(MustacheTemplate, __toString)
   try {
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), (char *) "O", 
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "O",
             &_this_zval, MustacheTemplate_ce_ptr) == FAILURE) {
       throw PhpInvalidParameterException();
     }
@@ -90,12 +89,12 @@ PHP_METHOD(MustacheTemplate, __toString)
     
     // Return
     zval rv;
-    zval * value = _zend_read_property(Z_OBJCE_P(_this_zval), _this_zval, "template", sizeof("template")-1, 1, &rv);
+    zval * value = zend_read_property(Z_OBJCE_P(_this_zval), _this_zval, "template", sizeof("template")-1, 1, &rv);
     convert_to_string(value);
     RETURN_ZVAL(value, 1, 0);
     
   } catch(...) {
-    mustache_exception_handler(TSRMLS_C);
+    mustache_exception_handler();
   }
 }
 /* }}} MustacheTemplate::__toString */

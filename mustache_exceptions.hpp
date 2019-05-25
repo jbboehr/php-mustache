@@ -14,7 +14,7 @@ extern zend_class_entry * MustacheParserException_ce_ptr;
 
 PHP_MINIT_FUNCTION(mustache_exceptions);
 
-void mustache_exception_handler(TSRMLS_D);
+void mustache_exception_handler();
 
 #ifdef __cplusplus
   } // extern "C" 

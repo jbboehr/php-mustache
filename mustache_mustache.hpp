@@ -8,30 +8,23 @@
    extern "C" {
 #endif
 
-#if PHP_MAJOR_VERSION < 7
-struct php_obj_Mustache {
-    zend_object std;
-    mustache::Mustache * mustache;
-};
-#else
 struct php_obj_Mustache {
     mustache::Mustache * mustache;
     zend_object std;
 };
-#endif
 
-php_obj_Mustache * php_mustache_mustache_object_fetch_object(zval * zv TSRMLS_DC);
+php_obj_Mustache * php_mustache_mustache_object_fetch_object(zval * zv);
 
 PHP_MINIT_FUNCTION(mustache_mustache);
 
-mustache::Mustache * mustache_new_Mustache(TSRMLS_D);
-void mustache_data_from_zval(mustache::Data * node, zval * current TSRMLS_DC);
+mustache::Mustache * mustache_new_Mustache();
+void mustache_data_from_zval(mustache::Data * node, zval * current);
 bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
-    mustache::Data ** node TSRMLS_DC);
+    mustache::Data ** node);
 bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
-    mustache::Node::Partials * partials TSRMLS_DC);
+    mustache::Node::Partials * partials);
 bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
-    mustache::Node ** node TSRMLS_DC);
+    mustache::Node ** node);
 
 PHP_METHOD(Mustache, __construct);
 PHP_METHOD(Mustache, getEscapeByDefault);
