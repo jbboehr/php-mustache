@@ -1,6 +1,7 @@
 
 #include "php_mustache.h"
 #include <Zend/zend_exceptions.h>
+#include "mustache/mustache.hpp"
 #include "mustache_private.hpp"
 #include "mustache_exceptions.hpp"
 

@@ -3,6 +3,7 @@
 
 #include <Zend/zend_closures.h>
 
+#include "mustache/mustache.hpp"
 #include "mustache_private.hpp"
 #include "mustache_zend_closure_lambda.hpp"
 

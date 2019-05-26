@@ -1,5 +1,6 @@
 
 #include "php_mustache.h"
+#include "mustache_private.hpp"
 #include "mustache_ast.hpp"
 #include "mustache_data.hpp"
 #include "mustache_exceptions.hpp"

@@ -2,7 +2,6 @@
 #ifndef PHP_MUSTACHE_ZEND_CLOSURE_LAMBDA_HPP
 #define PHP_MUSTACHE_ZEND_CLOSURE_LAMBDA_HPP
 
-#include <Zend/zend_closures.h>
 #include "mustache_lambda.hpp"
 
 class ZendClosureLambda : public Lambda {

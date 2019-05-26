@@ -2,6 +2,7 @@
 #include <mustache/mustache.hpp>
 #include <mustache/lambda.hpp>
 #include "php_mustache.h"
+#include "mustache_private.hpp"
 #include <Zend/zend_closures.h>
 #include "mustache_class_method_lambda.hpp"
 #include "mustache_exceptions.hpp"
