@@ -118,8 +118,10 @@ static zend_always_inline bool is_valid_function(const zend_function * f)
 /* {{{ is_valid_property */
 static zend_always_inline bool is_valid_property(const zend_property_info * prop)
 {
-  return (prop->flags & ZEND_ACC_SHADOW) == 0 &&
-          (prop->flags & ZEND_ACC_PROTECTED) == 0 &&
+  return (prop->flags & ZEND_ACC_PROTECTED) == 0 &&
+#ifdef ZEND_ACC_SHADOW
+          (prop->flags & ZEND_ACC_SHADOW) == 0 &&
+#endif
           (prop->flags & ZEND_ACC_PRIVATE) == 0;
 }
 /* }}} */
@@ -237,7 +239,11 @@ static zend_always_inline void mustache_data_from_object_properties_zval(mustach
   node->type = mustache::Data::TypeNone;
 
   if( Z_OBJ_HT_P(current)->get_properties != NULL ) {
+#if PHP_VERSION_ID >= 80000
+    data_hash = Z_OBJ_HT_P(current)->get_properties(Z_OBJ_P(current));
+#else
     data_hash = Z_OBJ_HT_P(current)->get_properties(current);
+#endif
   }
   if( data_hash != NULL && zend_hash_num_elements(data_hash) > 0 ) {
 #if PHP_VERSION_ID < 70300
