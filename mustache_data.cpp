@@ -107,9 +107,14 @@ static zend_always_inline bool is_invokable_object(const zend_class_entry * ce)
 /* {{{ is_valid_function */
 static zend_always_inline bool is_valid_function(const zend_function * f)
 {
-  return (f->common.fn_flags & ZEND_ACC_CTOR) == 0 &&
+  return (f->common.fn_flags & ZEND_ACC_STATIC) == 0 &&
+#ifdef ZEND_ACC_CTOR
+          (f->common.fn_flags & ZEND_ACC_CTOR) == 0 &&
+#endif
+#ifdef ZEND_ACC_DTOR
           (f->common.fn_flags & ZEND_ACC_DTOR) == 0 &&
-          (f->common.fn_flags & ZEND_ACC_STATIC) == 0 &&
+#endif
+
           (f->common.fn_flags & ZEND_ACC_PROTECTED) == 0 &&
           (f->common.fn_flags & ZEND_ACC_PRIVATE) == 0;
 }
