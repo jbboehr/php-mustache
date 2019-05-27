@@ -10,10 +10,10 @@
   <email>jbboehr@php.net</email>
   <active>yes</active>
  </lead>
- <date>2018-11-12</date>
+ <date>2019-05-27</date>
  <version>
-  <release>0.8.1</release>
-  <api>0.8.1</api>
+  <release>0.9.0</release>
+  <api>0.9.0</api>
  </version>
  <stability>
   <release>stable</release>
@@ -21,11 +21,8 @@
  </stability>
  <license uri="https://opensource.org/licenses/MIT">MIT</license>
  <notes>
-- Require libmustache >= 0.5.0
-- Remove old deprecated experimental compiler
-- Change minimum PHP version to 5.6
-- Allow installation on PHP 7.3
-- Fix missing php5to7.h (@remicollet)
+- PHP 7.4 support
+- Removed PHP 5.x support
  </notes>
  <contents>
   <dir name="/">

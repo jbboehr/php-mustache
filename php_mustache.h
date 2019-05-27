@@ -5,8 +5,8 @@
 #include <string>
 
 #define PHP_MUSTACHE_NAME "mustache"
-#define PHP_MUSTACHE_VERSION "0.8.1"
-#define PHP_MUSTACHE_RELEASE "2018-11-12"
+#define PHP_MUSTACHE_VERSION "0.9.0"
+#define PHP_MUSTACHE_RELEASE "2019-05-27"
 #define PHP_MUSTACHE_BUILD "master"
 #define PHP_MUSTACHE_AUTHORS "John Boehr <jbboehr@gmail.com> (lead)"
 #define PHP_MUSTACHE_SPEC "1.1.2"
