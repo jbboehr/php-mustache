@@ -12,6 +12,7 @@ let
 in
 
 buildPecl rec {
+  pname = "mustache";
   name = "mustache-${version}";
   version = orDefault phpMustacheVersion "v0.7.4";
   src = orDefault phpMustacheSrc (fetchurl {
