@@ -27,6 +27,10 @@ matrix:
     - NIX_PHP_ATTR=php72
   - language: nix
     env:
+    - NIX_CHANNEL=19.03
+    - NIX_PHP_ATTR=php73
+  - language: nix
+    env:
     - NIX_CHANNEL=unstable
     - NIX_PHP_ATTR=php
 
