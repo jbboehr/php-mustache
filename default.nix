@@ -1,6 +1,9 @@
 {
   pkgs ? import <nixpkgs> {},
   php ? pkgs.php,
+  buildPecl ? pkgs.callPackage <nixpkgs/pkgs/build-support/build-pecl.nix> {
+    inherit php;
+  },
 
   phpMustacheVersion ? null,
   phpMustacheSrc ? ./.,
@@ -18,6 +21,6 @@
 }:
 
 pkgs.callPackage ./derivation.nix {
-  inherit php libmustache mustache_spec phpMustacheVersion phpMustacheSrc phpMustacheSha256;
+  inherit buildPecl php libmustache mustache_spec phpMustacheVersion phpMustacheSrc phpMustacheSha256;
 }
 
