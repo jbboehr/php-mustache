@@ -264,15 +264,8 @@ bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
   if( Z_TYPE_P(tmpl) == IS_STRING ) {
     // Tokenize template
     char * tmpstr = Z_STRVAL_P(tmpl);
-    *node = new mustache::Node();
-    try {
-      std::string templateStr(tmpstr/*, (size_t) Z_STRLEN_P(tmpl)*/);
-      mustache->tokenize(&templateStr, *node);
-    } catch(...) {
-      delete *node; // Prevent leaks
-      *node = NULL;
-      throw;
-    }
+    std::string templateStr(tmpstr/*, (size_t) Z_STRLEN_P(tmpl)*/);
+    mustache->tokenize(&templateStr, *node);
     return true;
 
   } else if( Z_TYPE_P(tmpl) == IS_OBJECT ) {
@@ -287,14 +280,7 @@ bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
         php_error(E_WARNING, "Empty MustacheTemplate");
         return false;
       } else {
-        *node = new mustache::Node();
-        try {
-          mustache->tokenize(&tmpstr, *node);
-        } catch(...) {
-          delete *node; // Prevent leaks
-          *node = NULL;
-          throw;
-        }
+        mustache->tokenize(&tmpstr, *node);
       }
       return true;
     } else if( Z_OBJCE_P(tmpl) == MustacheAST_ce_ptr ) {
@@ -519,7 +505,7 @@ PHP_METHOD(Mustache, parse)
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
     
     // Check template parameter
-    mustache::Node * templateNodePtr = NULL;
+    mustache::Node * templateNodePtr = new mustache::Node();
     if( !mustache_parse_template_param(tmpl, payload->mustache, &templateNodePtr) ) {
       delete templateNodePtr;
       RETURN_FALSE;
