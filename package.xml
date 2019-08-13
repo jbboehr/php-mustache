@@ -26,6 +26,7 @@
  </notes>
  <contents>
   <dir name="/">
+   <file name="CHANGELOG.md" role="doc" />
    <file name="LICENSE.md" role="doc" />
    <file name="README.md" role="doc" />
    <file name="ax_cxx_compile_stdcxx_11.m4" role="src" />
