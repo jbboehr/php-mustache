@@ -231,7 +231,7 @@ bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
         mustache::Node::Partials * partials)
 {
     HashTable * data_hash = NULL;
-    ulong key_nindex = 0;
+    zend_ulong key_nindex = 0;
 
     // Ignore if not an array
     if( array == NULL || Z_TYPE_P(array) != IS_ARRAY ) {
