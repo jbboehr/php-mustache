@@ -16,7 +16,7 @@ matrix:
   - language: php
     php: '7.3'
   - language: php
-    php: '7.4snapshot'
+    php: '7.4'
   - language: php
     php: 'master'
   - language: nix
@@ -31,6 +31,10 @@ matrix:
     env:
     - NIX_CHANNEL=19.03
     - NIX_PHP_ATTR=php73
+  - language: nix
+    env:
+    - NIX_CHANNEL=unstable
+    - NIX_PHP_ATTR=php74
   - language: nix
     env:
     - NIX_CHANNEL=unstable
