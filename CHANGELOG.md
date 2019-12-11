@@ -4,10 +4,11 @@ All Notable changes to `php-mustache` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
-## [Unreleased]
+## [0.9.1] - 2019-12-11
 
 ### Fixed
 - Memory leak ([GH-57](https://github.com/jbboehr/php-mustache/issues/57))
+- PHP 7.4 build issues ([GH-61](https://github.com/jbboehr/php-mustache/pull/61)) ([@sunpoet](https://github.com/sunpoet))
 
 ## [0.9.0] - 2019-05-27
 
