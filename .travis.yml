@@ -21,19 +21,15 @@ matrix:
     php: 'master'
   - language: nix
     env:
-    - NIX_CHANNEL=18.09
-    - NIX_PHP_ATTR=php71
-  - language: nix
-    env:
-    - NIX_CHANNEL=18.09
+    - NIX_CHANNEL=20.03
     - NIX_PHP_ATTR=php72
   - language: nix
     env:
-    - NIX_CHANNEL=19.03
+    - NIX_CHANNEL=20.03
     - NIX_PHP_ATTR=php73
   - language: nix
     env:
-    - NIX_CHANNEL=unstable
+    - NIX_CHANNEL=20.03
     - NIX_PHP_ATTR=php74
   - language: nix
     env:
@@ -43,7 +39,6 @@ matrix:
 env:
   global:
     - LIBMUSTACHE_VERSION: v0.5.0
-    - secure: "IRf7Rmrh7x4k5PVsYKkiogLiX94wsIQoABhBkvwqXLw7MruuBlm4S9w8iecb71U7Cd4uNfG2KX4GXNZF9E8s7UIkUsUHU++W0vm+ctEBqPtj6ArWH2cuzzqzUuDdxYFtKWocJt0QmVKp/WMSX0ZA32BTxIkEw2KhVof0+idU2eQ="
 
 branches:
   only:
