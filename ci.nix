@@ -21,78 +21,61 @@ let
             cp $pecl_tgz $out
         '';
 
-    generateMustacheTestsForPlatform = { pkgs, php, buildPecl, phpMustacheSrc }:
+    generateTestsForPlatform = { pkgs, path, phpAttr, dist }:
         pkgs.recurseIntoAttrs {
-            mustache = pkgs.callPackage ./default.nix {
-               inherit php buildPecl phpMustacheSrc;
+            mustache = let
+                php = pkgs.${phpAttr};
+            in pkgs.callPackage ./default.nix {
+                inherit php;
+                phpMustacheSrc = dist;
+                buildPecl = pkgs.callPackage "${path}/pkgs/build-support/build-pecl.nix" { inherit php; };
             };
+            # not working due to debuginfo issue
+            # "error adding symbols: file in wrong format"
+            # probably due to cross compiling
+            # mustache-32bit = let
+            #     php = pkgs.pkgsi686Linux.${phpAttr};
+            # in pkgs.pkgsi686Linux.callPackage ./default.nix {
+            #     inherit php;
+            #     phpMustacheSrc = dist;
+            #     buildPecl = pkgs.callPackage "${path}/pkgs/build-support/build-pecl.nix" { inherit php; };
+            # };
         };
 in
 builtins.mapAttrs (k: _v:
   let
     path = builtins.fetchTarball {
-       url = https://github.com/NixOS/nixpkgs/archive/release-19.09.tar.gz;
-       name = "nixpkgs-19.09";
+       url = https://github.com/NixOS/nixpkgs/archive/release-20.03.tar.gz;
+       name = "nixpkgs-20.03";
     };
     pkgs = import (path) { system = k; };
 
-    phpMustacheSrc = generateMustacheDrv {
+    dist = generateMustacheDrv {
         inherit pkgs;
         inherit (pkgs) php;
         phpYaml = pkgs.phpPackages.yaml;
     };
   in
   pkgs.recurseIntoAttrs {
-    peclDist = phpMustacheSrc;
+    inherit dist;
 
-    php71 = let
-        path = builtins.fetchTarball {
-           url = https://github.com/NixOS/nixpkgs/archive/release-19.03.tar.gz;
-           name = "nixpkgs-19.03";
-        };
-        pkgs = import (path) { system = k; };
-        php = pkgs.php71;
-    in generateMustacheTestsForPlatform {
-        inherit pkgs php phpMustacheSrc;
-        buildPecl = pkgs.callPackage "${path}/pkgs/build-support/build-pecl.nix" { inherit php; };
-    };
-
-    php72 = let
-        php = pkgs.php72;
-    in generateMustacheTestsForPlatform {
-        inherit pkgs php phpMustacheSrc;
-        buildPecl = pkgs.callPackage "${path}/pkgs/build-support/build-pecl.nix" { inherit php; };
+    php72 = generateTestsForPlatform {
+        inherit pkgs path dist;
+        phpAttr = "php72";
     };
 
     php73 = let
         php = pkgs.php73;
-    in generateMustacheTestsForPlatform {
-        inherit pkgs php phpMustacheSrc;
-        buildPecl = pkgs.callPackage "${path}/pkgs/build-support/build-pecl.nix" { inherit php; };
+    in generateTestsForPlatform {
+        inherit pkgs path dist;
+        phpAttr = "php73";
     };
 
     php74 = let
-        path = builtins.fetchTarball {
-           url = https://github.com/NixOS/nixpkgs/archive/master.tar.gz;
-           name = "nixpkgs-unstable";
-        };
-        pkgs = import (path) { system = k; };
         php = pkgs.php74;
-    in generateMustacheTestsForPlatform {
-        inherit pkgs php phpMustacheSrc;
-        buildPecl = pkgs.callPackage "${path}/pkgs/build-support/build-pecl.nix" { inherit php; };
-    };
-
-    php = let
-        path = builtins.fetchTarball {
-           url = https://github.com/NixOS/nixpkgs/archive/master.tar.gz;
-           name = "nixpkgs-unstable";
-        };
-        pkgs = import (path) { system = k; };
-        php = pkgs.php;
-    in generateMustacheTestsForPlatform {
-        inherit pkgs php phpMustacheSrc;
-        buildPecl = pkgs.callPackage "${path}/pkgs/build-support/build-pecl.nix" { inherit php; };
+    in generateTestsForPlatform {
+        inherit pkgs path dist;
+        phpAttr = "php74";
     };
   }
 ) {
