@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+source .ci/vars.sh
+source .ci/fold.sh
+
 export COVERAGE=${COVERAGE:-true}
 export LIBMUSTACHE_VERSION=${LIBMUSTACHE_VERSION:-master}
 export TRAVIS_BUILD_DIR=${TRAVIS_BUILD_DIR:-`pwd`}
@@ -12,33 +15,34 @@ export REPORT_EXIT_STATUS=1
 export TEST_PHP_EXECUTABLE=`which php`
 
 function install_libmustache() (
-    set -e -o pipefail
+    set -o errexit -o pipefail -o xtrace
 
-    echo "Installing libmustache ${LIBMUSTACHE_VERSION}"
-
-    local dir=${INSTALL_PREFIX}/src/libmustache
-    rm -rf ${dir}
-    mkdir -p $(dirname ${dir})
-    git clone -b ${LIBMUSTACHE_VERSION} git://github.com/jbboehr/libmustache.git ${dir}
-    cd ${dir}
+    rm -rf libmustache
+    git clone git://github.com/jbboehr/libmustache.git
+    cd libmustache
+    git checkout ${LIBMUSTACHE_VERSION}
     autoreconf -fiv
     ./configure --prefix=${INSTALL_PREFIX} --without-mustache-spec
     make all install
 )
 
+function install_coveralls_lcov() (
+    set -o errexit -o pipefail -o xtrace
+
+    gem install coveralls-lcov
+)
+
 function before_install() (
-    set -e -o pipefail
+    set -o errexit -o pipefail
 
     # Don't install this unless we're actually on travis
     if [[ "${COVERAGE}" = "true" ]] && [[ "${TRAVIS}" = "true" ]]; then
-        gem install coveralls-lcov
+        cifold "install coveralls-lcov" install_coveralls_lcov
     fi
 )
 
-function install() (
-    set -e -o pipefail
-
-    install_libmustache
+function build_php_mustache() (
+    set -o errexit -o pipefail -o xtrace
 
     phpize
     if [[ "${COVERAGE}" = "true" ]]; then
@@ -53,42 +57,63 @@ function install() (
     make clean all
 )
 
+function install() (
+    set -o errexit -o pipefail
+
+    cifold "install libmustache" install_libmustache
+    cifold "main build step" build_php_mustache
+)
+
+function initialize_coverage() (
+    set -o errexit -o pipefail -o xtrace
+
+    lcov --directory . --zerocounters
+    lcov --directory . --capture --compat-libtool --initial --output-file coverage.info
+)
+
 function before_script() (
     set -e -o pipefail
 
     if [[ "${COVERAGE}" = "true" ]]; then
-        echo "Initializing coverage"
-        lcov --directory . --zerocounters
-        lcov --directory . --capture --compat-libtool --initial --output-file coverage.info
+        cifold "initialize coverage" initialize_coverage
     fi
 )
 
-function script() (
-    set -e -o pipefail
+function test_php_mustache() (
+    set -o errexit -o pipefail -o xtrace
 
-    echo "Running main test suite"
     ${TEST_PHP_EXECUTABLE} run-tests.php -n -d extension=modules/mustache.so ./tests/*.phpt
 )
 
+function script() (
+    set -o errexit -o pipefail
+
+    cifold "main test suite" test_php_mustache
+)
+
+function upload_coverage() (
+    set -o errexit -o pipefail -o xtrace
+
+    lcov --no-checksum --directory . --capture --compat-libtool --output-file coverage.info
+    lcov --remove coverage.info "/usr*" \
+        --remove coverage.info "*/.phpenv/*" \
+        --remove coverage.info "/home/travis/build/include/*" \
+        --compat-libtool \
+        --output-file coverage.info
+
+    coveralls-lcov coverage.info
+)
+
 function after_success() (
-    set -e -o pipefail
+    set -o errexit -o pipefail
 
     if [[ "${COVERAGE}" = "true" ]]; then
-        echo "Processing coverage"
-        lcov --no-checksum --directory . --capture --compat-libtool --output-file coverage.info
-        lcov --remove coverage.info "/usr*" \
-            --remove coverage.info "*/.phpenv/*" \
-            --remove coverage.info "/home/travis/build/include/*" \
-            --compat-libtool \
-            --output-file coverage.info
-
-        echo "Uploading coverage"
-        coveralls-lcov coverage.info
+        cifold "upload coverage" upload_coverage
     fi
 )
 
 function after_failure() (
-    set -e -o pipefail
+    # set -o errexit -o pipefail
 
     for i in `find tests -name "*.out" 2>/dev/null`; do
         echo "-- START ${i}";

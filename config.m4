@@ -61,11 +61,17 @@ fi
 
 dnl MAIN -----------------------------------------------------------------------
 if test "$PHP_MUSTACHE" != "no"; then
-  
+    AH_BOTTOM([
+#ifdef __clang__
+#include "main/php_config.h"
+#/**/undef/**/ HAVE_ASM_GOTO
+#endif
+    ])
+
   AC_DEFINE(HAVE_MUSTACHE, 1, [Whether you have mustache support])
   PHP_REQUIRE_CXX()
   PHP_ADD_LIBRARY(stdc++, 1, MUSTACHE_SHARED_LIBADD)
-  
+
   PHP_MUSTACHE_ADD_SOURCES([
     php_mustache.cpp
     mustache_ast.cpp

@@ -1,4 +1,8 @@
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #define NOMINMAX
 
 #include "php_mustache.h"

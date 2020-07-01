@@ -1,4 +1,8 @@
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <string>
 #include <php.h>
 #include <php_ini.h>
@@ -28,14 +32,14 @@ PHP_INI_END()
 static PHP_MINIT_FUNCTION(mustache)
 {
   REGISTER_INI_ENTRIES();
-  
+
   PHP_MINIT(mustache_ast)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_mustache)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_data)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_template)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_exceptions)(INIT_FUNC_ARGS_PASSTHRU);
   PHP_MINIT(mustache_lambda_helper)(INIT_FUNC_ARGS_PASSTHRU);
-  
+
   return SUCCESS;
 }
 /* }}} */
@@ -44,7 +48,7 @@ static PHP_MINIT_FUNCTION(mustache)
 static PHP_MSHUTDOWN_FUNCTION(mustache)
 {
   UNREGISTER_INI_ENTRIES();
-  
+
   return SUCCESS;
 }
 /* }}} */
@@ -65,7 +69,7 @@ static PHP_MINFO_FUNCTION(mustache)
   php_info_print_table_row(2, "c++11 unordered map support", "disabled");
 #endif
   php_info_print_table_end();
-  
+
   DISPLAY_INI_ENTRIES();
 }
 /* }}} */
@@ -98,9 +102,9 @@ zend_module_entry mustache_module_entry = {
 };
 /* }}} */
 
-#ifdef COMPILE_DL_MUSTACHE 
+#ifdef COMPILE_DL_MUSTACHE
 extern "C" {
-  ZEND_GET_MODULE(mustache)      // Common for all PHP extensions which are build as shared modules  
+  ZEND_GET_MODULE(mustache)      // Common for all PHP extensions which are build as shared modules
 }
 #endif
 

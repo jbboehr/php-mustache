@@ -49,3 +49,5 @@ tests/*.exp
 tests/*.php
 tests/*.sh
 tmp-php.ini
+
+/result*

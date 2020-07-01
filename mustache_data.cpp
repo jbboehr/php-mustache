@@ -1,4 +1,8 @@
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <mustache/mustache.hpp>
 #include <mustache/lambda.hpp>
 #include "php_mustache.h"
@@ -19,7 +23,7 @@ static zend_object_handlers MustacheData_obj_handlers;
 ZEND_BEGIN_ARG_INFO_EX(MustacheData____construct_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
     ZEND_ARG_INFO(0, tmpl)
 ZEND_END_ARG_INFO()
-        
+
 ZEND_BEGIN_ARG_INFO_EX(MustacheData__toValue_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
@@ -49,11 +53,11 @@ static void MustacheData_obj_free(zend_object *object)
 {
   try {
     struct php_obj_MustacheData * payload = php_mustache_data_fetch_object(object);
-    
+
     if( payload->data != NULL ) {
       delete payload->data;
     }
-    
+
     zend_object_std_dtor((zend_object *)object);
   } catch(...) {
     mustache_exception_handler();
@@ -65,7 +69,7 @@ static void MustacheData_obj_free(zend_object *object)
 static zend_object * MustacheData_obj_create(zend_class_entry * ce)
 {
   struct php_obj_MustacheData * intern;
-  
+
   try {
     intern = (struct php_obj_MustacheData *) ecalloc(1, sizeof(struct php_obj_MustacheData) + zend_object_properties_size(ce));
     zend_object_std_init(&intern->std, ce);
@@ -91,7 +95,7 @@ PHP_MINIT_FUNCTION(mustache_data)
   MustacheData_obj_handlers.offset = XtOffsetOf(struct php_obj_MustacheData, std);
   MustacheData_obj_handlers.free_obj = MustacheData_obj_free;
   MustacheData_obj_handlers.clone_obj = NULL;
-  
+
   return SUCCESS;
 }
 /* }}} */
@@ -140,7 +144,7 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
   zend_string * key;
   std::string ckey;
   zval * data_entry = NULL;
-  
+
   int length = 0;
   mustache::Data * child = NULL;
 
@@ -429,7 +433,7 @@ void mustache_data_from_zval(mustache::Data * node, zval * current)
           break;
       case IS_OBJECT:
           mustache_data_from_object_zval(node, current);
-          break;    
+          break;
       default:
           php_error(E_WARNING, "Invalid data type: %d", Z_TYPE_P(current));
           break;
@@ -503,16 +507,16 @@ PHP_METHOD(MustacheData, __construct)
     // Class parameters
     _this_zval = getThis();
     struct php_obj_MustacheData * payload = php_mustache_data_object_fetch_object(_this_zval);
-    
+
     // Check if argument was given
     if( data == NULL ) {
       throw PhpInvalidParameterException();
     }
-    
+
     // Convert data
     payload->data = new mustache::Data();
     mustache_data_from_zval(payload->data, data);
-    
+
   } catch(...) {
     mustache_exception_handler();
   }
@@ -532,17 +536,17 @@ PHP_METHOD(MustacheData, toValue)
 
     _this_zval = getThis();
     struct php_obj_MustacheData * payload = php_mustache_data_object_fetch_object(_this_zval);
-  
+
     // Check if data was initialized
     if( payload->data == NULL ) {
       php_error_docref(NULL, E_WARNING, "MustacheData was not initialized properly");
       RETURN_FALSE;
       return;
     }
-    
+
     // Reverse template data
     mustache_data_to_zval(payload->data, return_value);
-  
+
   } catch(...) {
     mustache_exception_handler();
   }

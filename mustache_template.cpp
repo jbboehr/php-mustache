@@ -1,4 +1,8 @@
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php_mustache.h"
 #include "mustache_private.hpp"
 #include "mustache_exceptions.hpp"
@@ -33,9 +37,9 @@ PHP_MINIT_FUNCTION(mustache_template)
 
     INIT_CLASS_ENTRY(ce, "MustacheTemplate", MustacheTemplate_methods);
     MustacheTemplate_ce_ptr = zend_register_internal_class(&ce);
-    
+
     zend_declare_property_null(MustacheTemplate_ce_ptr, "template", sizeof("template") - 1, ZEND_ACC_PROTECTED);
-    
+
     return SUCCESS;
   } catch(...) {
     mustache_exception_handler();
@@ -51,7 +55,7 @@ PHP_METHOD(MustacheTemplate, __construct)
     // Custom parameters
     char * template_str = NULL;
     long template_len = 0;
-    
+
     // Check parameters
     zval * _this_zval = NULL;
     if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "O|s",
@@ -61,13 +65,13 @@ PHP_METHOD(MustacheTemplate, __construct)
 
     // Class parameters
     _this_zval = getThis();
-    
+
     // Check if data was null
     if( template_len > 0 && template_str != NULL ) {
-      zend_update_property_stringl(MustacheTemplate_ce_ptr, _this_zval, 
+      zend_update_property_stringl(MustacheTemplate_ce_ptr, _this_zval,
             "template", sizeof("template") - 1, template_str, template_len);
     }
-    
+
   } catch(...) {
     mustache_exception_handler();
   }
@@ -84,16 +88,16 @@ PHP_METHOD(MustacheTemplate, __toString)
             &_this_zval, MustacheTemplate_ce_ptr) == FAILURE) {
       throw PhpInvalidParameterException();
     }
-    
+
     // Class parameters
     _this_zval = getThis();
-    
+
     // Return
     zval rv;
     zval * value = zend_read_property(Z_OBJCE_P(_this_zval), _this_zval, "template", sizeof("template")-1, 1, &rv);
     convert_to_string(value);
     RETURN_ZVAL(value, 1, 0);
-    
+
   } catch(...) {
     mustache_exception_handler();
   }
