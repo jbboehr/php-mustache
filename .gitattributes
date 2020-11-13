@@ -1,2 +1,2 @@
-/.ci/*                          linguist-documentation=true
+/.github/*                      linguist-documentation=true
 /tests/mustache-spec*.phpt      linguist-generated=true

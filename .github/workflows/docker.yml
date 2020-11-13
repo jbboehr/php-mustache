@@ -1,95 +1,42 @@
-
 name: docker
 
 on:
     push:
         branches:
-        - master
-        - github-actions
-        - ci
+            - master
+            - github-actions
+            - ci
     pull_request:
         branches:
-        - master
+            - master
 
 jobs:
-    debian_php72:
+    docker:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                PHP_VERSION:
+                    - "7.2"
+                    - "7.3"
+                    - "7.4"
+                    # - "8.0-rc"
+                DOCKER_NAME:
+                    - "alpine"
+                    - "debian"
+        steps:
+            - uses: actions/checkout@v2
+            - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I am putting everything in a FSCKING BASH SCRIPT
+              env:
+                  PHP_VERSION: ${{ matrix.PHP_VERSION }}
+                  DOCKER_NAME: ${{ matrix.DOCKER_NAME }}
+              run: bash ./.github/scripts/docker.sh
+    fedora:
         runs-on: ubuntu-latest
         steps:
-        - uses: actions/checkout@v2
-        - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I am putting everything in a FSCKING BASH SCRIPT
-          env:
-            PHP_VERSION: "7.2"
-            DOCKER_NAME: debian
-          run: bash ./.github/workflows/docker.sh
-    debian_php73:
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v2
-        - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I am putting everything in a FSCKING BASH SCRIPT
-          env:
-            PHP_VERSION: "7.3"
-            DOCKER_NAME: debian
-          run: bash ./.github/workflows/docker.sh
-    debian_php74:
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v2
-        - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I am putting everything in a FSCKING BASH SCRIPT
-          env:
-            PHP_VERSION: "7.4"
-            DOCKER_NAME: debian
-          run: bash ./.github/workflows/docker.sh
-    debian_php80:
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v2
-        - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I am putting everything in a FSCKING BASH SCRIPT
-          env:
-            PHP_VERSION: "8.0-rc"
-            DOCKER_NAME: debian
-          run: bash ./.github/workflows/docker.sh
-    alpine_php72:
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v2
-        - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I am putting everything in a FSCKING BASH SCRIPT
-          env:
-            PHP_VERSION: "7.2"
-            DOCKER_NAME: alpine
-          run: bash ./.github/workflows/docker.sh
-    alpine_php73:
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v2
-        - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I am putting everything in a FSCKING BASH SCRIPT
-          env:
-            PHP_VERSION: "7.3"
-            DOCKER_NAME: alpine
-          run: bash ./.github/workflows/docker.sh
-    alpine_php74:
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v2
-        - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I am putting everything in a FSCKING BASH SCRIPT
-          env:
-            PHP_VERSION: "7.4"
-            DOCKER_NAME: alpine
-          run: bash ./.github/workflows/docker.sh
-    alpine_php80:
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v2
-        - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I am putting everything in a FSCKING BASH SCRIPT
-          env:
-            PHP_VERSION: "8.0-rc"
-            DOCKER_NAME: alpine
-          run: bash ./.github/workflows/docker.sh
-    fedora_phpdefault:
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v2
-        - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I am putting everything in a FSCKING BASH SCRIPT
-          env:
-            DOCKER_NAME: fedora
-            TEST_PHP_EXECUTABLE: /usr/bin/php
-          run: bash ./.github/workflows/docker.sh
+            - uses: actions/checkout@v2
+            - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I am putting everything in a FSCKING BASH SCRIPT
+              env:
+                  DOCKER_NAME: fedora
+                  TEST_PHP_EXECUTABLE: /usr/bin/php
+              run: bash ./.github/scripts/docker.sh

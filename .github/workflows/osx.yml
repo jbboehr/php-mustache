@@ -1,37 +1,25 @@
 name: osx
 
 on:
-  push:
-    branches:
-    - master
-    - github-actions
-    - ci
-  pull_request:
-    branches:
-    - master
+    push:
+        branches:
+            - master
+            - github-actions
+            - ci
+    pull_request:
+        branches:
+            - master
 
 jobs:
-  php72:
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I'm putting everything in a FSCKING BASH SCRIPT
-      env:
-        PHP_VERSION: "7.2"
-      run: bash ./.github/workflows/osx.sh
-  php73:
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I'm putting everything in a FSCKING BASH SCRIPT
-      env:
-        PHP_VERSION: "7.3"
-      run: bash ./.github/workflows/osx.sh
-  php74:
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I'm putting everything in a FSCKING BASH SCRIPT
-      env:
-        PHP_VERSION: "7.4"
-      run: bash ./.github/workflows/osx.sh
+    osx:
+        runs-on: macos-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                PHP_VERSION: ["7.2", "7.3", "7.4"]
+        steps:
+            - uses: actions/checkout@v2
+            - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I'm putting everything in a FSCKING BASH SCRIPT
+              env:
+                  PHP_VERSION: ${{ matrix.PHP_VERSION }}
+              run: bash ./.github/scripts/osx.sh

@@ -2,8 +2,8 @@
 
 set -e -o pipefail
 
-source .ci/vars.sh
-source .ci/fold.sh
+source .github/scripts/vars.sh
+source .github/scripts/fold.sh
 
 # config
 export DOCKER_NAME=${DOCKER_NAME:-"alpine"}

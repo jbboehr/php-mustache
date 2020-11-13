@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-source .ci/vars.sh
-source .ci/fold.sh
+source .github/scripts/vars.sh
+source .github/scripts/fold.sh
 
 export COVERAGE=${COVERAGE:-true}
 export LIBMUSTACHE_VERSION=${LIBMUSTACHE_VERSION:-master}
@@ -26,19 +26,10 @@ function install_libmustache() (
     make all install
 )
 
-function install_coveralls_lcov() (
-    set -o errexit -o pipefail -o xtrace
-
-    gem install coveralls-lcov
-)
-
 function before_install() (
     set -o errexit -o pipefail
 
-    # Don't install this unless we're actually on travis
-    if [[ "${COVERAGE}" = "true" ]] && [[ "${TRAVIS}" = "true" ]]; then
-        cifold "install coveralls-lcov" install_coveralls_lcov
-    fi
+    return 0
 )
 
 function build_php_mustache() (
@@ -91,7 +82,7 @@ function script() (
     cifold "main test suite" test_php_mustache
 )
 
-function upload_coverage() (
+function process_coverage() (
     set -o errexit -o pipefail -o xtrace
 
     lcov --no-checksum --directory . --capture --compat-libtool --output-file coverage.info
@@ -100,15 +91,13 @@ function upload_coverage() (
         --remove coverage.info "/home/travis/build/include/*" \
         --compat-libtool \
         --output-file coverage.info
-
-    coveralls-lcov coverage.info
 )
 
 function after_success() (
     set -o errexit -o pipefail
 
     if [[ "${COVERAGE}" = "true" ]]; then
-        cifold "upload coverage" upload_coverage
+        cifold "upload coverage" process_coverage
     fi
 )
 

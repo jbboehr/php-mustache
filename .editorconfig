@@ -19,3 +19,7 @@ indent_size = 2
 
 [package.xml]
 indent_size = 1
+
+[*.yml]
+indent_size = 4
+indent_style = space

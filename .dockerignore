@@ -1,4 +1,4 @@
-.git/
+**/.git/*
 **/*~
 **/*.a
 **/acinclude.m4
@@ -52,9 +52,9 @@
 **/tmp-php.ini
 
 # ci and docker
-.github
-.travis.*
+**/.github/*
 **/*.nix
 **/*Dockerfile
 **/.dockerignore
 **/result*/**
+**/nix/*
