@@ -57,10 +57,13 @@ void mustache_exception_handler()
     ZVAL_OBJ(&ex, obj);
     exception = &ex;
 
-    zend_update_property_long(MustacheParserException_ce_ptr, exception,
-            (char *) "templateLineNo", strlen("templateLineNo"), e.lineNo);
-    zend_update_property_long(MustacheParserException_ce_ptr, exception,
-            (char *) "templateCharNo", strlen("templateCharNo"), e.charNo);
+#if PHP_VERSION_ID < 80000
+    zend_update_property_long(MustacheParserException_ce_ptr, exception, (char *) "templateLineNo", strlen("templateLineNo"), e.lineNo);
+    zend_update_property_long(MustacheParserException_ce_ptr, exception, (char *) "templateCharNo", strlen("templateCharNo"), e.charNo);
+#else
+    zend_update_property_long(MustacheParserException_ce_ptr, Z_OBJ_P(exception), (char *) "templateLineNo", strlen("templateLineNo"), e.lineNo);
+    zend_update_property_long(MustacheParserException_ce_ptr, Z_OBJ_P(exception), (char *) "templateCharNo", strlen("templateCharNo"), e.charNo);
+#endif
   } catch( mustache::Exception& e ) {
     zend_throw_exception_ex(MustacheException_ce_ptr, 0,
             (char *) e.what(), "MustacheException");

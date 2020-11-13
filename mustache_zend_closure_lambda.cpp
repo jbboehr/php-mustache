@@ -18,11 +18,15 @@ ZendClosureLambda::~ZendClosureLambda()
 
 int ZendClosureLambda::getUserFunctionParamCount()
 {
+#if PHP_VERSION_ID < 80000
   const zend_function * func = zend_get_closure_method_def(closure);
+#else
+  const zend_function * func = zend_get_closure_method_def(Z_OBJ_P(closure));
+#endif
   return func->common.num_args;
 }
 
 int ZendClosureLambda::invokeUserFunction(zval *retval_ptr, int param_count, zval params[])
 {
-  return call_user_function_ex(CG(function_table), NULL, closure, retval_ptr, param_count, params, 1, NULL);
+  return call_user_function(NULL, NULL, closure, retval_ptr, param_count, params);
 }

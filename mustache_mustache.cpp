@@ -210,7 +210,11 @@ static inline void mustache_parse_partial_param(char * key, zval * data,
         // String key, object value
         if( Z_OBJCE_P(data) == MustacheTemplate_ce_ptr ) {
             zval rv;
+#if PHP_VERSION_ID < 80000
             zval * value = zend_read_property(Z_OBJCE_P(data), data, "template", sizeof("template")-1, 1, &rv);
+#else
+            zval * value = zend_read_property(Z_OBJCE_P(data), Z_OBJ_P(data), "template", sizeof("template")-1, 1, &rv);
+#endif
             convert_to_string(value);
             std::string tmpstr(Z_STRVAL_P(value));
             ckey.assign(key);
@@ -276,7 +280,11 @@ bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
     // Use compiled template
     if( Z_OBJCE_P(tmpl) == MustacheTemplate_ce_ptr ) {
         zval rv;
+#if PHP_VERSION_ID < 80000
         zval * value = zend_read_property(Z_OBJCE_P(tmpl), tmpl, "template", sizeof("template")-1, 1, &rv);
+#else
+        zval * value = zend_read_property(Z_OBJCE_P(tmpl), Z_OBJ_P(tmpl), "template", sizeof("template")-1, 1, &rv);
+#endif
         convert_to_string(value);
         std::string tmpstr(Z_STRVAL_P(value));
 
