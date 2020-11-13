@@ -1,6 +1,5 @@
 # php-mustache
 
-[![Travis Build Status](https://travis-ci.com/jbboehr/php-mustache.png?branch=master)](https://travis-ci.com/jbboehr/php-mustache)
 [![GitHub Linux Build Status](https://github.com/jbboehr/php-mustache/workflows/linux/badge.svg)](https://github.com/jbboehr/php-mustache/actions?query=workflow%3Alinux)
 [![GitHub OSX Build Status](https://github.com/jbboehr/php-mustache/workflows/osx/badge.svg)](https://github.com/jbboehr/php-mustache/actions?query=workflow%3Aosx)
 [![GitHub Docker Build Status](https://github.com/jbboehr/php-mustache/workflows/docker/badge.svg)](https://github.com/jbboehr/php-mustache/actions?query=workflow%3Adocker)

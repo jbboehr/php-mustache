@@ -10,10 +10,10 @@
   <email>jbboehr@php.net</email>
   <active>yes</active>
  </lead>
- <date>2019-12-11</date>
+ <date>2020-11-12</date>
  <version>
-  <release>0.9.1</release>
-  <api>0.9.1</api>
+  <release>0.9.2</release>
+  <api>0.9.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -21,8 +21,8 @@
  </stability>
  <license uri="https://opensource.org/licenses/MIT">MIT</license>
  <notes>
-- PHP 7.4 build fixes (@sunpoet)
-- Fixed memory leak
+ - Fixes for latest PHP 8.0
+ - Drop max PHP version constraint in package.xml
  </notes>
  <contents>
   <dir name="/">
@@ -235,7 +235,6 @@
   <required>
    <php>
     <min>7.0.0</min>
-    <max>7.4.99</max>
    </php>
    <pearinstaller>
     <min>1.4.1</min>
