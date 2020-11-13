@@ -33,5 +33,5 @@ int ClassMethodLambda::getUserFunctionParamCount()
 
 int ClassMethodLambda::invokeUserFunction(zval *retval_ptr, int param_count, zval params[])
 {
-  return call_user_function_ex(EG(function_table), object, &function_name, retval_ptr, param_count, params, 1, NULL);
+  return call_user_function(NULL, object, &function_name, retval_ptr, param_count, params);
 }

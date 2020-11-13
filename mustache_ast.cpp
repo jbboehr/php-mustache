@@ -255,8 +255,11 @@ PHP_METHOD(MustacheAST, __sleep)
       int len = 0;
       mustache_node_to_binary_string(payload->node, &str, &len);
       if( str != NULL ) {
-        zend_update_property_stringl(MustacheAST_ce_ptr, _this_zval,
-              ZEND_STRL("binaryString"), str, len);
+#if PHP_VERSION_ID < 80000
+        zend_update_property_stringl(MustacheAST_ce_ptr, _this_zval, ZEND_STRL("binaryString"), str, len);
+#else
+        zend_update_property_stringl(MustacheAST_ce_ptr, Z_OBJ_P(_this_zval), ZEND_STRL("binaryString"), str, len);
+#endif
         add_next_index_string(return_value, "binaryString");
         efree(str);
       }
@@ -338,7 +341,11 @@ static inline void php_mustache_ast_wakeup(zval * _this_zval, zval * return_valu
 {
     zval rv;
     struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(_this_zval);
+#if PHP_VERSION_ID < 80000
     zval * value = zend_read_property(Z_OBJCE_P(_this_zval), _this_zval, "binaryString", sizeof("binaryString")-1, 1, &rv);
+#else
+    zval * value = zend_read_property(Z_OBJCE_P(_this_zval), Z_OBJ_P(_this_zval), "binaryString", sizeof("binaryString")-1, 1, &rv);
+#endif
 
     if( Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) > 0 ) {
     	mustache_node_from_binary_string(&payload->node, Z_STRVAL_P(value), Z_STRLEN_P(value));

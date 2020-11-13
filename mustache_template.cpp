@@ -68,8 +68,11 @@ PHP_METHOD(MustacheTemplate, __construct)
 
     // Check if data was null
     if( template_len > 0 && template_str != NULL ) {
-      zend_update_property_stringl(MustacheTemplate_ce_ptr, _this_zval,
-            "template", sizeof("template") - 1, template_str, template_len);
+#if PHP_VERSION_ID < 80000
+      zend_update_property_stringl(MustacheTemplate_ce_ptr, _this_zval, "template", sizeof("template") - 1, template_str, template_len);
+#else
+      zend_update_property_stringl(MustacheTemplate_ce_ptr, Z_OBJ_P(_this_zval), "template", sizeof("template") - 1, template_str, template_len);
+#endif
     }
 
   } catch(...) {
@@ -94,7 +97,11 @@ PHP_METHOD(MustacheTemplate, __toString)
 
     // Return
     zval rv;
+#if PHP_VERSION_ID < 80000
     zval * value = zend_read_property(Z_OBJCE_P(_this_zval), _this_zval, "template", sizeof("template")-1, 1, &rv);
+#else
+    zval * value = zend_read_property(Z_OBJCE_P(_this_zval), Z_OBJ_P(_this_zval), "template", sizeof("template")-1, 1, &rv);
+#endif
     convert_to_string(value);
     RETURN_ZVAL(value, 1, 0);
 
