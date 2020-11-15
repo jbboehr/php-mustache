@@ -31,6 +31,7 @@
    <file name="README.md" role="doc" />
    <file name="ax_cxx_compile_stdcxx_11.m4" role="src" />
    <file name="config.m4" role="src" />
+   <file name="config.w32" role="src" />
    <file name="mustache_ast.cpp" role="src" />
    <file name="mustache_ast.hpp" role="src" />
    <file name="mustache_class_method_lambda.cpp" role="src" />
