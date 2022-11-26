@@ -18,7 +18,7 @@ function install_libmustache() (
     set -o errexit -o pipefail -o xtrace
 
     rm -rf libmustache
-    git clone git://github.com/jbboehr/libmustache.git
+    git clone https://github.com/jbboehr/libmustache.git
     cd libmustache
     git checkout ${LIBMUSTACHE_VERSION}
     autoreconf -fiv

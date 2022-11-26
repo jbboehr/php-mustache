@@ -17,13 +17,14 @@ jobs:
             fail-fast: false
             matrix:
                 PHP_VERSION:
-                    - "7.2"
-                    - "7.3"
                     - "7.4"
                     - "8.0"
+                    - "8.1"
                 COVERAGE: ["true", "false"]
         steps:
             - uses: actions/checkout@v2
+              with:
+                submodules: recursive
             - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I'm putting everything in a FSCKING BASH SCRIPT
               env:
                   PHP_VERSION: ${{ matrix.PHP_VERSION }}
