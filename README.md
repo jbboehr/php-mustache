@@ -1,8 +1,6 @@
 # php-mustache
 
-[![GitHub Linux Build Status](https://github.com/jbboehr/php-mustache/workflows/linux/badge.svg)](https://github.com/jbboehr/php-mustache/actions?query=workflow%3Alinux)
-[![GitHub OSX Build Status](https://github.com/jbboehr/php-mustache/workflows/osx/badge.svg)](https://github.com/jbboehr/php-mustache/actions?query=workflow%3Aosx)
-[![GitHub Docker Build Status](https://github.com/jbboehr/php-mustache/workflows/docker/badge.svg)](https://github.com/jbboehr/php-mustache/actions?query=workflow%3Adocker)
+[![GitHub Build Status](https://github.com/jbboehr/php-mustache/workflows/ci/badge.svg)](https://github.com/jbboehr/php-mustache/actions?query=workflow%3Aci)
 [![Coverage Status](https://coveralls.io/repos/jbboehr/php-mustache/badge.svg?branch=master&service=github)](https://coveralls.io/github/jbboehr/php-mustache?branch=master)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md)
 

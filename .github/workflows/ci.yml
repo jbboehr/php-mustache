@@ -1,0 +1,100 @@
+name: ci
+
+on:
+    push:
+        branches:
+            - master
+            - github-actions
+            - ci
+    pull_request:
+        branches:
+            - master
+
+jobs:
+    linux:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                PHP_VERSION:
+                    - "7.4"
+                    - "8.0"
+                    - "8.1"
+                    - "8.2"
+                COVERAGE: ["true", "false"]
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                submodules: recursive
+            - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I'm putting everything in a FSCKING BASH SCRIPT
+              env:
+                  PHP_VERSION: ${{ matrix.PHP_VERSION }}
+                  COVERAGE: ${{ matrix.COVERAGE }}
+              run: bash ./.github/scripts/linux.sh
+            - name: Coveralls
+              if: ${{ matrix.COVERAGE == 'true' }}
+              uses: coverallsapp/github-action@master
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  path-to-lcov: ./coverage.info
+
+    docker:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                PHP_VERSION:
+                    - "7.4"
+                    - "8.0"
+                    - "8.1"
+                    - "8.2-rc"
+                DOCKER_NAME:
+                    - "alpine"
+                    - "debian"
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                submodules: recursive
+            - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I am putting everything in a FSCKING BASH SCRIPT
+              env:
+                  PHP_VERSION: ${{ matrix.PHP_VERSION }}
+                  DOCKER_NAME: ${{ matrix.DOCKER_NAME }}
+              run: bash ./.github/scripts/docker.sh
+
+    docker-fedora:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I am putting everything in a FSCKING BASH SCRIPT
+              env:
+                  DOCKER_NAME: fedora
+                  TEST_PHP_EXECUTABLE: /usr/bin/php
+              run: bash ./.github/scripts/docker.sh
+
+    osx:
+        runs-on: macos-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                PHP_VERSION:
+                    - "7.4"
+                    - "8.0"
+                    - "8.1"
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                submodules: recursive
+            - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I'm putting everything in a FSCKING BASH SCRIPT
+              env:
+                  PHP_VERSION: ${{ matrix.PHP_VERSION }}
+              run: bash ./.github/scripts/osx.sh
+
+    nix:
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v3
+        - uses: cachix/install-nix-action@v18
+          with:
+            nix_path: nixpkgs=channel:nixos-22.05
+        - run: nix-build
+        - run: nix-build nix/ci.nix

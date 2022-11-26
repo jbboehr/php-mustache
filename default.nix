@@ -3,7 +3,8 @@
   stdenv ? pkgs.stdenv,
   php ? pkgs.php,
   buildPecl ? pkgs.callPackage <nixpkgs/pkgs/build-support/build-pecl.nix> {
-    inherit php stdenv;
+    php = php.unwrapped;
+    inherit stdenv;
   },
   gitignoreSource ? (import (pkgs.fetchFromGitHub {
     owner = "hercules-ci";
@@ -18,8 +19,8 @@
   }))) {},
 
   libmustache ? pkgs.callPackage (import ((fetchTarball {
-    url = "https://github.com/jbboehr/libmustache/archive/1761e260bbd2247891aa49cb04318b40206b9a4b.tar.gz";
-    sha256 = "0pch9i6yywx2p7d5j3rz8lwgrg69hfs8bagdjm4whcmvrpx8cvi4";
+    url = "https://github.com/jbboehr/libmustache/archive/230d5c885e156a9b4fe9f9690128fe400b55087c.tar.gz";
+    sha256 = "0gbdx8f2v300yshwr0pvhw99qkc7ac5lq904w0l6m9v0132lxvl9";
   }))) { inherit mustache_spec stdenv; },
 
   phpMustacheVersion ? null,
