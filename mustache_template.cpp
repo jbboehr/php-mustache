@@ -17,7 +17,11 @@ ZEND_BEGIN_ARG_INFO_EX(MustacheTemplate____construct_args, ZEND_SEND_BY_VAL, ZEN
     ZEND_ARG_INFO(0, vars)
 ZEND_END_ARG_INFO()
 
+#if PHP_VERSION_ID >= 80200
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(MustacheTemplate____toString_args, 0, 0, IS_STRING, 0)
+#else
 ZEND_BEGIN_ARG_INFO_EX(MustacheTemplate____toString_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+#endif
 ZEND_END_ARG_INFO()
 /* }}} */
 
