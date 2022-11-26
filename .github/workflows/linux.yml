@@ -20,9 +20,10 @@ jobs:
                     - "7.4"
                     - "8.0"
                     - "8.1"
+                    - "8.2"
                 COVERAGE: ["true", "false"]
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
               with:
                 submodules: recursive
             - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I'm putting everything in a FSCKING BASH SCRIPT
