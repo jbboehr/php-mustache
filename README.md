@@ -6,13 +6,11 @@
 
 C++ implementation of [Mustache](http://mustache.github.com/) as a PHP extension.
 
-
 ## Features
 
 All features of Mustache are supported EXCEPT:
 
 * Whitespace rules. All whitespace is kept as it is in the input template.
-
 
 ## Installation
 
@@ -72,7 +70,6 @@ nix-env -i -f https://github.com/jbboehr/php-mustache/archive/master.tar.gz
 
 See [Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild). You may need to add [msinttypes](https://code.google.com/p/msinttypes/) ([export](https://github.com/jbboehr/msinttypes/)) to your include directory.
 
-
 ## Usage
 
 Example:
@@ -111,10 +108,9 @@ See also: [template loader example](examples.md)
 
 ## Credits
 
-- [John Boehr](https://github.com/jbboehr)
-- [Adam Baratz](https://github.com/adambaratz)
-- [All Contributors](../../contributors)
-
+* [John Boehr](https://github.com/jbboehr)
+* [Adam Baratz](https://github.com/adambaratz)
+* [All Contributors](../../contributors)
 
 ## License
 

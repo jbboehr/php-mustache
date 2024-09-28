@@ -1,37 +1,86 @@
-{ php, stdenv, autoreconfHook, fetchurl, mustache_spec, libmustache, pkgconfig,
-  buildPecl ? import <nixpkgs/pkgs/build-support/build-pecl.nix> {
-    # re2c is required for nixpkgs master, must not be specified for <= 19.03
-    inherit php stdenv autoreconfHook fetchurl;
-  },
-  phpMustacheVersion ? null,
-  phpMustacheSrc ? null,
-  phpMustacheSha256 ? null
+{
+  lib,
+  php,
+  stdenv,
+  pkg-config,
+  valgrind,
+  autoreconfHook,
+  buildPecl,
+  src,
+  lcov,
+  mustache_spec,
+  libmustache,
+  checkSupport ? false,
+  valgrindSupport ? true,
+  coverageSupport ? false,
 }:
-
-let
-  orDefault = x: y: (if (!isNull x) then x else y);
-in
-
-buildPecl rec {
+(buildPecl rec {
   pname = "mustache";
   name = "mustache-${version}";
-  version = orDefault phpMustacheVersion "v0.7.4";
-  src = orDefault phpMustacheSrc (fetchurl {
-    url = "https://github.com/jbboehr/php-mustache/archive/${version}.tar.gz";
-    sha256 = orDefault phpMustacheSha256 "163lrr2869zpzyxiag6af1jvxhg4ivqbljrfyqgbflcq2c9vn975";
-  });
+  version = "v0.9.3";
 
-  buildInputs = [ libmustache ];
-  nativeBuildInputs = [ mustache_spec pkgconfig ];
+  inherit src;
 
-  # needed or the tests will fail below
-  postBuild = ''
-      PREV=$(patchelf --print-rpath modules/mustache.so)
-      patchelf --set-rpath ${libmustache}/lib:$PREV modules/mustache.so
+  buildInputs = [libmustache];
+  nativeBuildInputs =
+    [php.unwrapped.dev pkg-config mustache_spec]
+    ++ lib.optional valgrindSupport valgrind
+    ++ lib.optional coverageSupport lcov;
+
+  passthru = {
+    inherit php stdenv;
+  };
+
+  configureFlags =
+    []
+    ++ lib.optional coverageSupport ["--enable-mustache-coverage"];
+
+  makeFlags = ["phpincludedir=$(dev)/include"];
+  outputs =
+    lib.optional (checkSupport && coverageSupport) "coverage"
+    ++ ["out" "dev"];
+
+  doCheck = checkSupport;
+  theRealFuckingCheckPhase =
+    ''
+      runHook preCheck
+      REPORT_EXIT_STATUS=1 NO_INTERACTION=1 make test TEST_PHP_ARGS="-n -j$(nproc --all)" || (find tests -name '*.log' | xargs cat ; exit 1)
+    ''
+    + (lib.optionalString valgrindSupport ''
+      USE_ZEND_ALLOC=0 REPORT_EXIT_STATUS=1 NO_INTERACTION=1 make test TEST_PHP_ARGS="-n -m -j$(nproc --all)" || (find tests -name '*.mem' | xargs cat ; exit 1)
+    '')
+    + ''
+      runHook postCheck
     '';
 
-  doCheck = true;
-  checkTarget = "test";
-  checkFlags = ["REPORT_EXIT_STATUS=1" "NO_INTERACTION=1"];
-}
+  preBuild = lib.optionalString coverageSupport ''
+    lcov --directory . --zerocounters
+    lcov --directory . --capture --compat-libtool --initial --output-file coverage.info
+  '';
 
+  postCheck = lib.optionalString coverageSupport ''
+    lcov --no-checksum --directory . --capture --no-markers --compat-libtool --output-file coverage.info
+    set -o noglob
+    lcov --remove coverage.info '${builtins.storeDir}/*' \
+        --compat-libtool \
+        --output-file coverage.info
+    set +o noglob
+    mkdir -p $coverage
+    genhtml coverage.info -o $coverage/html/
+    cp coverage.info $coverage/coverage.info
+  '';
+
+  meta = with lib; {
+    homepage = "https://github.com/jbboehr/php-mustache";
+    license = licenses.bsd3;
+    platforms = platforms.linux;
+    outputsToInstall = outputs;
+  };
+
+  #TEST_PHP_DETAILED = 1;
+})
+.overrideAttrs (o:
+    o
+    // {
+      checkPhase = o.theRealFuckingCheckPhase;
+    })

@@ -24,7 +24,7 @@ function install_libmustache() (
     cd libmustache
     git checkout ${LIBMUSTACHE_VERSION}
     autoreconf -i
-    ./configure --without-mustache-spec
+    ./configure --without-mustache-spec --prefix=$HOME/buildprefix
     make
     make install
 )
@@ -33,7 +33,7 @@ function install() (
     set -o errexit -o pipefail -o xtrace
 
     phpize
-    ./configure
+    ./configure --prefix=$HOME/buildprefix --with-libmustache=$HOME/buildprefix
     make
 )
 

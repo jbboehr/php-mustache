@@ -54,6 +54,9 @@ static PHP_MSHUTDOWN_FUNCTION(mustache)
 /* }}} */
 
 /* {{{ PHP_MINFO_FUNCTION */
+const char *PHP_MUSTACHE_MOTD =
+        "Think not that I am come to send peace on earth: I came not to send peace, but a sword. Matthew 10:34";
+
 static PHP_MINFO_FUNCTION(mustache)
 {
   php_info_print_table_start();
@@ -71,6 +74,10 @@ static PHP_MINFO_FUNCTION(mustache)
   php_info_print_table_end();
 
   DISPLAY_INI_ENTRIES();
+
+  php_info_print_box_start(0);
+  PUTS(PHP_MUSTACHE_MOTD);
+  php_info_print_box_end();
 }
 /* }}} */
 

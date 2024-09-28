@@ -73,7 +73,7 @@ function before_script() (
 function test_php_mustache() (
     set -o errexit -o pipefail -o xtrace
 
-    ${TEST_PHP_EXECUTABLE} run-tests.php -n -d extension=modules/mustache.so ./tests/*.phpt
+    ${TEST_PHP_EXECUTABLE} run-tests.php -n -d extension=modules/mustache.so -j$(nproc --all) ./tests/*.phpt
 )
 
 function script() (

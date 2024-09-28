@@ -19,6 +19,9 @@ PHP_ARG_ENABLE(mustache, whether to enable mustache support,
 dnl Make sure that the comment is aligned:
 [  --enable-mustache Enable mustache support])
 
+PHP_ARG_ENABLE(mustache-coverage, whether to enable mustache coverage support,
+[AS_HELP_STRING([--enable-mustache-coverage], [Enable mustache coverage support])], [no], [no])
+
 dnl LIBMUSTACHE ----------------------------------------------------------------
 PHP_ARG_WITH(libmustache, libmustache location,
 dnl Make sure that the comment is aligned:
@@ -61,12 +64,16 @@ fi
 
 dnl MAIN -----------------------------------------------------------------------
 if test "$PHP_MUSTACHE" != "no"; then
-    AH_BOTTOM([
+  AH_BOTTOM([
 #ifdef __clang__
 #include "main/php_config.h"
 #/**/undef/**/ HAVE_ASM_GOTO
 #endif
-    ])
+  ])
+  if test "$PHP_MUSTACHE_COVERAGE" == "yes"; then
+    CXXFLAGS="--coverage -fprofile-arcs -ftest-coverage $CXXFLAGS"
+    LDFLAGS="--coverage -lgcov $LDFLAGS"
+  fi
 
   AC_DEFINE(HAVE_MUSTACHE, 1, [Whether you have mustache support])
   PHP_REQUIRE_CXX()

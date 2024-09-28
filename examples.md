@@ -1,5 +1,5 @@
 
-## Examples
+# Examples
 
 You can adapt this Mustache_Template_Loader class or use it as an
 example of how to interface with whatever framework you use. The MustacheAST
