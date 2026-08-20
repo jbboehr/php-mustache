@@ -20,6 +20,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Reject malformed, over-budget, and trailing `MustacheAST` serialization data.
 - Reject attempts to reinitialize a `MustacheAST` while its node may be borrowed by a render.
 - Invalidate retained `MustacheLambdaHelper` values safely when their callback returns.
+- Release lambda arguments and return values reliably when callbacks or string conversion fail.
 
 ## [0.9.3] - 2022-11-26
 

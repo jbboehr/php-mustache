@@ -14,33 +14,110 @@
 
 #undef min
 
-std::string Lambda::invoke()
-{
-  zval closure_result;
-  std::string closure_result_string;
+namespace {
 
-  if( invokeUserFunction(&closure_result, 0, NULL) == SUCCESS ) {
-    convert_to_string(&closure_result);
-    closure_result_string.assign(Z_STRVAL(closure_result), Z_STRLEN(closure_result));
-    zval_dtor(&closure_result);
+class ZvalGuard {
+  private:
+    zval value;
+
+  public:
+    ZvalGuard()
+    {
+      ZVAL_UNDEF(&value);
+    }
+
+    ~ZvalGuard()
+    {
+      if( !Z_ISUNDEF(value) ) {
+        zval_ptr_dtor(&value);
+      }
+    }
+
+    ZvalGuard(const ZvalGuard&) = delete;
+    ZvalGuard& operator=(const ZvalGuard&) = delete;
+
+    zval * get()
+    {
+      return &value;
+    }
+};
+
+class ZvalArguments {
+  private:
+    zval * values;
+    int count;
+
+  public:
+    explicit ZvalArguments(int argument_count) :
+        values(NULL),
+        count(argument_count)
+    {
+      if( count == 0 ) {
+        return;
+      }
+
+      values = (zval *) safe_emalloc(count, sizeof(zval), 0);
+      for( int i = 0; i < count; i++ ) {
+        ZVAL_UNDEF(&values[i]);
+      }
+    }
+
+    ~ZvalArguments()
+    {
+      if( values == NULL ) {
+        return;
+      }
+
+      for( int i = count - 1; i >= 0; i-- ) {
+        if( !Z_ISUNDEF(values[i]) ) {
+          zval_ptr_dtor(&values[i]);
+        }
+      }
+      efree(values);
+    }
+
+    ZvalArguments(const ZvalArguments&) = delete;
+    ZvalArguments& operator=(const ZvalArguments&) = delete;
+
+    zval * data()
+    {
+      return values;
+    }
+
+    zval& operator[](int index)
+    {
+      return values[index];
+    }
+};
+
+} // namespace
+
+std::string Lambda::invokeUserFunctionAsString(int param_count, zval params[])
+{
+  ZvalGuard result;
+  if( invokeUserFunction(result.get(), param_count, params) != SUCCESS ||
+      EG(exception) != NULL || Z_ISUNDEF_P(result.get()) ) {
+    return std::string();
   }
 
-  return closure_result_string;
+  convert_to_string(result.get());
+  if( EG(exception) != NULL || Z_TYPE_P(result.get()) != IS_STRING ) {
+    return std::string();
+  }
+
+  return std::string(Z_STRVAL_P(result.get()), Z_STRLEN_P(result.get()));
+}
+
+std::string Lambda::invoke()
+{
+  return invokeUserFunctionAsString(0, NULL);
 }
 
 std::string Lambda::invoke(
     std::string_view text, mustache::LambdaRenderContext context)
 {
-  zval closure_result;
-  std::string closure_result_string;
-
-  int param_count = 0;
-  zval * params = NULL;
-
-  param_count = std::min(getUserFunctionParamCount(), 2);
-  if( param_count >= 0 ) {
-    params = (zval *) safe_emalloc(sizeof(zval), param_count, 0);
-  }
+  int param_count = std::max(0, std::min(getUserFunctionParamCount(), 2));
+  ZvalArguments params(param_count);
   if( param_count >= 1 ) {
     ZVAL_STRINGL(&params[0], text.data(), text.size());
   }
@@ -54,19 +131,5 @@ std::string Lambda::invoke(
     payload->state->context = context;
   }
 
-  if( invokeUserFunction(&closure_result, param_count, params) == SUCCESS ) {
-    convert_to_string(&closure_result);
-    closure_result_string.assign(Z_STRVAL(closure_result), Z_STRLEN(closure_result));
-  }
-  zval_dtor(&closure_result);
-
-  if( params != NULL ) {
-    for( param_count = param_count - 1; param_count >= 0; param_count-- ) {
-      zval_dtor(&params[param_count]);
-    }
-
-    efree(params);
-  }
-
-  return closure_result_string;
+  return invokeUserFunctionAsString(param_count, params.data());
 }
