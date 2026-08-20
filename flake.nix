@@ -21,7 +21,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     libmustache = {
-      url = "github:jbboehr/libmustache";
+      url = "github:jbboehr/libmustache/develop";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.systems.follows = "systems";
       inputs.flake-utils.follows = "flake-utils";
@@ -73,13 +73,7 @@
           };
         };
 
-        libmustachePackage = pkgs.callPackage (libmustache + "/nix/derivation.nix") {
-          libmustacheSrc = libmustache;
-          mustache_spec = mustache_spec.packages.${system}.mustache-spec;
-          inherit (gitignore.lib) gitignoreFilterWith;
-          # Removed from Nixpkgs after 24.05, but unused by this pinned derivation.
-          libstdcxx5 = null;
-        };
+        libmustachePackage = libmustache.packages.${system}.libmustache;
 
         makePackage = {
           stdenv ? pkgs.stdenv,
