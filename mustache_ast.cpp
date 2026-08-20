@@ -47,11 +47,11 @@ static zend_function_entry MustacheAST_methods[] = {
 /* }}} */
 
 /* {{{ mustache_node_from_binary_string */
-void mustache_node_from_binary_string(mustache::Node ** node, char * str, int len)
+void mustache_node_from_binary_string(mustache::Node ** node, const char * str, size_t len)
 {
   std::vector<uint8_t> uint_str;
   uint_str.resize(len);
-  int i = 0;
+  size_t i = 0;
   for( i = 0; i < len; i++ ) {
     uint_str[i] = str[i];
   }
@@ -62,14 +62,14 @@ void mustache_node_from_binary_string(mustache::Node ** node, char * str, int le
 /* }}} */
 
 /* {{{ mustache_node_to_binary_string */
-void mustache_node_to_binary_string(mustache::Node * node, char ** estr, int * elen)
+void mustache_node_to_binary_string(mustache::Node * node, char ** estr, size_t * elen)
 {
   std::vector<uint8_t> * serialPtr = node->serialize();
   std::vector<uint8_t> & serial = *serialPtr;
-  int serialLen = serial.size();
+  size_t serialLen = serial.size();
 
   char * str = (char *) emalloc(sizeof(char *) * (serialLen + 1));
-  for( int i = 0 ; i < serialLen; i++ ) {
+  for( size_t i = 0 ; i < serialLen; i++ ) {
     str[i] = (char) serial[i];
   }
   str[serialLen] = '\0';
@@ -119,7 +119,7 @@ void mustache_node_to_zval(mustache::Node * node, zval * current)
     for ( it = node->partials.begin() ; it != node->partials.end(); it++ ) {
       ZVAL_NULL(&child);
       mustache_node_to_zval(&(it->second), &child);
-      add_assoc_zval(&children, it->first.c_str(), &child);
+      add_assoc_zval_ex(&children, it->first.c_str(), it->first.length(), &child);
     }
 
     add_assoc_zval(current, "partials", &children);
@@ -208,7 +208,7 @@ PHP_METHOD(MustacheAST, __construct)
   try {
     // Custom parameters
     char * str = NULL;
-    long str_len = 0;
+    size_t str_len = 0;
 
     // Check parameters
     zval * _this_zval = NULL;
@@ -256,7 +256,7 @@ PHP_METHOD(MustacheAST, __sleep)
     if( payload->node != NULL ) {
       // Serialize and store
       char * str = NULL;
-      int len = 0;
+      size_t len = 0;
       mustache_node_to_binary_string(payload->node, &str, &len);
       if( str != NULL ) {
 #if PHP_VERSION_ID < 80000
@@ -326,7 +326,7 @@ PHP_METHOD(MustacheAST, __toString)
 
     // Convert to PHP binary string
     char * str = NULL;
-    int len = 0;
+    size_t len = 0;
     mustache_node_to_binary_string(payload->node, &str, &len);
 
     if( str != NULL ) {
@@ -372,4 +372,3 @@ PHP_METHOD(MustacheAST, __wakeup)
   }
 }
 /* }}} MustacheAST::__wakeup */
-

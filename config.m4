@@ -9,11 +9,6 @@ AC_DEFUN([PHP_MUSTACHE_ADD_FLAGS], [
   PHP_MUSTACHE_FLAGS="$PHP_MUSTACHE_FLAGS $1"
 ])
 
-dnl C++11 ----------------------------------------------------------------------
-dnl Switch the includes if compiling into PHP
-m4_include(ax_cxx_compile_stdcxx_11.m4)
-AX_CXX_COMPILE_STDCXX_11
-
 dnl MUSTACHE -------------------------------------------------------------------
 PHP_ARG_ENABLE(mustache, whether to enable mustache support,
 dnl Make sure that the comment is aligned:
@@ -37,22 +32,29 @@ AC_MSG_CHECKING([for libmustache files])
 dnl Priority to user provided path
 if test -r $PHP_LIBMUSTACHE/$SEARCH_FOR; then
   LIBMUSTACHE_DIR=$PHP_LIBMUSTACHE
+  LIBMUSTACHE_CFLAGS="-I$LIBMUSTACHE_DIR/include"
   AC_MSG_RESULT(found in $LIBMUSTACHE_DIR)
 
 dnl Default to pkg-config output
-elif test -x "$PKG_CONFIG" && $PKG_CONFIG --exists mustache; then
+elif test -x "$PKG_CONFIG" && $PKG_CONFIG --exists 'mustache >= 0.6.0'; then
   LIBMUSTACHE_CFLAGS=`$PKG_CONFIG mustache --cflags`
   LIBMUSTACHE_LIBS=`$PKG_CONFIG mustache --libs`
   LIBMUSTACHE_VERSION=`$PKG_CONFIG mustache --modversion`
   AC_MSG_RESULT(version $LIBMUSTACHE_VERSION found using pkg-config)
   PHP_EVAL_LIBLINE($LIBMUSTACHE_LIBS, MUSTACHE_SHARED_LIBADD)
   PHP_EVAL_INCLINE($LIBMUSTACHE_CFLAGS)
+  PHP_MUSTACHE_ADD_FLAGS([$LIBMUSTACHE_CFLAGS])
+
+elif test -x "$PKG_CONFIG" && $PKG_CONFIG --exists mustache; then
+  LIBMUSTACHE_VERSION=`$PKG_CONFIG mustache --modversion`
+  AC_MSG_ERROR([libmustache >= 0.6.0 required; version $LIBMUSTACHE_VERSION found])
 
 dnl Fallback to some well known locations
 else
   for i in $SEARCH_PATH ; do
     if test -r $i/$SEARCH_FOR; then
       LIBMUSTACHE_DIR=$i
+      LIBMUSTACHE_CFLAGS="-I$LIBMUSTACHE_DIR/include"
       AC_MSG_RESULT(found in $i)
       break
     fi
@@ -79,6 +81,29 @@ if test "$PHP_MUSTACHE" != "no"; then
   PHP_REQUIRE_CXX()
   PHP_ADD_LIBRARY(stdc++, 1, MUSTACHE_SHARED_LIBADD)
 
+  AC_LANG_PUSH([C++])
+  PHP_MUSTACHE_SAVED_CXXFLAGS="$CXXFLAGS"
+  CXXFLAGS="$CXXFLAGS $LIBMUSTACHE_CFLAGS"
+  AC_MSG_CHECKING([whether libmustache provides the C++17 ABI 6 contract])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <mustache/mustache_config.h>
+#include <string_view>
+
+#if !defined(MUSTACHE_CXX_STANDARD) || MUSTACHE_CXX_STANDARD < 17
+# error libmustache 0.6.0 or later is required
+#endif
+  ]], [[
+    std::string_view value;
+    return value.empty() ? 0 : 1;
+  ]])], [
+    AC_MSG_RESULT([yes])
+  ], [
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([libmustache >= 0.6.0 and a C++17 compiler are required])
+  ])
+  CXXFLAGS="$PHP_MUSTACHE_SAVED_CXXFLAGS"
+  AC_LANG_POP([C++])
+
   PHP_MUSTACHE_ADD_SOURCES([
     php_mustache.cpp
     mustache_ast.cpp
@@ -101,4 +126,3 @@ if test "$PHP_MUSTACHE" != "no"; then
   PHP_SUBST(MUSTACHE_SHARED_LIBADD)
   PHP_NEW_EXTENSION(mustache, $PHP_MUSTACHE_SOURCES, $ext_shared, , $PHP_MUSTACHE_FLAGS, cxx)
 fi
-

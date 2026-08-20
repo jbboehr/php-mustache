@@ -10,6 +10,7 @@
 #include "mustache_exceptions.hpp"
 #include "mustache_template.hpp"
 #include "mustache_mustache.hpp"
+#include <string_view>
 
 /* {{{ ZE2 OO definitions */
 zend_class_entry * Mustache_ce_ptr;
@@ -159,10 +160,12 @@ mustache::Mustache * mustache_new_Mustache() {
     mustache->setEscapeByDefault(false);
   }
   if( MUSTACHEG(default_start_sequence) ) {
-    mustache->setStartSequence(MUSTACHEG(default_start_sequence), 0);
+    const char * start_sequence = MUSTACHEG(default_start_sequence);
+    mustache->setStartSequence(std::string_view(start_sequence, strlen(start_sequence)));
   }
   if( MUSTACHEG(default_stop_sequence) ) {
-    mustache->setStopSequence(MUSTACHEG(default_stop_sequence), 0);
+    const char * stop_sequence = MUSTACHEG(default_stop_sequence);
+    mustache->setStopSequence(std::string_view(stop_sequence, strlen(stop_sequence)));
   }
 
   return mustache;
@@ -191,7 +194,7 @@ bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache, musta
 /* }}} */
 
 /* {{{ mustache_parse_partials_param */
-static inline void mustache_parse_partial_param(char * key, zval * data,
+static inline void mustache_parse_partial_param(const char * key, size_t key_len, zval * data,
         mustache::Mustache * mustache, mustache::Node::Partials * partials)
 {
     std::string ckey;
@@ -202,8 +205,8 @@ static inline void mustache_parse_partial_param(char * key, zval * data,
 
     if( Z_TYPE_P(data) == IS_STRING ) {
       // String key, string value
-      ckey.assign(key);
-      tmpl.assign(Z_STRVAL_P(data));
+      ckey.assign(key, key_len);
+      tmpl.assign(Z_STRVAL_P(data), Z_STRLEN_P(data));
       partials->insert(std::make_pair(ckey, node));
       mustache->tokenize(&tmpl, &(*partials)[ckey]);
     } else if( Z_TYPE_P(data) == IS_OBJECT ) {
@@ -216,12 +219,12 @@ static inline void mustache_parse_partial_param(char * key, zval * data,
             zval * value = zend_read_property(Z_OBJCE_P(data), Z_OBJ_P(data), "template", sizeof("template")-1, 1, &rv);
 #endif
             convert_to_string(value);
-            std::string tmpstr(Z_STRVAL_P(value));
-            ckey.assign(key);
+            std::string tmpstr(Z_STRVAL_P(value), Z_STRLEN_P(value));
+            ckey.assign(key, key_len);
             partials->insert(std::make_pair(ckey, node));
             mustache->tokenize(&tmpstr, &(*partials)[ckey]);
         } else if( Z_OBJCE_P(data) == MustacheAST_ce_ptr ) {
-            ckey.assign(key);
+            ckey.assign(key, key_len);
             maPayload = php_mustache_ast_object_fetch_object(data);
             partials->insert(std::make_pair(ckey, node));
             nodePtr = &(*partials)[ckey];
@@ -256,7 +259,7 @@ bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
         if( !key ) {
             php_error(E_WARNING, "Partial array contains a non-string key");
         } else {
-            mustache_parse_partial_param(key->val, data_entry, mustache, partials);
+            mustache_parse_partial_param(ZSTR_VAL(key), ZSTR_LEN(key), data_entry, mustache, partials);
         }
     } ZEND_HASH_FOREACH_END();
 
@@ -271,8 +274,7 @@ bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
   // Prepare template string
   if( Z_TYPE_P(tmpl) == IS_STRING ) {
     // Tokenize template
-    char * tmpstr = Z_STRVAL_P(tmpl);
-    std::string templateStr(tmpstr/*, (size_t) Z_STRLEN_P(tmpl)*/);
+    std::string templateStr(Z_STRVAL_P(tmpl), Z_STRLEN_P(tmpl));
     mustache->tokenize(&templateStr, *node);
     return true;
 
@@ -286,7 +288,7 @@ bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
         zval * value = zend_read_property(Z_OBJCE_P(tmpl), Z_OBJ_P(tmpl), "template", sizeof("template")-1, 1, &rv);
 #endif
         convert_to_string(value);
-        std::string tmpstr(Z_STRVAL_P(value));
+        std::string tmpstr(Z_STRVAL_P(value), Z_STRLEN_P(value));
 
       if( !tmpstr.length() ) {
         php_error(E_WARNING, "Empty MustacheTemplate");
@@ -446,7 +448,7 @@ PHP_METHOD(Mustache, setStartSequence)
   try {
     // Custom parameters
     char * str = NULL;
-    long str_len = 0;
+    size_t str_len = 0;
 
     // Check parameters
     zval * _this_zval = NULL;
@@ -460,7 +462,7 @@ PHP_METHOD(Mustache, setStartSequence)
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
 
     // Main
-    payload->mustache->setStartSequence(str/*, str_len*/);
+    payload->mustache->setStartSequence(std::string_view(str, str_len));
     RETURN_TRUE;
 
   } catch(...) {
@@ -475,7 +477,7 @@ PHP_METHOD(Mustache, setStopSequence)
   try {
     // Custom parameters
     char * str = NULL;
-    long str_len = 0;
+    size_t str_len = 0;
 
     // Check parameters
     zval * _this_zval;
@@ -489,7 +491,7 @@ PHP_METHOD(Mustache, setStopSequence)
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
 
     // Main
-    payload->mustache->setStopSequence(str/*, str_len*/);
+    payload->mustache->setStopSequence(std::string_view(str, str_len));
     RETURN_TRUE;
 
   } catch(...) {
@@ -618,7 +620,7 @@ PHP_METHOD(Mustache, tokenize)
   try {
     // Custom parameters
     char * template_str = NULL;
-    long template_len = 0;
+    size_t template_len = 0;
 
     // Check parameters
     zval * _this_zval = NULL;
@@ -632,7 +634,7 @@ PHP_METHOD(Mustache, tokenize)
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
 
     // Assign template to string
-    std::string templateStr(template_str/*, template_len*/);
+    std::string templateStr(template_str, template_len);
 
     // Tokenize template
     mustache::Node root;

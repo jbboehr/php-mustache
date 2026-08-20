@@ -104,7 +104,7 @@ PHP_MINIT_FUNCTION(mustache_data)
 static zend_always_inline bool is_invokable_object(const zend_class_entry * ce)
 {
   const HashTable * function_table = ce != NULL ? &ce->function_table : NULL;
-  return function_table != NULL && zend_hash_str_exists(function_table, "__invoke", strlen("__invoke"));
+  return function_table != NULL && zend_hash_str_exists(function_table, ZEND_STRL("__invoke"));
 }
 /* }}} is_invokable_object */
 
@@ -195,7 +195,7 @@ static zend_always_inline void mustache_data_from_array_zval(mustache::Data * no
     } else if( node->type == mustache::Data::TypeMap ) {
       child = new mustache::Data;
       mustache_data_from_zval(child, data_entry);
-      ckey.assign(ZSTR_VAL(key));
+      ckey.assign(ZSTR_VAL(key), ZSTR_LEN(key));
       node->data.insert(std::pair<std::string,mustache::Data*>(ckey, child));
     } else {
       php_error(E_WARNING, "Weird data conflict");
@@ -244,6 +244,7 @@ static zend_always_inline void mustache_data_from_object_properties_zval(mustach
   zend_property_info * prop;
   char * prop_name;
   const char * class_name;
+  zend_string * prop_name_source;
 
   node->type = mustache::Data::TypeNone;
 
@@ -275,6 +276,7 @@ static zend_always_inline void mustache_data_from_object_properties_zval(mustach
       (void)key_nindex; /* avoid [-Wunused-but-set-variable] */
       if( key && ZSTR_LEN(key) && ZSTR_VAL(key)[0] ) { // skip private/protected
         prop_name = ZSTR_VAL(key);
+        prop_name_source = key;
 
         // defined properties must be public
         // implicit properties won't be in properties_info, so they'll be assumed to be visible
@@ -284,7 +286,9 @@ static zend_always_inline void mustache_data_from_object_properties_zval(mustach
           if( prop_zv != NULL ) {
             prop = (zend_property_info *) Z_PTR_P(prop_zv);
             is_visible = is_valid_property(prop);
-            zend_unmangle_property_name(prop->name, &class_name, (const char **) &prop_name);
+            if( zend_unmangle_property_name(prop->name, &class_name, (const char **) &prop_name) == SUCCESS ) {
+              prop_name_source = prop->name;
+            }
           }
         }
 
@@ -293,7 +297,8 @@ static zend_always_inline void mustache_data_from_object_properties_zval(mustach
 
           child = new mustache::Data;
           mustache_data_from_zval(child, data_entry);
-          ckey.assign(prop_name);
+          ckey.assign(prop_name,
+              ZSTR_LEN(prop_name_source) - (size_t) (prop_name - ZSTR_VAL(prop_name_source)));
           node->data.insert(std::pair<std::string,mustache::Data*>(ckey, child));
         }
       }
@@ -350,11 +355,14 @@ static zend_always_inline void mustache_data_from_object_functions_zval(mustache
       if( is_valid_function(function_entry) ) {
         node->type = mustache::Data::TypeMap;
 
-        ckey.assign(ZSTR_VAL(function_entry->common.function_name));
+        ckey.assign(ZSTR_VAL(function_entry->common.function_name),
+            ZSTR_LEN(function_entry->common.function_name));
 
         child = new mustache::Data();
         child->type = mustache::Data::TypeLambda;
-        child->lambda = new ClassMethodLambda(current, ZSTR_VAL(function_entry->common.function_name));
+        child->lambda = new ClassMethodLambda(current,
+            ZSTR_VAL(function_entry->common.function_name),
+            ZSTR_LEN(function_entry->common.function_name));
 
         node->data.insert(std::pair<std::string,mustache::Data*>(ckey,child));
       }
@@ -387,7 +395,7 @@ static zend_always_inline void mustache_data_from_object_zval(mustache::Data * n
     node->lambda = new ZendClosureLambda(current);
   } else if( is_invokable_object(ce) ) {
     node->type = mustache::Data::TypeLambda;
-    node->lambda = new ClassMethodLambda(current, "__invoke");
+    node->lambda = new ClassMethodLambda(current, ZEND_STRL("__invoke"));
   } else {
     // functions should take precendence over properties
     mustache_data_from_object_properties_zval(node, current);
@@ -426,7 +434,7 @@ void mustache_data_from_zval(mustache::Data * node, zval * current)
           break;
       case IS_STRING:
           node->type = mustache::Data::TypeString;
-          node->val = new std::string(Z_STRVAL_P(current)/*, (size_t) Z_STRLEN_P(current)*/);
+          node->val = new std::string(Z_STRVAL_P(current), Z_STRLEN_P(current));
           break;
       case IS_ARRAY:
           mustache_data_from_array_zval(node, current);
@@ -479,7 +487,7 @@ void mustache_data_to_zval(mustache::Data * node, zval * current)
       for ( m_it = node->data.begin() ; m_it != node->data.end(); m_it++ ) {
         ZVAL_NULL(&child);
         mustache_data_to_zval((*m_it).second, &child);
-        add_assoc_zval(current, (*m_it).first.c_str(), &child);
+        add_assoc_zval_ex(current, (*m_it).first.c_str(), (*m_it).first.length(), &child);
       }
       break;
     default:
@@ -552,4 +560,3 @@ PHP_METHOD(MustacheData, toValue)
   }
 }
 /* }}} MustacheData::toValue */
-

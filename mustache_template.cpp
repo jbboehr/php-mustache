@@ -58,7 +58,7 @@ PHP_METHOD(MustacheTemplate, __construct)
   try {
     // Custom parameters
     char * template_str = NULL;
-    long template_len = 0;
+    size_t template_len = 0;
 
     // Check parameters
     zval * _this_zval = NULL;
@@ -114,4 +114,3 @@ PHP_METHOD(MustacheTemplate, __toString)
   }
 }
 /* }}} MustacheTemplate::__toString */
-

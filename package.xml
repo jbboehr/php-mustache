@@ -28,7 +28,6 @@
    <file name="CHANGELOG.md" role="doc" />
    <file name="LICENSE.md" role="doc" />
    <file name="README.md" role="doc" />
-   <file name="ax_cxx_compile_stdcxx_11.m4" role="src" />
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
    <file name="mustache_ast.cpp" role="src" />

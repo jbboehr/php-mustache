@@ -20,7 +20,7 @@ std::string Lambda::invoke()
 
   if( invokeUserFunction(&closure_result, 0, NULL) == SUCCESS ) {
     convert_to_string(&closure_result);
-    closure_result_string.assign(Z_STRVAL(closure_result));
+    closure_result_string.assign(Z_STRVAL(closure_result), Z_STRLEN(closure_result));
     zval_dtor(&closure_result);
   }
 
@@ -40,7 +40,7 @@ std::string Lambda::invoke(std::string * text, mustache::Renderer * renderer)
     params = (zval *) safe_emalloc(sizeof(zval), param_count, 0);
   }
   if( param_count >= 1 ) {
-    ZVAL_STRING(&params[0], text->c_str());
+    ZVAL_STRINGL(&params[0], text->c_str(), text->length());
   }
   if( param_count >= 2 ) {
     object_init_ex(&params[1], MustacheLambdaHelper_ce_ptr);
@@ -51,7 +51,7 @@ std::string Lambda::invoke(std::string * text, mustache::Renderer * renderer)
 
   if( invokeUserFunction(&closure_result, param_count, params) == SUCCESS ) {
     convert_to_string(&closure_result);
-    closure_result_string.assign(Z_STRVAL(closure_result));
+    closure_result_string.assign(Z_STRVAL(closure_result), Z_STRLEN(closure_result));
   }
   zval_dtor(&closure_result);
 

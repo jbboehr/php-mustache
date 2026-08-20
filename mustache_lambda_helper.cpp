@@ -100,7 +100,7 @@ PHP_METHOD(MustacheLambdaHelper, render)
   try {
     // Custom parameters
     char * template_str = NULL;
-    long template_len = 0;
+    size_t template_len = 0;
 
     // Check parameters
     zval * _this_zval = NULL;
@@ -113,7 +113,7 @@ PHP_METHOD(MustacheLambdaHelper, render)
     _this_zval = getThis();
     struct php_obj_MustacheLambdaHelper * payload = php_mustache_lambda_helper_object_fetch_object(_this_zval);
 
-    std::string templateStr(template_str/*, (size_t) Z_STRLEN_P(template_str)*/);
+    std::string templateStr(template_str, template_len);
 
     mustache::Node node;
     mustache::Tokenizer tokenizer;
@@ -124,10 +124,9 @@ PHP_METHOD(MustacheLambdaHelper, render)
 
     payload->renderer->renderForLambda(&node, &output);
 
-    RETURN_STRING(output.c_str());
+    RETURN_STRINGL(output.c_str(), output.length());
   } catch(...) {
     mustache_exception_handler();
   }
 }
 /* }}} MustacheLambdaHelper::render */
-

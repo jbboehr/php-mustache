@@ -18,9 +18,9 @@ class ClassMethodLambda : public Lambda {
     int invokeUserFunction(zval *retval_ptr, int param_count, zval params[]);
 
   public:
-    ClassMethodLambda(zval * object, const char * function_name_string) : object(object) {
+    ClassMethodLambda(zval * object, const char * function_name_string, size_t function_name_length) : object(object) {
       Z_ADDREF_P(object);
-      ZVAL_STRING(&function_name, function_name_string);
+      ZVAL_STRINGL(&function_name, function_name_string, function_name_length);
     };
     ~ClassMethodLambda();
 };
@@ -30,4 +30,3 @@ class ClassMethodLambda : public Lambda {
 #endif
 
 #endif /* PHP_MUSTACHE_CLASS_METHOD_LAMBDA_HPP */
-

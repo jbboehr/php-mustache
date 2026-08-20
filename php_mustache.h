@@ -3,6 +3,11 @@
 #define PHP_MUSTACHE_H
 
 #include <string>
+#include <mustache/mustache_config.h>
+
+#if !defined(MUSTACHE_CXX_STANDARD) || MUSTACHE_CXX_STANDARD < 17
+#error libmustache 0.6.0 or later with C++17 support is required
+#endif
 
 #define PHP_MUSTACHE_NAME "mustache"
 #define PHP_MUSTACHE_VERSION "0.9.3"
