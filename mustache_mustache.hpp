@@ -20,10 +20,6 @@ PHP_MINIT_FUNCTION(mustache_mustache);
 mustache::Mustache * mustache_new_Mustache();
 bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
     mustache::Data ** node);
-bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
-    mustache::Node::Partials * partials);
-bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
-    mustache::Node ** node);
 
 PHP_METHOD(Mustache, __construct);
 PHP_METHOD(Mustache, getEscapeByDefault);

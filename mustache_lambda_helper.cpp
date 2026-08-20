@@ -7,6 +7,10 @@
 #include "mustache_private.hpp"
 #include "mustache_exceptions.hpp"
 #include "mustache_lambda_helper.hpp"
+#include <memory>
+#include <string>
+#include <string_view>
+#include <mustache/mustache.hpp>
 
 /* {{{ ZE2 OO definitions */
 zend_class_entry * MustacheLambdaHelper_ce_ptr;
@@ -46,6 +50,12 @@ struct php_obj_MustacheLambdaHelper * php_mustache_lambda_helper_object_fetch_ob
 static void MustacheLambdaHelper_obj_free(zend_object *object)
 {
   try {
+    struct php_obj_MustacheLambdaHelper * payload =
+        php_mustache_lambda_helper_fetch_object(object);
+
+    delete payload->state;
+    payload->state = NULL;
+
     zend_object_std_dtor((zend_object *)object);
   } catch(...) {
     mustache_exception_handler();
@@ -59,9 +69,12 @@ static zend_object * MustacheLambdaHelper_obj_create(zend_class_entry * ce)
   struct php_obj_MustacheLambdaHelper * intern;
 
   try {
+    std::unique_ptr<php_mustache_lambda_helper_state> state =
+        std::make_unique<php_mustache_lambda_helper_state>();
     intern = (struct php_obj_MustacheLambdaHelper *) ecalloc(1, sizeof(struct php_obj_MustacheLambdaHelper) + zend_object_properties_size(ce));
     zend_object_std_init(&intern->std, ce);
     intern->std.handlers = &MustacheLambdaHelper_obj_handlers;
+    intern->state = state.release();
     return &intern->std;
   } catch(...) {
     mustache_exception_handler();
@@ -112,17 +125,18 @@ PHP_METHOD(MustacheLambdaHelper, render)
     // Class parameters
     _this_zval = getThis();
     struct php_obj_MustacheLambdaHelper * payload = php_mustache_lambda_helper_object_fetch_object(_this_zval);
-
-    std::string templateStr(template_str, template_len);
+    if( payload->state == NULL ) {
+      throw InvalidParameterException("MustacheLambdaHelper state was not initialized properly");
+    }
 
     mustache::Node node;
     mustache::Tokenizer tokenizer;
-    tokenizer.tokenize(&templateStr, &node);
+    tokenizer.tokenize(std::string_view(template_str, template_len), &node);
 
     std::string output;
     output.reserve(template_len);
 
-    payload->renderer->renderForLambda(&node, &output);
+    payload->state->context.render(node, output);
 
     RETURN_STRINGL(output.c_str(), output.length());
   } catch(...) {

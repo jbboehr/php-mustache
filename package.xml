@@ -54,6 +54,8 @@
    <file name="tests/MustacheAST____construct.phpt" role="test" />
    <file name="tests/MustacheAST____sleep.phpt" role="test" />
    <file name="tests/MustacheAST__toArray.phpt" role="test" />
+   <file name="tests/MustacheAST__rejects-invalid-serialization.phpt" role="test" />
+   <file name="tests/MustacheAST__rejects-reinitialization-during-render.phpt" role="test" />
    <file name="tests/MustacheAST____toString.phpt" role="test" />
    <file name="tests/MustacheAST____wakeup-apc.phpt" role="test" />
    <file name="tests/MustacheAST____wakeup.phpt" role="test" />
@@ -70,6 +72,7 @@
    <file name="tests/Mustache__getStopSequence.phpt" role="test" />
    <file name="tests/MustacheLambdaHelper__render-closure.phpt" role="test" />
    <file name="tests/MustacheLambdaHelper__render-object.phpt" role="test" />
+   <file name="tests/MustacheLambdaHelper__rejects-use-after-callback.phpt" role="test" />
    <file name="tests/Mustache__parse.phpt" role="test" />
    <file name="tests/Mustache__render-accepts-class-instance.phpt" role="test" />
    <file name="tests/Mustache__render-accepts-MustacheAST.phpt" role="test" />
@@ -84,6 +87,8 @@
    <file name="tests/Mustache__render-does-not-mutate-true.phpt" role="test" />
    <file name="tests/Mustache__render-empty-string-empty-data.phpt" role="test" />
    <file name="tests/Mustache__render-empty-string-with-data.phpt" role="test" />
+   <file name="tests/Mustache__render-embedded-nul-template.phpt" role="test" />
+   <file name="tests/Mustache__render-configured-delimiters.phpt" role="test" />
    <file name="tests/Mustache__render-lambda-closure-section.phpt" role="test" />
    <file name="tests/Mustache__render-lambda-closure-variable.phpt" role="test" />
    <file name="tests/Mustache__render-lambda-invokable-array.phpt" role="test" />
@@ -96,6 +101,7 @@
    <file name="tests/Mustache__render-recursive-array.phpt" role="test" />
    <file name="tests/Mustache__render-recursive-object.phpt" role="test" />
    <file name="tests/Mustache__render-references.phpt" role="test" />
+   <file name="tests/Mustache__render-source-and-AST-partials-equally.phpt" role="test" />
    <file name="tests/Mustache__render-tag.phpt" role="test" />
    <file name="tests/Mustache__setEscapeByDefault.phpt" role="test" />
    <file name="tests/Mustache__setStartSequence.phpt" role="test" />

@@ -3,21 +3,27 @@
 #define PHP_MUSTACHE_AST_HPP
 
 #include <mustache/mustache.hpp>
+#include <memory>
+#include <string>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+struct php_mustache_ast_state {
+    std::unique_ptr<mustache::Node> node;
+};
+
 struct php_obj_MustacheAST {
-    mustache::Node * node;
+    php_mustache_ast_state * state;
     zend_object std;
 };
 
 extern zend_class_entry * MustacheAST_ce_ptr;
 
-void mustache_node_from_binary_string(mustache::Node ** node, const char * str, size_t len);
-void mustache_node_to_binary_string(mustache::Node * node, char ** estr, size_t * elen);
-void mustache_node_to_zval(mustache::Node * node, zval * current);
+std::unique_ptr<mustache::Node> mustache_node_from_binary_string(const char * str, size_t len);
+std::string mustache_node_to_binary_string(const mustache::Node& node);
+void mustache_node_to_zval(const mustache::Node& node, zval * current);
 
 struct php_obj_MustacheAST * php_mustache_ast_object_fetch_object(zval * zv);
 

@@ -9,11 +9,17 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ### Changed
 
 - Preserve PHP null, boolean, integer, and floating-point data as typed libmustache values. Their rendered spelling now follows libmustache's typed-value rules.
+- Compile source templates and source partials through libmustache's owning template handles while preserving configured delimiters.
+- Store `MustacheAST` values with explicit ownership and bounded serialization.
+- Clone AST-backed partials into each compatibility render so ownership never aliases PHP objects.
 
 ### Fixed
 
 - Reject recursive, over-deep, and over-budget data conversion without publishing a partial `MustacheData` value.
 - Retain PHP objects and closures for as long as their converted lambda values are alive.
+- Reject malformed, over-budget, and trailing `MustacheAST` serialization data.
+- Reject attempts to reinitialize a `MustacheAST` while its node may be borrowed by a render.
+- Invalidate retained `MustacheLambdaHelper` values safely when their callback returns.
 
 ## [0.9.3] - 2022-11-26
 

@@ -2,15 +2,18 @@
 #ifndef PHP_MUSTACHE_LAMBDA_HELPER_HPP
 #define PHP_MUSTACHE_LAMBDA_HELPER_HPP
 
-#include <mustache/mustache.hpp>
-#include <mustache/renderer.hpp>
+#include <mustache/lambda.hpp>
 
 #ifdef __cplusplus
    extern "C" {
 #endif
 
+struct php_mustache_lambda_helper_state {
+    mustache::LambdaRenderContext context;
+};
+
 struct php_obj_MustacheLambdaHelper {
-    mustache::Renderer * renderer;
+    php_mustache_lambda_helper_state * state;
     zend_object std;
 };
 
@@ -28,4 +31,3 @@ extern PHP_METHOD(MustacheLambdaHelper, render);
 #endif
 
 #endif /* PHP_MUSTACHE_LAMBDA_HELPER_HPP */
-

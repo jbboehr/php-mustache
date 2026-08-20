@@ -7,6 +7,11 @@
 #include "mustache_private.hpp"
 #include "mustache_exceptions.hpp"
 #include "mustache_ast.hpp"
+#include <memory>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 /* {{{ ZE2 OO definitions */
 zend_class_entry * MustacheAST_ce_ptr;
@@ -46,42 +51,43 @@ static zend_function_entry MustacheAST_methods[] = {
 };
 /* }}} */
 
-/* {{{ mustache_node_from_binary_string */
-void mustache_node_from_binary_string(mustache::Node ** node, const char * str, size_t len)
-{
-  std::vector<uint8_t> uint_str;
-  uint_str.resize(len);
-  size_t i = 0;
-  for( i = 0; i < len; i++ ) {
-    uint_str[i] = str[i];
-  }
+namespace {
 
-  size_t vpos = 0;
-  *node = mustache::Node::unserialize(uint_str, 0, &vpos);
+mustache::Node::SerializationLimits mustache_ast_serialization_limits()
+{
+  mustache::Node::SerializationLimits limits;
+  limits.maxInputBytes = size_t{16} * 1024 * 1024;
+  limits.maxOutputBytes = size_t{16} * 1024 * 1024;
+  limits.maxNestingDepth = 64;
+  limits.maxNodes = 100000;
+  limits.maxDataPartsPerNode = 256;
+  limits.maxDataParts = 100000;
+  return limits;
+}
+
+} // namespace
+
+/* {{{ mustache_node_from_binary_string */
+std::unique_ptr<mustache::Node> mustache_node_from_binary_string(const char * str, size_t len)
+{
+  const std::string_view serial = len == 0 ? std::string_view() : std::string_view(str, len);
+  return mustache::Node::unserializeOwned(serial, mustache_ast_serialization_limits());
 }
 /* }}} */
 
 /* {{{ mustache_node_to_binary_string */
-void mustache_node_to_binary_string(mustache::Node * node, char ** estr, size_t * elen)
+std::string mustache_node_to_binary_string(const mustache::Node& node)
 {
-  std::vector<uint8_t> * serialPtr = node->serialize();
-  std::vector<uint8_t> & serial = *serialPtr;
-  size_t serialLen = serial.size();
-
-  char * str = (char *) emalloc(sizeof(char *) * (serialLen + 1));
-  for( size_t i = 0 ; i < serialLen; i++ ) {
-    str[i] = (char) serial[i];
+  std::vector<uint8_t> serial = node.serializeValue(mustache_ast_serialization_limits());
+  if( serial.empty() ) {
+    return std::string();
   }
-  str[serialLen] = '\0';
-  delete serialPtr;
-
-  *elen = serialLen;
-  *estr = str;
+  return std::string(reinterpret_cast<const char *>(serial.data()), serial.size());
 }
 /* }}} */
 
 /* {{{ mustache_node_to_zval */
-void mustache_node_to_zval(mustache::Node * node, zval * current)
+void mustache_node_to_zval(const mustache::Node& node, zval * current)
 {
   zval children = {0};
   zval child = {0};
@@ -89,21 +95,24 @@ void mustache_node_to_zval(mustache::Node * node, zval * current)
   array_init(current);
 
   // Basic data
-  add_assoc_long(current, "type", node->type);
-  add_assoc_long(current, "flags", node->flags);
-  if( NULL != node->data && node->data->length() > 0 ) {
-    add_assoc_stringl_ex(current, ZEND_STRL("data"), (char *) node->data->c_str(), node->data->length());
+  add_assoc_long(current, "type", node.type);
+  add_assoc_long(current, "flags", node.flags);
+  if( node.data.has_value() && !node.data->empty() ) {
+    add_assoc_stringl_ex(current, ZEND_STRL("data"),
+        (char *) node.data->data(), node.data->length());
   }
 
   // Children
-  if( node->children.size() > 0 ) {
+  if( !node.children.empty() ) {
     ZVAL_NULL(&children);
     array_init(&children);
 
-    mustache::Node::Children::iterator it;
-    for ( it = node->children.begin() ; it != node->children.end(); it++ ) {
+    for( const std::unique_ptr<mustache::Node>& child_node : node.children ) {
+      if( child_node == NULL ) {
+        throw InvalidParameterException("MustacheAST contains an empty child node");
+      }
       ZVAL_NULL(&child);
-      mustache_node_to_zval(*it, &child);
+      mustache_node_to_zval(*child_node, &child);
       add_next_index_zval(&children, &child);
     }
 
@@ -111,15 +120,17 @@ void mustache_node_to_zval(mustache::Node * node, zval * current)
   }
 
   // Partials
-  if( node->partials.size() > 0 ) {
+  if( !node.partials.empty() ) {
     ZVAL_NULL(&children);
     array_init(&children);
 
-    mustache::Node::Partials::iterator it;
-    for ( it = node->partials.begin() ; it != node->partials.end(); it++ ) {
+    for( const auto& partial : node.partials ) {
+      if( partial.second == NULL ) {
+        throw InvalidParameterException("MustacheAST contains an empty partial node");
+      }
       ZVAL_NULL(&child);
-      mustache_node_to_zval(&(it->second), &child);
-      add_assoc_zval_ex(&children, it->first.c_str(), it->first.length(), &child);
+      mustache_node_to_zval(*partial.second, &child);
+      add_assoc_zval_ex(&children, partial.first.c_str(), partial.first.length(), &child);
     }
 
     add_assoc_zval(current, "partials", &children);
@@ -145,9 +156,8 @@ static void MustacheAST_obj_free(zend_object * object)
   try {
     struct php_obj_MustacheAST * payload = php_mustache_ast_fetch_object(object);
 
-    if( payload->node != NULL ) {
-      delete payload->node;
-    }
+    delete payload->state;
+    payload->state = NULL;
 
     zend_object_std_dtor((zend_object *)object);
   } catch(...) {
@@ -162,10 +172,12 @@ static zend_object * MustacheAST_obj_create(zend_class_entry * ce)
   struct php_obj_MustacheAST * intern;
 
   try {
+    std::unique_ptr<php_mustache_ast_state> state =
+        std::make_unique<php_mustache_ast_state>();
     intern = (struct php_obj_MustacheAST *) ecalloc(1, sizeof(struct php_obj_MustacheAST) + zend_object_properties_size(ce));
     zend_object_std_init(&intern->std, ce);
     intern->std.handlers = &MustacheAST_obj_handlers;
-    intern->node = NULL;
+    intern->state = state.release();
     return &intern->std;
   } catch(...) {
     mustache_exception_handler();
@@ -222,12 +234,15 @@ PHP_METHOD(MustacheAST, __construct)
     struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(_this_zval);
 
     // Check payload
-    if( payload->node != NULL ) {
+    if( payload->state == NULL ) {
+      throw InvalidParameterException("MustacheAST state was not initialized properly");
+    }
+    if( payload->state->node != NULL ) {
       throw InvalidParameterException("MustacheAST is already initialized");
     }
 
     // Unserialize
-    mustache_node_from_binary_string(&payload->node, str, str_len);
+    payload->state->node = mustache_node_from_binary_string(str, str_len);
 
   } catch(...) {
     mustache_exception_handler();
@@ -253,20 +268,17 @@ PHP_METHOD(MustacheAST, __sleep)
     array_init(return_value);
 
     // Check payload
-    if( payload->node != NULL ) {
+    if( payload->state != NULL && payload->state->node != NULL ) {
       // Serialize and store
-      char * str = NULL;
-      size_t len = 0;
-      mustache_node_to_binary_string(payload->node, &str, &len);
-      if( str != NULL ) {
+      std::string serial = mustache_node_to_binary_string(*payload->state->node);
 #if PHP_VERSION_ID < 80000
-        zend_update_property_stringl(MustacheAST_ce_ptr, _this_zval, ZEND_STRL("binaryString"), str, len);
+      zend_update_property_stringl(MustacheAST_ce_ptr, _this_zval, ZEND_STRL("binaryString"),
+          serial.data(), serial.size());
 #else
-        zend_update_property_stringl(MustacheAST_ce_ptr, Z_OBJ_P(_this_zval), ZEND_STRL("binaryString"), str, len);
+      zend_update_property_stringl(MustacheAST_ce_ptr, Z_OBJ_P(_this_zval), ZEND_STRL("binaryString"),
+          serial.data(), serial.size());
 #endif
-        add_next_index_string(return_value, "binaryString");
-        efree(str);
-      }
+      add_next_index_string(return_value, "binaryString");
     }
 
   } catch(...) {
@@ -291,12 +303,12 @@ PHP_METHOD(MustacheAST, toArray)
     struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(_this_zval);
 
     // Check payload
-    if( payload->node == NULL ) {
+    if( payload->state == NULL || payload->state->node == NULL ) {
       throw InvalidParameterException("MustacheAST was not initialized properly");
     }
 
     // Convert to PHP array
-    mustache_node_to_zval(payload->node, return_value);
+    mustache_node_to_zval(*payload->state->node, return_value);
 
   } catch(...) {
     mustache_exception_handler();
@@ -320,19 +332,13 @@ PHP_METHOD(MustacheAST, __toString)
     struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(_this_zval);
 
     // Check payload
-    if( payload->node == NULL ) {
+    if( payload->state == NULL || payload->state->node == NULL ) {
       throw InvalidParameterException("MustacheAST was not initialized properly");
     }
 
     // Convert to PHP binary string
-    char * str = NULL;
-    size_t len = 0;
-    mustache_node_to_binary_string(payload->node, &str, &len);
-
-    if( str != NULL ) {
-      RETVAL_STRINGL(str, len);
-      efree(str);
-    }
+    std::string serial = mustache_node_to_binary_string(*payload->state->node);
+    RETVAL_STRINGL(serial.data(), serial.size());
 
   } catch(...) {
     mustache_exception_handler();
@@ -341,7 +347,7 @@ PHP_METHOD(MustacheAST, __toString)
 /* }}} MustacheAST::__toString */
 
 /* {{{ proto void MustacheAST::__wakeup() */
-static inline void php_mustache_ast_wakeup(zval * _this_zval, zval * return_value)
+static inline void php_mustache_ast_wakeup(zval * _this_zval)
 {
     zval rv;
     struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(_this_zval);
@@ -351,8 +357,15 @@ static inline void php_mustache_ast_wakeup(zval * _this_zval, zval * return_valu
     zval * value = zend_read_property(Z_OBJCE_P(_this_zval), Z_OBJ_P(_this_zval), "binaryString", sizeof("binaryString")-1, 1, &rv);
 #endif
 
+    if( payload->state == NULL ) {
+      throw InvalidParameterException("MustacheAST state was not initialized properly");
+    }
     if( Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) > 0 ) {
-    	mustache_node_from_binary_string(&payload->node, Z_STRVAL_P(value), Z_STRLEN_P(value));
+      if( payload->state->node != NULL ) {
+        throw InvalidParameterException("MustacheAST is already initialized");
+      }
+      payload->state->node =
+          mustache_node_from_binary_string(Z_STRVAL_P(value), Z_STRLEN_P(value));
     }
 }
 
@@ -366,7 +379,7 @@ PHP_METHOD(MustacheAST, __wakeup)
       throw PhpInvalidParameterException();
     }
 
-    php_mustache_ast_wakeup(getThis(), return_value);
+    php_mustache_ast_wakeup(getThis());
   } catch(...) {
     mustache_exception_handler();
   }

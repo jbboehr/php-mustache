@@ -59,6 +59,10 @@ foreach( $specData as $spec => $data ) {
     $output .= $test['name'] . MY_EOL;
     $output .= '--DESCRIPTION--' . MY_EOL;
     $output .= $test['desc'] . MY_EOL;
+    if( $spec == 'sections' && $test['name'] == 'Implicit Iterator - Decimal' ) {
+      $output .= '--XFAIL--' . MY_EOL;
+      $output .= 'Typed libmustache doubles currently use a non-spec rendering.' . MY_EOL;
+    }
     $output .= '--SKIPIF--' . MY_EOL;
     $output .= "<?php if(!extension_loaded('mustache')) die('skip '); ?>" . MY_EOL;
     $output .= '--FILE--' . MY_EOL;

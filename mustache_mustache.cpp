@@ -10,7 +10,11 @@
 #include "mustache_exceptions.hpp"
 #include "mustache_template.hpp"
 #include "mustache_mustache.hpp"
+#include <cstddef>
+#include <memory>
+#include <string>
 #include <string_view>
+#include <utility>
 
 /* {{{ ZE2 OO definitions */
 zend_class_entry * Mustache_ce_ptr;
@@ -196,128 +200,268 @@ bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache, musta
 }
 /* }}} */
 
-/* {{{ mustache_parse_partials_param */
-static inline void mustache_parse_partial_param(const char * key, size_t key_len, zval * data,
-        mustache::Mustache * mustache, mustache::Node::Partials * partials)
-{
-    std::string ckey;
-    std::string tmpl;
-    mustache::Node node;
-    mustache::Node * nodePtr = NULL;
-    struct php_obj_MustacheAST * maPayload;
+namespace {
 
-    if( Z_TYPE_P(data) == IS_STRING ) {
-      // String key, string value
-      ckey.assign(key, key_len);
-      tmpl.assign(Z_STRVAL_P(data), Z_STRLEN_P(data));
-      partials->insert(std::make_pair(ckey, node));
-      mustache->tokenize(&tmpl, &(*partials)[ckey]);
-    } else if( Z_TYPE_P(data) == IS_OBJECT ) {
-        // String key, object value
-        if( Z_OBJCE_P(data) == MustacheTemplate_ce_ptr ) {
-            zval rv;
-#if PHP_VERSION_ID < 80000
-            zval * value = zend_read_property(Z_OBJCE_P(data), data, "template", sizeof("template")-1, 1, &rv);
-#else
-            zval * value = zend_read_property(Z_OBJCE_P(data), Z_OBJ_P(data), "template", sizeof("template")-1, 1, &rv);
-#endif
-            convert_to_string(value);
-            std::string tmpstr(Z_STRVAL_P(value), Z_STRLEN_P(value));
-            ckey.assign(key, key_len);
-            partials->insert(std::make_pair(ckey, node));
-            mustache->tokenize(&tmpstr, &(*partials)[ckey]);
-        } else if( Z_OBJCE_P(data) == MustacheAST_ce_ptr ) {
-            ckey.assign(key, key_len);
-            maPayload = php_mustache_ast_object_fetch_object(data);
-            partials->insert(std::make_pair(ckey, node));
-            nodePtr = &(*partials)[ckey];
-            nodePtr->type = mustache::Node::TypeContainer;
-            nodePtr->child = maPayload->node;
-        } else {
-            php_error(E_WARNING, "Object not an instance of MustacheTemplate or MustacheAST");
-        }
-    } else {
-        php_error(E_WARNING, "Partial array contains an invalid value");
-    }
+struct NodeCloneState {
+    size_t nodes = 0;
+    size_t dataParts = 0;
+};
+
+static zval * mustache_dereference_zval(zval * value)
+{
+  if( value == NULL ) {
+    return NULL;
+  }
+  if( Z_TYPE_P(value) == IS_INDIRECT ) {
+    value = Z_INDIRECT_P(value);
+  }
+  ZVAL_DEREF(value);
+  return value;
 }
 
-bool mustache_parse_partials_param(zval * array, mustache::Mustache * mustache,
-        mustache::Node::Partials * partials)
+static bool mustache_is_ast(zval * value)
 {
-    HashTable * data_hash = NULL;
-    zend_ulong key_nindex = 0;
-
-    // Ignore if not an array
-    if( array == NULL || Z_TYPE_P(array) != IS_ARRAY ) {
-        return false;
-    }
-
-    data_hash = HASH_OF(array);
-
-    zval * data_entry = NULL;
-    zend_string * key = NULL;
-
-    ZEND_HASH_FOREACH_KEY_VAL(data_hash, key_nindex, key, data_entry) {
-        (void)key_nindex;
-        if( !key ) {
-            php_error(E_WARNING, "Partial array contains a non-string key");
-        } else {
-            mustache_parse_partial_param(ZSTR_VAL(key), ZSTR_LEN(key), data_entry, mustache, partials);
-        }
-    } ZEND_HASH_FOREACH_END();
-
-  return true;
+  value = mustache_dereference_zval(value);
+  return value != NULL && Z_TYPE_P(value) == IS_OBJECT &&
+      Z_OBJCE_P(value) == MustacheAST_ce_ptr;
 }
-/* }}} */
 
-/* {{{ mustache_parse_template_param */
-bool mustache_parse_template_param(zval * tmpl, mustache::Mustache * mustache,
-        mustache::Node ** node)
+static const mustache::Node * mustache_ast_node(zval * value)
 {
-  // Prepare template string
-  if( Z_TYPE_P(tmpl) == IS_STRING ) {
-    // Tokenize template
-    std::string templateStr(Z_STRVAL_P(tmpl), Z_STRLEN_P(tmpl));
-    mustache->tokenize(&templateStr, *node);
-    return true;
+  value = mustache_dereference_zval(value);
+  struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(value);
+  if( payload->state == NULL || payload->state->node == NULL ) {
+    php_error(E_WARNING, "Empty MustacheAST");
+    return NULL;
+  }
+  return payload->state->node.get();
+}
 
-  } else if( Z_TYPE_P(tmpl) == IS_OBJECT ) {
-    // Use compiled template
-    if( Z_OBJCE_P(tmpl) == MustacheTemplate_ce_ptr ) {
-        zval rv;
+static std::string mustache_template_object_source(zval * value)
+{
+  zval rv;
 #if PHP_VERSION_ID < 80000
-        zval * value = zend_read_property(Z_OBJCE_P(tmpl), tmpl, "template", sizeof("template")-1, 1, &rv);
+  zval * source_value = zend_read_property(
+      Z_OBJCE_P(value), value, "template", sizeof("template") - 1, 1, &rv);
 #else
-        zval * value = zend_read_property(Z_OBJCE_P(tmpl), Z_OBJ_P(tmpl), "template", sizeof("template")-1, 1, &rv);
+  zval * source_value = zend_read_property(
+      Z_OBJCE_P(value), Z_OBJ_P(value), "template", sizeof("template") - 1, 1, &rv);
 #endif
-        convert_to_string(value);
-        std::string tmpstr(Z_STRVAL_P(value), Z_STRLEN_P(value));
+  zend_string * source_string = zval_get_string(source_value);
+  std::string source(ZSTR_VAL(source_string), ZSTR_LEN(source_string));
+  zend_string_release(source_string);
+  return source;
+}
 
-      if( !tmpstr.length() ) {
-        php_error(E_WARNING, "Empty MustacheTemplate");
-        return false;
-      } else {
-        mustache->tokenize(&tmpstr, *node);
-      }
-      return true;
-    } else if( Z_OBJCE_P(tmpl) == MustacheAST_ce_ptr ) {
-      struct php_obj_MustacheAST * maPayload = php_mustache_ast_object_fetch_object(tmpl);
-      if( maPayload->node == NULL ) {
-        php_error(E_WARNING, "Empty MustacheAST");
-        return false;
-      }
-      *node = maPayload->node;
-      return true;
-    } else {
-      php_error(E_WARNING, "Object not an instance of MustacheTemplate or MustacheAST");
-      return false;
-    }
-  } else {
+static bool mustache_template_source(zval * value, std::string& source)
+{
+  value = mustache_dereference_zval(value);
+  if( value == NULL ) {
     php_error(E_WARNING, "Invalid argument");
     return false;
   }
+  if( Z_TYPE_P(value) == IS_STRING ) {
+    source.assign(Z_STRVAL_P(value), Z_STRLEN_P(value));
+    return true;
+  }
+  if( Z_TYPE_P(value) != IS_OBJECT ) {
+    php_error(E_WARNING, "Invalid argument");
+    return false;
+  }
+  if( Z_OBJCE_P(value) != MustacheTemplate_ce_ptr ) {
+    php_error(E_WARNING, "Object not an instance of MustacheTemplate or MustacheAST");
+    return false;
+  }
+
+  source = mustache_template_object_source(value);
+  if( source.empty() ) {
+    php_error(E_WARNING, "Empty MustacheTemplate");
+    return false;
+  }
+  return true;
 }
-/* }}} */
+
+static bool mustache_partial_source(zval * value, std::string& source)
+{
+  value = mustache_dereference_zval(value);
+  if( value != NULL && Z_TYPE_P(value) == IS_STRING ) {
+    source.assign(Z_STRVAL_P(value), Z_STRLEN_P(value));
+    return true;
+  }
+  if( value != NULL && Z_TYPE_P(value) == IS_OBJECT ) {
+    if( Z_OBJCE_P(value) == MustacheTemplate_ce_ptr ) {
+      source = mustache_template_object_source(value);
+      return true;
+    }
+    php_error(E_WARNING, "Object not an instance of MustacheTemplate or MustacheAST");
+    return false;
+  }
+  php_error(E_WARNING, "Partial array contains an invalid value");
+  return false;
+}
+
+static std::unique_ptr<mustache::Node> mustache_clone_node(
+    const mustache::Node& source, size_t depth, NodeCloneState& state)
+{
+  if( depth == 0 || depth > 64 ) {
+    throw InvalidParameterException("MustacheAST nesting limit exceeded while cloning a partial");
+  }
+  if( state.nodes >= 100000 ) {
+    throw InvalidParameterException("MustacheAST node limit exceeded while cloning a partial");
+  }
+  ++state.nodes;
+  if( source.dataParts.size() > 256 ||
+      state.dataParts > 100000 - source.dataParts.size() ) {
+    throw InvalidParameterException("MustacheAST data-part limit exceeded while cloning a partial");
+  }
+  state.dataParts += source.dataParts.size();
+
+  std::unique_ptr<mustache::Node> clone = std::make_unique<mustache::Node>();
+  clone->type = source.type;
+  clone->flags = source.flags;
+  clone->data = source.data;
+  clone->dataParts = source.dataParts;
+  clone->startSequence = source.startSequence;
+  clone->stopSequence = source.stopSequence;
+
+  clone->children.reserve(source.children.size());
+  for( const std::unique_ptr<mustache::Node>& child : source.children ) {
+    if( child == NULL ) {
+      throw InvalidParameterException("MustacheAST contains an empty child node");
+    }
+    clone->children.push_back(mustache_clone_node(*child, depth + 1, state));
+  }
+  if( source.child != NULL ) {
+    clone->child = mustache_clone_node(*source.child, depth + 1, state);
+  }
+  for( const auto& partial : source.partials ) {
+    if( partial.second == NULL ) {
+      throw InvalidParameterException("MustacheAST contains an empty partial node");
+    }
+    clone->partials.emplace(
+        partial.first, mustache_clone_node(*partial.second, depth + 1, state));
+  }
+  return clone;
+}
+
+static std::unique_ptr<mustache::Node> mustache_clone_node(const mustache::Node& source)
+{
+  NodeCloneState state;
+  return mustache_clone_node(source, 1, state);
+}
+
+static bool mustache_partials_include_ast(zval * partials)
+{
+  partials = mustache_dereference_zval(partials);
+  if( partials == NULL || Z_TYPE_P(partials) != IS_ARRAY ) {
+    return false;
+  }
+
+  zval * value = NULL;
+  ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL_P(partials), value) {
+    if( mustache_is_ast(value) ) {
+      return true;
+    }
+  } ZEND_HASH_FOREACH_END();
+  return false;
+}
+
+static bool mustache_parse_template_param(zval * value, mustache::Mustache * mustache,
+    mustache::Node& owned_node, const mustache::Node ** node)
+{
+  if( mustache_is_ast(value) ) {
+    *node = mustache_ast_node(value);
+    return *node != NULL;
+  }
+
+  std::string source;
+  if( !mustache_template_source(value, source) ) {
+    return false;
+  }
+  mustache->tokenize(std::string_view(source), &owned_node);
+  *node = &owned_node;
+  return true;
+}
+
+static bool mustache_compile_template_param(zval * value, mustache::Mustache * mustache,
+    mustache::CompiledTemplate& compiled)
+{
+  std::string source;
+  if( !mustache_template_source(value, source) ) {
+    return false;
+  }
+  compiled = mustache->compile(std::string_view(source));
+  return true;
+}
+
+static void mustache_compile_partials(zval * partials_value, mustache::Mustache * mustache,
+    mustache::PartialMap& partials)
+{
+  partials_value = mustache_dereference_zval(partials_value);
+  if( partials_value == NULL || Z_TYPE_P(partials_value) != IS_ARRAY ) {
+    return;
+  }
+
+  zend_ulong numeric_key = 0;
+  zend_string * key = NULL;
+  zval * value = NULL;
+  ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(partials_value), numeric_key, key, value) {
+    (void) numeric_key;
+    if( key == NULL ) {
+      php_error(E_WARNING, "Partial array contains a non-string key");
+      continue;
+    }
+
+    std::string source;
+    if( !mustache_partial_source(value, source) ) {
+      continue;
+    }
+    partials.emplace(
+        std::string(ZSTR_VAL(key), ZSTR_LEN(key)),
+        mustache->compile(std::string_view(source)));
+  } ZEND_HASH_FOREACH_END();
+}
+
+static void mustache_parse_partials(zval * partials_value, mustache::Mustache * mustache,
+    mustache::Node::Partials& partials)
+{
+  partials_value = mustache_dereference_zval(partials_value);
+  if( partials_value == NULL || Z_TYPE_P(partials_value) != IS_ARRAY ) {
+    return;
+  }
+
+  zend_ulong numeric_key = 0;
+  zend_string * key = NULL;
+  zval * value = NULL;
+  ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(partials_value), numeric_key, key, value) {
+    (void) numeric_key;
+    if( key == NULL ) {
+      php_error(E_WARNING, "Partial array contains a non-string key");
+      continue;
+    }
+
+    std::unique_ptr<mustache::Node> partial;
+    if( mustache_is_ast(value) ) {
+      const mustache::Node * ast_node = mustache_ast_node(value);
+      if( ast_node == NULL ) {
+        continue;
+      }
+      // Node::Partials owns its values. Clone deliberately rather than
+      // adopting the node still owned by the PHP MustacheAST object.
+      partial = mustache_clone_node(*ast_node);
+    } else {
+      std::string source;
+      if( !mustache_partial_source(value, source) ) {
+        continue;
+      }
+      partial = std::make_unique<mustache::Node>();
+      mustache->tokenize(std::string_view(source), partial.get());
+    }
+    partials.emplace(std::string(ZSTR_VAL(key), ZSTR_LEN(key)), std::move(partial));
+  } ZEND_HASH_FOREACH_END();
+}
+
+} // namespace
 
 /* {{{ proto void Mustache::__construct() */
 PHP_METHOD(Mustache, __construct)
@@ -522,17 +666,17 @@ PHP_METHOD(Mustache, parse)
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
 
     // Check template parameter
-    mustache::Node * templateNodePtr = new mustache::Node();
-    if( !mustache_parse_template_param(tmpl, payload->mustache, &templateNodePtr) ) {
-      delete templateNodePtr;
+    mustache::Node templateNode;
+    const mustache::Node * templateNodePtr = NULL;
+    if( !mustache_parse_template_param(tmpl, payload->mustache, templateNode, &templateNodePtr) ) {
       RETURN_FALSE;
       return;
     }
 
     // Handle return value
-    if( Z_TYPE_P(tmpl) == IS_STRING ) {
+    zval * templateValue = mustache_dereference_zval(tmpl);
+    if( templateValue != NULL && Z_TYPE_P(templateValue) == IS_STRING ) {
       if( MustacheAST_ce_ptr == NULL ) {
-        delete templateNodePtr;
         php_error_docref(NULL, E_WARNING, "Class MustacheAST does not exist");
         RETURN_FALSE;
         return;
@@ -541,13 +685,17 @@ PHP_METHOD(Mustache, parse)
       // Initialize new object
       object_init_ex(return_value, MustacheAST_ce_ptr);
       struct php_obj_MustacheAST * intern = php_mustache_ast_object_fetch_object(return_value);
-      intern->node = templateNodePtr;
+      if( intern->state == NULL ) {
+        throw InvalidParameterException("MustacheAST state was not initialized properly");
+      }
+      intern->state->node =
+          std::make_unique<mustache::Node>(std::move(templateNode));
 
     // Ref - not sure if this is required
 //    Z_SET_REFCOUNT_P(return_value, 1);
 //    Z_SET_ISREF_P(return_value);
 
-    } else if( Z_TYPE_P(tmpl) == IS_OBJECT ) {
+    } else if( templateValue != NULL && Z_TYPE_P(templateValue) == IS_OBJECT ) {
       // Handle return value for object parameter
       // @todo return the object itself?
       RETURN_TRUE;
@@ -579,14 +727,6 @@ PHP_METHOD(Mustache, render)
     _this_zval = getThis();
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
 
-    // Prepare template tree
-    mustache::Node templateNode;
-    mustache::Node * templateNodePtr = &templateNode;
-    if( !mustache_parse_template_param(tmpl, payload->mustache, &templateNodePtr) ) {
-      RETURN_FALSE;
-      return;
-    }
-
     // Prepare template data
     mustache::Data templateData;
     mustache::Data * templateDataPtr = &templateData;
@@ -595,18 +735,37 @@ PHP_METHOD(Mustache, render)
       return;
     }
 
-    // Tokenize partials
-    mustache::Node::Partials templatePartials;
-    mustache_parse_partials_param(partials, payload->mustache, &templatePartials);
-
-    // Reserve length of template
     std::string output;
-    if( Z_TYPE_P(tmpl) == IS_STRING ) {
-      output.reserve(Z_STRLEN_P(tmpl));
+    if( mustache_is_ast(tmpl) || mustache_partials_include_ast(partials) ) {
+      // AST-backed inputs remain on the compatibility renderer. Its partial
+      // map owns explicit deep clones of public MustacheAST values.
+      mustache::Node templateNode;
+      const mustache::Node * templateNodePtr = NULL;
+      if( !mustache_parse_template_param(tmpl, payload->mustache, templateNode, &templateNodePtr) ) {
+        RETURN_FALSE;
+        return;
+      }
+      mustache::Node::Partials templatePartials;
+      mustache_parse_partials(partials, payload->mustache, templatePartials);
+      zval * templateValue = mustache_dereference_zval(tmpl);
+      if( templateValue != NULL && Z_TYPE_P(templateValue) == IS_STRING ) {
+        output.reserve(Z_STRLEN_P(templateValue));
+      }
+      payload->mustache->render(
+          templateNodePtr, templateDataPtr, &templatePartials, &output);
+    } else {
+      // Ordinary source templates and source-backed partials use immutable,
+      // independently owned compiled handles.
+      mustache::CompiledTemplate compiledTemplate;
+      if( !mustache_compile_template_param(tmpl, payload->mustache, compiledTemplate) ) {
+        RETURN_FALSE;
+        return;
+      }
+      mustache::PartialMap compiledPartials;
+      mustache_compile_partials(partials, payload->mustache, compiledPartials);
+      output = payload->mustache->render(
+          compiledTemplate, *templateDataPtr, compiledPartials);
     }
-
-    // Render template
-    payload->mustache->render(templateNodePtr, templateDataPtr, &templatePartials, &output);
 
     // Output
     RETVAL_STRINGL(output.c_str(), output.length());
@@ -641,10 +800,10 @@ PHP_METHOD(Mustache, tokenize)
 
     // Tokenize template
     mustache::Node root;
-    payload->mustache->tokenize(&templateStr, &root);
+    payload->mustache->tokenize(std::string_view(templateStr), &root);
 
     // Convert to PHP array
-    mustache_node_to_zval(&root, return_value);
+    mustache_node_to_zval(root, return_value);
 
   } catch(...) {
     mustache_exception_handler();
