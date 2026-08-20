@@ -12,10 +12,8 @@ $data = new stdClass;
 $data->var = 1.2345;
 $r = $m->render('{{var}}', $data);
 var_dump($r);
-var_dump(strval(1.2345)); // verify rendered template matches strval() output
 var_dump($data->var);
 ?>
 --EXPECT--
-string(6) "1.2345"
-string(6) "1.2345"
+string(18) "1.2344999999999999"
 float(1.2345)

@@ -180,14 +180,17 @@ bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache, musta
   if( Z_TYPE_P(data) == IS_OBJECT ) {
     if( Z_OBJCE_P(data) == MustacheData_ce_ptr ) {
       mdPayload = php_mustache_data_object_fetch_object(data);
+      if( mdPayload->data == NULL ) {
+        throw InvalidParameterException("MustacheData was not initialized properly");
+      }
       *node = mdPayload->data;
       return true;
     } else {
-      mustache_data_from_zval(*node, data);
+      **node = mustache_data_from_zval(data);
       return true;
     }
   } else {
-    mustache_data_from_zval(*node, data);
+    **node = mustache_data_from_zval(data);
     return true;
   }
 }
@@ -667,11 +670,10 @@ PHP_METHOD(Mustache, debugDataStructure)
     _this_zval = getThis();
 
     // Prepare template data
-    mustache::Data templateData;
-    mustache_data_from_zval(&templateData, data);
+    mustache::Data templateData = mustache_data_from_zval(data);
 
     // Reverse template data
-    mustache_data_to_zval(&templateData, return_value);
+    mustache_data_to_zval(templateData, return_value);
 
   } catch(...) {
     mustache_exception_handler();

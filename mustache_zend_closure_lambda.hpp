@@ -6,18 +6,21 @@
 
 class ZendClosureLambda : public Lambda {
   private:
-    zval * closure;
+    zval closure;
 
   protected:
     int getUserFunctionParamCount();
     int invokeUserFunction(zval *retval_ptr, int param_count, zval params[]);
 
   public:
-    ZendClosureLambda(zval * closure) : closure(closure) {
-      Z_ADDREF_P(closure);
+    ZendClosureLambda(zval * closure_value) {
+      ZVAL_COPY(&closure, closure_value);
     };
+    ZendClosureLambda(const ZendClosureLambda&) = delete;
+    ZendClosureLambda& operator=(const ZendClosureLambda&) = delete;
+    ZendClosureLambda(ZendClosureLambda&&) = delete;
+    ZendClosureLambda& operator=(ZendClosureLambda&&) = delete;
     ~ZendClosureLambda();
 };
 
 #endif /* PHP_MUSTACHE_ZEND_CLOSURE_LAMBDA_HPP */
-

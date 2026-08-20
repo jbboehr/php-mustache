@@ -12,10 +12,8 @@ $data = new stdClass;
 $data->var = true;
 $r = $m->render('{{var}}', $data);
 var_dump($r);
-var_dump(strval(true)); // verify rendered template matches strval() output
 var_dump($data->var);
 ?>
 --EXPECT--
-string(1) "1"
-string(1) "1"
+string(4) "true"
 bool(true)

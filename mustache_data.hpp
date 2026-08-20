@@ -19,8 +19,8 @@ struct php_obj_MustacheData * php_mustache_data_object_fetch_object(zval * zv);
 
 PHP_MINIT_FUNCTION(mustache_data);
 
-void mustache_data_from_zval(mustache::Data * node, zval * current);
-void mustache_data_to_zval(mustache::Data * node, zval * current);
+mustache::Data mustache_data_from_zval(zval * current);
+void mustache_data_to_zval(const mustache::Data& node, zval * current);
 
 PHP_METHOD(MustacheData, __construct);
 PHP_METHOD(MustacheData, toValue);
@@ -30,4 +30,3 @@ PHP_METHOD(MustacheData, toValue);
 #endif
 
 #endif /* PHP_MUSTACHE_DATA_HPP */
-

@@ -10,9 +10,13 @@ if(!extension_loaded('mustache')) die('skip ');
 $m = new Mustache();
 $data = new stdClass;
 $data->var = $data;
+set_error_handler(static function ($severity, $message) {
+  echo $message, "\n";
+});
 $r = $m->render('{{var}}', $data);
+restore_error_handler();
 var_dump($r);
 ?>
---EXPECTF--
-Warning: Data includes circular reference in %s on line 5
-string(0) ""
+--EXPECT--
+Mustache::render(): Data includes circular reference
+NULL

@@ -3,17 +3,20 @@ Mustache::render() member function - will not crash if data contains array with 
 --SKIPIF--
 <?php
 
-// references are a distinct type of zval in PHP7 and they are not supported by this extension
-if(!extension_loaded('mustache') || (defined('PHP_VERSION_ID') && PHP_VERSION_ID >= 70000)) die('skip ');
+if(!extension_loaded('mustache')) die('skip ');
  ?>
 --FILE--
 <?php
 $m = new Mustache();
 $data = array();
 $data['var'] = &$data;
+set_error_handler(static function ($severity, $message) {
+  echo $message, "\n";
+});
 $r = $m->render('{{var}}', $data);
+restore_error_handler();
 var_dump($r);
 ?>
---EXPECTF--
-Warning: Data includes circular reference in %s on line 5
-string(0) ""
+--EXPECT--
+Mustache::render(): Data includes circular reference
+NULL

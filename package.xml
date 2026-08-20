@@ -59,6 +59,10 @@
    <file name="tests/MustacheAST____wakeup.phpt" role="test" />
    <file name="tests/Mustache____construct.phpt" role="test" />
    <file name="tests/MustacheData____construct.phpt" role="test" />
+   <file name="tests/MustacheData__conversion-errors-are-transactional.phpt" role="test" />
+   <file name="tests/MustacheData__object-property-precedence.phpt" role="test" />
+   <file name="tests/MustacheData__owns-lambda-values.phpt" role="test" />
+   <file name="tests/MustacheData__scalar-types.phpt" role="test" />
    <file name="tests/MustacheData__toValue.phpt" role="test" />
    <file name="tests/Mustache__debugDataStructure.phpt" role="test" />
    <file name="tests/Mustache__getEscapeByDefault.phpt" role="test" />

@@ -13,6 +13,11 @@
 #include "mustache_lambda.hpp"
 #include "mustache_zend_closure_lambda.hpp"
 #include "mustache_data.hpp"
+#include <cmath>
+#include <cstdint>
+#include <memory>
+#include <unordered_set>
+#include <utility>
 
 /* {{{ ZE2 OO definitions */
 zend_class_entry * MustacheData_ce_ptr;
@@ -100,399 +105,364 @@ PHP_MINIT_FUNCTION(mustache_data)
 }
 /* }}} */
 
-/* {{{ is_invokable_object */
+namespace {
+
+struct DataConversionLimits {
+    size_t maxNestingDepth = 32;
+    size_t maxNodes = 100000;
+    size_t maxStringBytes = size_t{64} * 1024 * 1024;
+    size_t maxContainerEntries = 100000;
+};
+
+template <typename T>
+class ActivePathGuard {
+  private:
+    std::unordered_set<const T *>& active;
+    const T * value;
+
+  public:
+    ActivePathGuard(std::unordered_set<const T *>& active_values, const T * current) :
+        active(active_values),
+        value(current)
+    {
+      if( !active.insert(value).second ) {
+        throw InvalidParameterException("Data includes circular reference");
+      }
+    }
+
+    ~ActivePathGuard()
+    {
+      active.erase(value);
+    }
+
+    ActivePathGuard(const ActivePathGuard&) = delete;
+    ActivePathGuard& operator=(const ActivePathGuard&) = delete;
+};
+
 static zend_always_inline bool is_invokable_object(const zend_class_entry * ce)
 {
   const HashTable * function_table = ce != NULL ? &ce->function_table : NULL;
   return function_table != NULL && zend_hash_str_exists(function_table, ZEND_STRL("__invoke"));
 }
-/* }}} is_invokable_object */
 
-/* {{{ is_valid_function */
-static zend_always_inline bool is_valid_function(const zend_function * f)
+static zend_always_inline bool is_valid_function(const zend_function * function)
 {
-  return (f->common.fn_flags & ZEND_ACC_STATIC) == 0 &&
+  return (function->common.fn_flags & ZEND_ACC_STATIC) == 0 &&
 #ifdef ZEND_ACC_CTOR
-          (f->common.fn_flags & ZEND_ACC_CTOR) == 0 &&
+          (function->common.fn_flags & ZEND_ACC_CTOR) == 0 &&
 #endif
 #ifdef ZEND_ACC_DTOR
-          (f->common.fn_flags & ZEND_ACC_DTOR) == 0 &&
+          (function->common.fn_flags & ZEND_ACC_DTOR) == 0 &&
 #endif
-
-          (f->common.fn_flags & ZEND_ACC_PROTECTED) == 0 &&
-          (f->common.fn_flags & ZEND_ACC_PRIVATE) == 0;
+          (function->common.fn_flags & ZEND_ACC_PROTECTED) == 0 &&
+          (function->common.fn_flags & ZEND_ACC_PRIVATE) == 0;
 }
-/* }}} */
 
-/* {{{ is_valid_property */
-static zend_always_inline bool is_valid_property(const zend_property_info * prop)
+static zend_always_inline bool is_valid_property(const zend_property_info * property)
 {
-  return (prop->flags & ZEND_ACC_PROTECTED) == 0 &&
+  return (property->flags & ZEND_ACC_PROTECTED) == 0 &&
 #ifdef ZEND_ACC_SHADOW
-          (prop->flags & ZEND_ACC_SHADOW) == 0 &&
+          (property->flags & ZEND_ACC_SHADOW) == 0 &&
 #endif
-          (prop->flags & ZEND_ACC_PRIVATE) == 0;
+          (property->flags & ZEND_ACC_PRIVATE) == 0;
 }
-/* }}} */
 
-/* {{{ mustache_data_from_array_zval */
-static zend_always_inline void mustache_data_from_array_zval(mustache::Data * node, zval * current)
-{
-  HashTable * data_hash = NULL;
-  long data_count = 0;
-  zend_ulong key_nindex = 0;
-  zend_string * key;
-  std::string ckey;
-  zval * data_entry = NULL;
+class DataConverter {
+  private:
+    DataConversionLimits limits;
+    size_t nodes = 0;
+    size_t stringBytes = 0;
+    size_t containerEntries = 0;
+    std::unordered_set<const HashTable *> activeArrays;
+    std::unordered_set<const zend_object *> activeObjects;
+    std::unordered_set<const zend_reference *> activeReferences;
 
-  int length = 0;
-  mustache::Data * child = NULL;
-
-  node->type = mustache::Data::TypeNone;
-
-  data_hash = HASH_OF(current);
-
-#if PHP_VERSION_ID < 70300
-  if( ZEND_HASH_APPLY_PROTECTION(data_hash) && ++data_hash->u.v.nApplyCount > 1 ) {
-    php_error(E_WARNING, "Data includes circular reference");
-    data_hash->u.v.nApplyCount--;
-    return;
-#else
-  if (!(GC_FLAGS(data_hash) & GC_IMMUTABLE)) {
-    if (GC_IS_RECURSIVE(data_hash)) {
-      php_error(E_WARNING, "Data includes circular reference");
-      return;
+    [[noreturn]] void fail(const char * message) const
+    {
+      throw InvalidParameterException(message);
     }
-    GC_PROTECT_RECURSION(data_hash);
-#endif
-  }
 
-  data_count = zend_hash_num_elements(data_hash);
-  ZEND_HASH_FOREACH_KEY_VAL_IND(data_hash, key_nindex, key, data_entry) {
-    (void)key_nindex; /* avoid [-Wunused-but-set-variable] */
-    if( !key ) {
-      if( node->type == mustache::Data::TypeNone ) {
-        node->init(mustache::Data::TypeArray, data_count);
-      } else if( node->type != mustache::Data::TypeArray ) {
-        php_error(E_WARNING, "Mixed numeric and associative arrays are not supported");
-        return; // EXIT
+    void consume(size_t& used, size_t amount, size_t maximum, const char * message)
+    {
+      if( used > maximum || amount > maximum - used ) {
+        fail(message);
       }
-    } else {
-      if( node->type == mustache::Data::TypeNone ) {
-        node->type = mustache::Data::TypeMap;
-      } else if( node->type != mustache::Data::TypeMap ) {
-        php_error(E_WARNING, "Mixed numeric and associative arrays are not supported");
-        return; // EXIT
+      used += amount;
+    }
+
+    void addNode(size_t depth)
+    {
+      if( depth == 0 || depth > limits.maxNestingDepth ) {
+        fail("Data nesting limit exceeded");
       }
+      consume(nodes, 1, limits.maxNodes, "Data node count limit exceeded");
     }
 
-    // Store value
-    if( node->type == mustache::Data::TypeArray ) {
-  	  child = new mustache::Data();
-      mustache_data_from_zval(child, data_entry);
-      node->array.push_back(child);
-      node->length = ++length;
-    } else if( node->type == mustache::Data::TypeMap ) {
-      child = new mustache::Data;
-      mustache_data_from_zval(child, data_entry);
-      ckey.assign(ZSTR_VAL(key), ZSTR_LEN(key));
-      node->data.insert(std::pair<std::string,mustache::Data*>(ckey, child));
-    } else {
-      php_error(E_WARNING, "Weird data conflict");
-      // Whoops
+    void addString(size_t length)
+    {
+      consume(stringBytes, length, limits.maxStringBytes, "Data string byte limit exceeded");
     }
-  } ZEND_HASH_FOREACH_END();
 
-#if PHP_VERSION_ID < 70300
-  if( ZEND_HASH_APPLY_PROTECTION(data_hash) ) {
-    data_hash->u.v.nApplyCount--;
-#else
-  if (!(GC_FLAGS(data_hash) & GC_IMMUTABLE)) {
-    GC_UNPROTECT_RECURSION(data_hash);
-#endif
-  }
-}
-/* }}} mustache_data_from_array_zval */
+    void addContainerEntry()
+    {
+      consume(containerEntries, 1, limits.maxContainerEntries, "Data container entry limit exceeded");
+    }
 
-/* {{{ mustache_data_from_double_zval */
-static zend_always_inline void mustache_data_from_double_zval(mustache::Data * node, zval * current)
-{
-  char * double_as_string;
+    mustache::Data convertArray(zval * current, size_t depth)
+    {
+      HashTable * values_hash = Z_ARRVAL_P(current);
+      ActivePathGuard<HashTable> active_guard(activeArrays, values_hash);
+      mustache::Data::Array array_values;
+      mustache::Data::Map object_values;
+      bool saw_numeric_key = false;
+      bool saw_string_key = false;
+      zend_ulong numeric_key = 0;
+      zend_string * string_key = NULL;
+      zval * value = NULL;
 
-  spprintf(&double_as_string, 0, "%.*G", (int) EG(precision), Z_DVAL_P(current));
+      array_values.reserve(zend_hash_num_elements(values_hash));
+      object_values.reserve(zend_hash_num_elements(values_hash));
 
-  node->type = mustache::Data::TypeString;
-  node->val = new std::string(double_as_string);
+      ZEND_HASH_FOREACH_KEY_VAL_IND(values_hash, numeric_key, string_key, value) {
+        (void) numeric_key;
+        if( string_key == NULL ) {
+          saw_numeric_key = true;
+        } else {
+          saw_string_key = true;
+        }
+        if( saw_numeric_key && saw_string_key ) {
+          fail("Mixed numeric and associative arrays are not supported");
+        }
 
-  efree(double_as_string);
-}
-/* }}} */
+        addContainerEntry();
+        if( string_key == NULL ) {
+          array_values.push_back(convert(value, depth + 1));
+        } else {
+          addString(ZSTR_LEN(string_key));
+          object_values.emplace(
+              std::string(ZSTR_VAL(string_key), ZSTR_LEN(string_key)),
+              convert(value, depth + 1));
+        }
+      } ZEND_HASH_FOREACH_END();
 
-/* {{{ mustache_data_from_object_properties_zval */
-static zend_always_inline void mustache_data_from_object_properties_zval(mustache::Data * node, zval * current)
-{
-  HashTable * data_hash = NULL;
-  zend_ulong key_nindex = 0;
-  zend_string * key;
-  std::string ckey;
-  zval * data_entry = NULL;
+      if( saw_string_key ) {
+        return mustache::Data::object(std::move(object_values));
+      }
+      return mustache::Data::array(std::move(array_values));
+    }
 
-  zend_class_entry * ce = Z_OBJCE_P(current);
-  mustache::Data * child = NULL;
+    void addObjectProperties(mustache::Data::Map& values, zval * current, size_t depth)
+    {
+      HashTable * properties = NULL;
+      zend_class_entry * class_entry = Z_OBJCE_P(current);
+      zend_ulong numeric_key = 0;
+      zend_string * key = NULL;
+      zval * value = NULL;
 
-  zval * prop_zv;
-  zend_property_info * prop;
-  char * prop_name;
-  const char * class_name;
-  zend_string * prop_name_source;
-
-  node->type = mustache::Data::TypeNone;
-
-  if( Z_OBJ_HT_P(current)->get_properties != NULL ) {
+      if( Z_OBJ_HT_P(current)->get_properties != NULL ) {
 #if PHP_VERSION_ID >= 80000
-    data_hash = Z_OBJ_HT_P(current)->get_properties(Z_OBJ_P(current));
+        properties = Z_OBJ_HT_P(current)->get_properties(Z_OBJ_P(current));
 #else
-    data_hash = Z_OBJ_HT_P(current)->get_properties(current);
+        properties = Z_OBJ_HT_P(current)->get_properties(current);
 #endif
-  }
-  if( data_hash != NULL && zend_hash_num_elements(data_hash) > 0 ) {
-#if PHP_VERSION_ID < 70300
-    if( ZEND_HASH_APPLY_PROTECTION(data_hash) && ++data_hash->u.v.nApplyCount > 1 ) {
-      php_error(E_WARNING, "Data includes circular reference");
-      data_hash->u.v.nApplyCount--;
-      return;
-#else
-    if (!(GC_FLAGS(data_hash) & GC_IMMUTABLE)) {
-      if (GC_IS_RECURSIVE(data_hash)) {
-        php_error(E_WARNING, "Data includes circular reference");
+      }
+      if( properties == NULL ) {
         return;
       }
-      GC_PROTECT_RECURSION(data_hash);
-#endif
-    }
 
+      ZEND_HASH_FOREACH_KEY_VAL_IND(properties, numeric_key, key, value) {
+        (void) numeric_key;
+        if( key == NULL || ZSTR_LEN(key) == 0 || ZSTR_VAL(key)[0] == '\0' ) {
+          continue;
+        }
 
-    ZEND_HASH_FOREACH_KEY_VAL_IND(data_hash, key_nindex, key, data_entry) {
-      (void)key_nindex; /* avoid [-Wunused-but-set-variable] */
-      if( key && ZSTR_LEN(key) && ZSTR_VAL(key)[0] ) { // skip private/protected
-        prop_name = ZSTR_VAL(key);
-        prop_name_source = key;
-
-        // defined properties must be public
-        // implicit properties won't be in properties_info, so they'll be assumed to be visible
+        const char * property_name = ZSTR_VAL(key);
+        zend_string * property_name_source = key;
         bool is_visible = true;
-        if( ce != NULL && &ce->properties_info != NULL ) {
-          prop_zv = zend_hash_find(&ce->properties_info, key);
-          if( prop_zv != NULL ) {
-            prop = (zend_property_info *) Z_PTR_P(prop_zv);
-            is_visible = is_valid_property(prop);
-            if( zend_unmangle_property_name(prop->name, &class_name, (const char **) &prop_name) == SUCCESS ) {
-              prop_name_source = prop->name;
+
+        if( class_entry != NULL ) {
+          zval * property_value = zend_hash_find(&class_entry->properties_info, key);
+          if( property_value != NULL ) {
+            zend_property_info * property = (zend_property_info *) Z_PTR_P(property_value);
+            const char * declaring_class_name = NULL;
+            is_visible = is_valid_property(property);
+            if( zend_unmangle_property_name(property->name, &declaring_class_name, &property_name) == SUCCESS ) {
+              property_name_source = property->name;
             }
           }
         }
-
-        if( is_visible ) {
-          node->type = mustache::Data::TypeMap;
-
-          child = new mustache::Data;
-          mustache_data_from_zval(child, data_entry);
-          ckey.assign(prop_name,
-              ZSTR_LEN(prop_name_source) - (size_t) (prop_name - ZSTR_VAL(prop_name_source)));
-          node->data.insert(std::pair<std::string,mustache::Data*>(ckey, child));
+        if( !is_visible ) {
+          continue;
         }
-      }
-    } ZEND_HASH_FOREACH_END();
 
-#if PHP_VERSION_ID < 70300
-    if( ZEND_HASH_APPLY_PROTECTION(data_hash) ) {
-      data_hash->u.v.nApplyCount--;
-#else
-    if (!(GC_FLAGS(data_hash) & GC_IMMUTABLE)) {
-      GC_UNPROTECT_RECURSION(data_hash);
-#endif
+        size_t property_name_offset =
+            static_cast<size_t>(property_name - ZSTR_VAL(property_name_source));
+        if( property_name_offset > ZSTR_LEN(property_name_source) ) {
+          fail("Invalid object property name");
+        }
+        size_t property_name_length = ZSTR_LEN(property_name_source) - property_name_offset;
+
+        addContainerEntry();
+        addString(property_name_length);
+        values.emplace(
+            std::string(property_name, property_name_length),
+            convert(value, depth + 1));
+      } ZEND_HASH_FOREACH_END();
     }
-  }
-}
-/* }}} mustache_data_from_object_properties_zval */
 
-/* {{{ mustache_data_from_object_functions_zval */
-static zend_always_inline void mustache_data_from_object_functions_zval(mustache::Data * node, zval * current)
-{
-  HashTable * data_hash = NULL;
-  zend_ulong key_nindex = 0;
-  zend_string * key;
-  std::string ckey;
-  zval * data_entry = NULL;
-  zend_function * function_entry = NULL;
-
-  zend_class_entry * ce = Z_OBJCE_P(current);
-  mustache::Data * child = NULL;
-
-  if( ce != NULL ) {
-    data_hash = &ce->function_table;
-  }
-  if( data_hash != NULL && zend_hash_num_elements(data_hash) > 0 ) {
-#if PHP_VERSION_ID < 70300
-    if( ZEND_HASH_APPLY_PROTECTION(data_hash) && ++data_hash->u.v.nApplyCount > 1 ) {
-      php_error(E_WARNING, "Data includes circular reference");
-      data_hash->u.v.nApplyCount--;
-      return;
-#else
-    if (!(GC_FLAGS(data_hash) & GC_IMMUTABLE)) {
-      if (GC_IS_RECURSIVE(data_hash)) {
-        php_error(E_WARNING, "Data includes circular reference");
+    void addObjectFunctions(mustache::Data::Map& values, zval * current, size_t depth)
+    {
+      zend_class_entry * class_entry = Z_OBJCE_P(current);
+      if( class_entry == NULL ) {
         return;
       }
-      GC_PROTECT_RECURSION(data_hash);
-#endif
+
+      zval * function_value = NULL;
+      ZEND_HASH_FOREACH_VAL_IND(&class_entry->function_table, function_value) {
+        zend_function * function = (zend_function *) Z_PTR_P(function_value);
+        zend_string * function_name = function->common.function_name;
+        if( !is_valid_function(function) || function_name == NULL ) {
+          continue;
+        }
+
+        std::string key(ZSTR_VAL(function_name), ZSTR_LEN(function_name));
+        if( values.find(key) != values.end() ) {
+          continue;
+        }
+
+        addContainerEntry();
+        addNode(depth + 1);
+        addString(key.length());
+        values.emplace(
+            std::move(key),
+            mustache::Data::lambda(std::make_unique<ClassMethodLambda>(
+                current, ZSTR_VAL(function_name), ZSTR_LEN(function_name))));
+      } ZEND_HASH_FOREACH_END();
     }
 
-    ZEND_HASH_FOREACH_KEY_VAL_IND(data_hash, key_nindex, key, data_entry) {
-      function_entry = (zend_function *) Z_PTR_P(data_entry);
-      (void)key; /* avoid [-Wunused-but-set-variable] */
-      (void)key_nindex;
-      if( is_valid_function(function_entry) ) {
-        node->type = mustache::Data::TypeMap;
-
-        ckey.assign(ZSTR_VAL(function_entry->common.function_name),
-            ZSTR_LEN(function_entry->common.function_name));
-
-        child = new mustache::Data();
-        child->type = mustache::Data::TypeLambda;
-        child->lambda = new ClassMethodLambda(current,
-            ZSTR_VAL(function_entry->common.function_name),
-            ZSTR_LEN(function_entry->common.function_name));
-
-        node->data.insert(std::pair<std::string,mustache::Data*>(ckey,child));
+    mustache::Data convertObject(zval * current, size_t depth)
+    {
+      zend_class_entry * class_entry = Z_OBJCE_P(current);
+      if( class_entry == MustacheData_ce_ptr ) {
+        fail("Nested MustacheData values are not supported");
       }
-    } ZEND_HASH_FOREACH_END();
+      if( class_entry == zend_ce_closure ) {
+        return mustache::Data::lambda(std::make_unique<ZendClosureLambda>(current));
+      }
+      if( is_invokable_object(class_entry) ) {
+        return mustache::Data::lambda(
+            std::make_unique<ClassMethodLambda>(current, ZEND_STRL("__invoke")));
+      }
 
-#if PHP_VERSION_ID < 70300
-    if( ZEND_HASH_APPLY_PROTECTION(data_hash) ) {
-      data_hash->u.v.nApplyCount--;
-#else
-    if (!(GC_FLAGS(data_hash) & GC_IMMUTABLE)) {
-      GC_UNPROTECT_RECURSION(data_hash);
-#endif
+      ActivePathGuard<zend_object> active_guard(activeObjects, Z_OBJ_P(current));
+      mustache::Data::Map values;
+      addObjectProperties(values, current, depth);
+      addObjectFunctions(values, current, depth);
+      return mustache::Data::object(std::move(values));
     }
-  }
-}
-/* }}} mustache_data_from_object_functions_zval */
 
-/* {{{ mustache_data_from_object_zval */
-static zend_always_inline void mustache_data_from_object_zval(mustache::Data * node, zval * current)
-{
-  zend_class_entry * ce = Z_OBJCE_P(current);
+  public:
+    mustache::Data convert(zval * current, size_t depth = 1)
+    {
+      if( current == NULL ) {
+        fail("Missing data value");
+      }
+      if( Z_TYPE_P(current) == IS_INDIRECT ) {
+        return convert(Z_INDIRECT_P(current), depth);
+      }
+      if( Z_TYPE_P(current) == IS_REFERENCE ) {
+        zend_reference * reference = Z_REF_P(current);
+        ActivePathGuard<zend_reference> active_guard(activeReferences, reference);
+        return convert(Z_REFVAL_P(current), depth);
+      }
 
-  node->type = mustache::Data::TypeNone;
+      addNode(depth);
+      switch( Z_TYPE_P(current) ) {
+        case IS_NULL:
+          return mustache::Data::null();
+        case IS_FALSE:
+          return mustache::Data::boolean(false);
+        case IS_TRUE:
+          return mustache::Data::boolean(true);
+        case IS_LONG:
+          return mustache::Data::integer(static_cast<std::int64_t>(Z_LVAL_P(current)));
+        case IS_DOUBLE:
+          if( !std::isfinite(Z_DVAL_P(current)) ) {
+            fail("Non-finite floating-point data is not supported");
+          }
+          return mustache::Data::floating(Z_DVAL_P(current));
+        case IS_STRING:
+          addString(Z_STRLEN_P(current));
+          return mustache::Data::string(
+              std::string(Z_STRVAL_P(current), Z_STRLEN_P(current)));
+        case IS_ARRAY:
+          return convertArray(current, depth);
+        case IS_OBJECT:
+          return convertObject(current, depth);
+        default:
+          fail("Invalid data type");
+      }
+    }
+};
 
-  if( ce == MustacheData_ce_ptr ) {
-    // @todo
-    php_error(E_WARNING, "MustacheData not implemented here");
-  } else if( ce == zend_ce_closure ) {
-    node->type = mustache::Data::TypeLambda;
-    node->lambda = new ZendClosureLambda(current);
-  } else if( is_invokable_object(ce) ) {
-    node->type = mustache::Data::TypeLambda;
-    node->lambda = new ClassMethodLambda(current, ZEND_STRL("__invoke"));
-  } else {
-    // functions should take precendence over properties
-    mustache_data_from_object_properties_zval(node, current);
-    mustache_data_from_object_functions_zval(node, current);
-  }
-}
-/* }}} mustache_data_from_object_zval */
+} // namespace
 
 /* {{{ mustache_data_from_zval */
-void mustache_data_from_zval(mustache::Data * node, zval * current)
+mustache::Data mustache_data_from_zval(zval * current)
 {
-  if( Z_TYPE_P(current) == IS_INDIRECT ) {
-    current = Z_INDIRECT_P(current);
-  }
-  ZVAL_DEREF(current);
-
-  switch( Z_TYPE_P(current) ) {
-      case IS_NULL:
-          node->type = mustache::Data::TypeString;
-          node->val = new std::string();
-          break;
-      case IS_LONG:
-          node->type = mustache::Data::TypeString;
-          node->val = new std::string(std::to_string((long long)Z_LVAL_P(current)));
-          break;
-      case IS_TRUE:
-          node->type = mustache::Data::TypeString;
-          node->val = new std::string("1");
-          break;
-      case IS_FALSE:
-          node->type = mustache::Data::TypeString;
-          node->val = new std::string();
-          break;
-      case IS_DOUBLE:
-          mustache_data_from_double_zval(node, current);
-          break;
-      case IS_STRING:
-          node->type = mustache::Data::TypeString;
-          node->val = new std::string(Z_STRVAL_P(current), Z_STRLEN_P(current));
-          break;
-      case IS_ARRAY:
-          mustache_data_from_array_zval(node, current);
-          break;
-      case IS_OBJECT:
-          mustache_data_from_object_zval(node, current);
-          break;
-      default:
-          php_error(E_WARNING, "Invalid data type: %d", Z_TYPE_P(current));
-          break;
-  }
+  DataConverter converter;
+  return converter.convert(current);
 }
 /* }}} mustache_data_from_zval */
 
 /* {{{ mustache_data_to_zval */
-void mustache_data_to_zval(mustache::Data * node, zval * current)
+void mustache_data_to_zval(const mustache::Data& node, zval * current)
 {
-  mustache::Data::Array::iterator a_it;
-  mustache::Data::List::iterator l_it;
-  mustache::Data::Map::iterator m_it;
-  mustache::Data::Array childNode;
-  int pos = 0;
-  zval child = {0};
-
-  switch( node->type ) {
+  switch( node.type() ) {
     case mustache::Data::TypeNone:
       ZVAL_NULL(current);
       break;
-    case mustache::Data::TypeString:
-      ZVAL_STRINGL(current, node->val->c_str(), node->val->length());
+    case mustache::Data::TypeString: {
+      const std::string& value = node.stringValue();
+      ZVAL_STRINGL(current, value.c_str(), value.length());
+      break;
+    }
+    case mustache::Data::TypeBoolean:
+      ZVAL_BOOL(current, node.booleanValue());
+      break;
+    case mustache::Data::TypeInteger:
+      ZVAL_LONG(current, static_cast<zend_long>(node.integerValue()));
+      break;
+    case mustache::Data::TypeDouble:
+      ZVAL_DOUBLE(current, node.floatingValue());
       break;
     case mustache::Data::TypeArray:
-        array_init(current);
-        for( pos = 0; pos < node->length; pos++ ) {
-            ZVAL_NULL(&child);
-            mustache_data_to_zval(node->array[pos], &child);
-            add_next_index_zval(current, &child);
-        }
+      array_init_size(current, node.arrayItems().size());
+      for( const mustache::Data& value : node.arrayItems() ) {
+        zval child;
+        mustache_data_to_zval(value, &child);
+        add_next_index_zval(current, &child);
+      }
       break;
     case mustache::Data::TypeList:
-      array_init(current);
-      for ( l_it = node->children.begin() ; l_it != node->children.end(); l_it++ ) {
-        ZVAL_NULL(&child);
-        mustache_data_to_zval(*l_it, &child);
+      array_init_size(current, node.listItems().size());
+      for( const mustache::Data& value : node.listItems() ) {
+        zval child;
+        mustache_data_to_zval(value, &child);
         add_next_index_zval(current, &child);
       }
       break;
     case mustache::Data::TypeMap:
-      array_init(current);
-      for ( m_it = node->data.begin() ; m_it != node->data.end(); m_it++ ) {
-        ZVAL_NULL(&child);
-        mustache_data_to_zval((*m_it).second, &child);
-        add_assoc_zval_ex(current, (*m_it).first.c_str(), (*m_it).first.length(), &child);
+      array_init_size(current, node.objectItems().size());
+      for( const auto& value : node.objectItems() ) {
+        zval child;
+        mustache_data_to_zval(value.second, &child);
+        add_assoc_zval_ex(current, value.first.c_str(), value.first.length(), &child);
       }
       break;
-    default:
+    case mustache::Data::TypeLambda:
       ZVAL_NULL(current);
-      php_error(E_WARNING, "Invalid data type");
+      php_error(E_WARNING, "Lambda data cannot be converted to a PHP value");
       break;
   }
 }
@@ -522,8 +492,10 @@ PHP_METHOD(MustacheData, __construct)
     }
 
     // Convert data
-    payload->data = new mustache::Data();
-    mustache_data_from_zval(payload->data, data);
+    std::unique_ptr<mustache::Data> converted =
+        std::make_unique<mustache::Data>(mustache_data_from_zval(data));
+    delete payload->data;
+    payload->data = converted.release();
 
   } catch(...) {
     mustache_exception_handler();
@@ -553,7 +525,7 @@ PHP_METHOD(MustacheData, toValue)
     }
 
     // Reverse template data
-    mustache_data_to_zval(payload->data, return_value);
+    mustache_data_to_zval(*payload->data, return_value);
 
   } catch(...) {
     mustache_exception_handler();

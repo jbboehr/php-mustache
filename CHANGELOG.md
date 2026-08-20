@@ -6,6 +6,15 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ## [Unreleased]
 
+### Changed
+
+- Preserve PHP null, boolean, integer, and floating-point data as typed libmustache values. Their rendered spelling now follows libmustache's typed-value rules.
+
+### Fixed
+
+- Reject recursive, over-deep, and over-budget data conversion without publishing a partial `MustacheData` value.
+- Retain PHP objects and closures for as long as their converted lambda values are alive.
+
 ## [0.9.3] - 2022-11-26
 
 ### Fixed

@@ -13,20 +13,20 @@
 
 ZendClosureLambda::~ZendClosureLambda()
 {
-  zval_ptr_dtor(closure);
+  zval_ptr_dtor(&closure);
 }
 
 int ZendClosureLambda::getUserFunctionParamCount()
 {
 #if PHP_VERSION_ID < 80000
-  const zend_function * func = zend_get_closure_method_def(closure);
+  const zend_function * func = zend_get_closure_method_def(&closure);
 #else
-  const zend_function * func = zend_get_closure_method_def(Z_OBJ_P(closure));
+  const zend_function * func = zend_get_closure_method_def(Z_OBJ(closure));
 #endif
   return func->common.num_args;
 }
 
 int ZendClosureLambda::invokeUserFunction(zval *retval_ptr, int param_count, zval params[])
 {
-  return call_user_function(NULL, NULL, closure, retval_ptr, param_count, params);
+  return call_user_function(NULL, NULL, &closure, retval_ptr, param_count, params);
 }

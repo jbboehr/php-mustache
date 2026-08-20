@@ -5,18 +5,17 @@
 
 #include "php_mustache.h"
 #include "mustache_private.hpp"
-#include "mustache_private.hpp"
 #include "mustache_class_method_lambda.hpp"
 
 ClassMethodLambda::~ClassMethodLambda()
 {
-  zval_ptr_dtor(object);
+  zval_ptr_dtor(&object);
   zval_dtor(&function_name);
 }
 
 int ClassMethodLambda::getUserFunctionParamCount()
 {
-  zend_class_entry * ce = Z_OBJCE_P(object);
+  zend_class_entry * ce = Z_OBJCE(object);
   zval * zv = NULL;
   zend_function * function_entry = NULL;
 
@@ -33,5 +32,5 @@ int ClassMethodLambda::getUserFunctionParamCount()
 
 int ClassMethodLambda::invokeUserFunction(zval *retval_ptr, int param_count, zval params[])
 {
-  return call_user_function(NULL, object, &function_name, retval_ptr, param_count, params);
+  return call_user_function(NULL, &object, &function_name, retval_ptr, param_count, params);
 }

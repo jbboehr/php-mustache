@@ -10,7 +10,7 @@
 
 class ClassMethodLambda : public Lambda {
   private:
-    zval * object;
+    zval object;
     zval function_name;
 
   protected:
@@ -18,10 +18,14 @@ class ClassMethodLambda : public Lambda {
     int invokeUserFunction(zval *retval_ptr, int param_count, zval params[]);
 
   public:
-    ClassMethodLambda(zval * object, const char * function_name_string, size_t function_name_length) : object(object) {
-      Z_ADDREF_P(object);
+    ClassMethodLambda(zval * object_value, const char * function_name_string, size_t function_name_length) {
+      ZVAL_COPY(&object, object_value);
       ZVAL_STRINGL(&function_name, function_name_string, function_name_length);
     };
+    ClassMethodLambda(const ClassMethodLambda&) = delete;
+    ClassMethodLambda& operator=(const ClassMethodLambda&) = delete;
+    ClassMethodLambda(ClassMethodLambda&&) = delete;
+    ClassMethodLambda& operator=(ClassMethodLambda&&) = delete;
     ~ClassMethodLambda();
 };
 
