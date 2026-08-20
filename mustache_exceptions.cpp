@@ -18,7 +18,7 @@ zend_class_entry * MustacheParserException_ce_ptr;
 PHP_MINIT_FUNCTION(mustache_exceptions)
 {
   try {
-    zend_class_entry * exception_ce = zend_exception_get_default();
+    zend_class_entry * exception_ce = zend_ce_exception;
 
     // MustacheException
     zend_class_entry mustache_exception_ce;
@@ -83,4 +83,3 @@ void mustache_exception_handler()
 #endif
 }
 /* }}} */
-

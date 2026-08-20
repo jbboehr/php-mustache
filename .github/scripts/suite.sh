@@ -59,7 +59,7 @@ function initialize_coverage() (
     set -o errexit -o pipefail -o xtrace
 
     lcov --directory . --zerocounters
-    lcov --directory . --capture --compat-libtool --initial --output-file coverage.info
+    lcov --no-checksum --directory . --capture --compat-libtool --initial --output-file coverage.base
 )
 
 function before_script() (
@@ -85,7 +85,8 @@ function script() (
 function process_coverage() (
     set -o errexit -o pipefail -o xtrace
 
-    lcov --no-checksum --directory . --capture --compat-libtool --output-file coverage.info
+    lcov --no-checksum --directory . --capture --compat-libtool --output-file coverage.run
+    lcov --add-tracefile coverage.base --add-tracefile coverage.run --output-file coverage.info
     lcov --remove coverage.info "/usr*" \
         --remove coverage.info "*/.phpenv/*" \
         --remove coverage.info "/home/travis/build/include/*" \

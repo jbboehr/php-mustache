@@ -53,13 +53,14 @@
       runHook postCheck
     '';
 
-  preBuild = lib.optionalString coverageSupport ''
+  preCheck = lib.optionalString coverageSupport ''
     lcov --directory . --zerocounters
-    lcov --directory . --capture --compat-libtool --initial --output-file coverage.info
+    lcov --no-checksum --directory . --capture --initial --no-markers --compat-libtool --output-file coverage.base
   '';
 
   postCheck = lib.optionalString coverageSupport ''
-    lcov --no-checksum --directory . --capture --no-markers --compat-libtool --output-file coverage.info
+    lcov --no-checksum --directory . --capture --no-markers --compat-libtool --output-file coverage.run
+    lcov --add-tracefile coverage.base --add-tracefile coverage.run --output-file coverage.info
     set -o noglob
     lcov --remove coverage.info '${builtins.storeDir}/*' \
         --compat-libtool \

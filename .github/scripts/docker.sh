@@ -7,7 +7,7 @@ source .github/scripts/fold.sh
 
 # config
 export DOCKER_NAME=${DOCKER_NAME:-"alpine"}
-export PHP_VERSION=${PHP_VERSION:-"7.4"}
+export PHP_VERSION=${PHP_VERSION:-"8.3"}
 export TEST_PHP_EXECUTABLE=${TEST_PHP_EXECUTABLE:-"/usr/local/bin/php"}
 export RUN_TESTS_PHP=${RUN_TESTS_PHP:-"/usr/local/lib/php/build/run-tests.php"}
 

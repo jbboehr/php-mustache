@@ -2,8 +2,7 @@
   description = "jbboehr/php-mustache";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     systems.url = "github:nix-systems/default-linux";
     flake-utils = {
       url = "github:numtide/flake-utils";
@@ -13,12 +12,9 @@
       url = "github:hercules-ci/gitignore.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    pre-commit-hooks = {
-      url = "github:cachix/pre-commit-hooks.nix";
+    git-hooks = {
+      url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.nixpkgs-stable.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-      inputs.gitignore.follows = "gitignore";
     };
     nix-github-actions = {
       url = "github:nix-community/nix-github-actions";
@@ -31,26 +27,27 @@
       inputs.flake-utils.follows = "flake-utils";
       inputs.gitignore.follows = "gitignore";
     };
-    mustache_spec.url = "github:jbboehr/mustache-spec";
+    mustache_spec = {
+      url = "github:jbboehr/mustache-spec";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
   };
 
   outputs = {
     self,
     nixpkgs,
-    nixpkgs-unstable,
     flake-utils,
     gitignore,
-    pre-commit-hooks,
-    systems,
+    git-hooks,
     nix-github-actions,
     libmustache,
     mustache_spec,
     ...
-  } @ args:
+  }:
     flake-utils.lib.eachDefaultSystem (
       system: let
         pkgs = nixpkgs.legacyPackages.${system};
-        pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
         lib = pkgs.lib;
 
         src' = gitignore.lib.gitignoreSource ./.;
@@ -76,6 +73,14 @@
           };
         };
 
+        libmustachePackage = pkgs.callPackage (libmustache + "/nix/derivation.nix") {
+          libmustacheSrc = libmustache;
+          mustache_spec = mustache_spec.packages.${system}.mustache-spec;
+          inherit (gitignore.lib) gitignoreFilterWith;
+          # Removed from Nixpkgs after 24.05, but unused by this pinned derivation.
+          libstdcxx5 = null;
+        };
+
         makePackage = {
           stdenv ? pkgs.stdenv,
           php ? pkgs.php,
@@ -85,7 +90,7 @@
             inherit src;
             inherit stdenv php;
             inherit coverageSupport;
-            libmustache = libmustache.packages.${system}.libmustache;
+            libmustache = libmustachePackage;
             mustache_spec = mustache_spec.packages.${system}.mustache-spec;
             buildPecl = pkgs.callPackage (nixpkgs + "/pkgs/build-support/php/build-pecl.nix") {
               inherit php stdenv;
@@ -97,7 +102,7 @@
             checkSupport = true;
           };
 
-        pre-commit-check = pre-commit-hooks.lib.${system}.run {
+        pre-commit-check = git-hooks.lib.${system}.run {
           src = src';
           hooks = {
             actionlint.enable = true;
@@ -153,8 +158,7 @@
 
         matrix = with pkgs; {
           php = {
-            inherit php81 php82 php83;
-            php84 = pkgs-unstable.php84;
+            inherit php83 php84 php85;
           };
           stdenv = {
             gcc = stdenv;
@@ -165,8 +169,8 @@
 
         # @see https://github.com/NixOS/nixpkgs/pull/110787
         buildConfs =
-          (lib.cartesianProductOfSets {
-            php = ["php81" "php82" "php83" "php84"];
+          (lib.cartesianProduct {
+            php = ["php83" "php84" "php85"];
             stdenv = [
               "gcc"
               "clang"
@@ -175,14 +179,8 @@
             ];
             coverageSupport = [false];
           })
-          ++ [
-            {
-              php = "php81";
-              stdenv = "gcc";
-            }
-          ]
-          ++ (lib.cartesianProductOfSets {
-            php = ["php81" "php82" "php83" "php84"];
+          ++ (lib.cartesianProduct {
+            php = ["php83" "php84" "php85"];
             stdenv = ["gcc"];
             coverageSupport = [true];
           });
@@ -215,11 +213,7 @@
         packages =
           packages'
           // {
-            # php81 = packages.php81-gcc;
-            # php82 = packages.php82-gcc;
-            # php83 = packages.php83-gcc;
-            # php84 = packages.php84-gcc;
-            default = packages.php81-gcc;
+            default = packages.php83-gcc;
           };
       in {
         inherit packages;
@@ -228,22 +222,17 @@
 
         checks =
           {inherit pre-commit-check;}
-          // (builtins.mapAttrs (name: package: makeCheck package) packages);
+          // (builtins.mapAttrs (name: package: makeCheck package) packages');
 
         formatter = pkgs.alejandra;
       }
     )
     // {
-      # prolly gonna break at some point
-      githubActions.matrix.include = let
-        cleanFn = v: v // {name = builtins.replaceStrings ["githubActions." "checks." "x86_64-linux."] ["" "" ""] v.attr;};
-      in
-        builtins.map cleanFn
+      githubActions.matrix =
         (nix-github-actions.lib.mkGithubMatrix {
           attrPrefix = "checks";
           checks = nixpkgs.lib.getAttrs ["x86_64-linux"] self.checks;
         })
-        .matrix
-        .include;
+        .matrix;
     };
 }

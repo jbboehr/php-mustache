@@ -6,7 +6,7 @@ source .github/scripts/vars.sh
 source .github/scripts/fold.sh
 
 # config
-export PHP_VERSION=${PHP_VERSION:-"7.4"}
+export PHP_VERSION=${PHP_VERSION:-"8.3"}
 export COVERAGE=${COVERAGE:-false}
 export DEBIAN_FRONTEND=noninteractive
 export SUDO=sudo
