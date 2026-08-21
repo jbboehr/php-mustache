@@ -138,7 +138,7 @@
               MD024 = false;
             };
             shellcheck.enable = true;
-            shellcheck.excludes = ["^.github\/scripts\/"];
+            shellcheck.excludes = ["^.github/scripts/(docker|fold|linux|osx|suite).sh$"];
           };
         };
 

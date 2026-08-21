@@ -4,7 +4,6 @@ source .github/scripts/vars.sh
 source .github/scripts/fold.sh
 
 export COVERAGE=${COVERAGE:-true}
-export LIBMUSTACHE_VERSION=${LIBMUSTACHE_VERSION:-master}
 export TRAVIS_BUILD_DIR=${TRAVIS_BUILD_DIR:-`pwd`}
 export INSTALL_PREFIX=${HOME}/build
 export PKG_CONFIG_PATH="${INSTALL_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
@@ -20,7 +19,7 @@ function install_libmustache() (
     rm -rf libmustache
     git clone https://github.com/jbboehr/libmustache.git
     cd libmustache
-    git checkout ${LIBMUSTACHE_VERSION}
+    git checkout "${LIBMUSTACHE_VERSION}"
     autoreconf -fiv
     ./configure --prefix=${INSTALL_PREFIX} --without-mustache-spec
     make all install

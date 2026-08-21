@@ -14,7 +14,7 @@ export SUDO=sudo
 function install_apt_packages() (
     ${SUDO} add-apt-repository ppa:ondrej/php
     ${SUDO} apt-get update
-    ${SUDO} apt-get install -y libjson-c-dev libyaml-dev php${PHP_VERSION}-dev lcov
+    ${SUDO} apt-get install -y libjson-c-dev libyaml-dev nlohmann-json3-dev "php${PHP_VERSION}-dev" lcov
 )
 
 cifold "install apt packages" install_apt_packages

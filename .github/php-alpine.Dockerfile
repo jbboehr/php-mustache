@@ -1,20 +1,22 @@
 ARG PHP_VERSION=8.3
 ARG PHP_TYPE=alpine
 ARG BASE_IMAGE=php:${PHP_VERSION}-${PHP_TYPE}
-ARG LIBMUSTACHE_VERSION=master
+ARG LIBMUSTACHE_VERSION
 
 # image0
 FROM ${BASE_IMAGE}
 ARG LIBMUSTACHE_VERSION
 WORKDIR /build
 
+RUN test -n "${LIBMUSTACHE_VERSION}"
+
 RUN apk update && \
-    apk --no-cache add alpine-sdk automake autoconf libtool json-c-dev yaml-dev
+    apk --no-cache add alpine-sdk automake autoconf libtool json-c-dev nlohmann-json yaml-dev
 
 # libmustache
 RUN git clone https://github.com/jbboehr/libmustache.git
 WORKDIR /build/libmustache
-RUN git checkout $LIBMUSTACHE_VERSION && git submodule update --init
+RUN git checkout "${LIBMUSTACHE_VERSION}" && git submodule update --init
 RUN autoreconf -fiv
 RUN ./configure \
         --prefix /usr/local/ \

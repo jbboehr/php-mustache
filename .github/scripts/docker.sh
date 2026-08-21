@@ -13,10 +13,10 @@ export RUN_TESTS_PHP=${RUN_TESTS_PHP:-"/usr/local/lib/php/build/run-tests.php"}
 
 function docker_build() (
     docker build \
-        -f .github/php-${DOCKER_NAME}.Dockerfile \
+        -f ".github/php-${DOCKER_NAME}.Dockerfile" \
         -t php-mustache \
-        --build-arg PHP_VERSION=${PHP_VERSION} \
-        --build-arg LIBMUSTACHE_VERSION=${LIBMUSTACHE_VERSION} \
+        --build-arg "PHP_VERSION=${PHP_VERSION}" \
+        --build-arg "LIBMUSTACHE_VERSION=${LIBMUSTACHE_VERSION}" \
         .
 )
 
@@ -25,10 +25,10 @@ function docker_run() (
     docker run \
         --env NO_INTERACTION=1 \
         --env REPORT_EXIT_STATUS=1 \
-        --env TEST_PHP_EXECUTABLE=${TEST_PHP_EXECUTABLE} \
+        --env "TEST_PHP_EXECUTABLE=${TEST_PHP_EXECUTABLE}" \
         -v "$PWD/tests:/mnt" \
         php-mustache \
-        php ${RUN_TESTS_PHP} /mnt
+        php "${RUN_TESTS_PHP}" /mnt
 )
 
 cifold "docker build" docker_build

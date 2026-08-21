@@ -1,12 +1,14 @@
 
 ARG PHP_VERSION=8.3
 ARG BASE_IMAGE=php:$PHP_VERSION
-ARG LIBMUSTACHE_VERSION=master
+ARG LIBMUSTACHE_VERSION
 
 # image0
 FROM ${BASE_IMAGE}
 ARG LIBMUSTACHE_VERSION
 WORKDIR /build
+
+RUN test -n "${LIBMUSTACHE_VERSION}"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         autoconf \
@@ -19,12 +21,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libyaml-dev \
         m4 \
         make \
+        nlohmann-json3-dev \
         pkg-config
 
 # libmustache
 RUN git clone https://github.com/jbboehr/libmustache.git
 WORKDIR /build/libmustache
-RUN git checkout $LIBMUSTACHE_VERSION && git submodule update --init
+RUN git checkout "${LIBMUSTACHE_VERSION}" && git submodule update --init
 RUN autoreconf -fiv
 RUN ./configure \
         --prefix /usr/local/ \

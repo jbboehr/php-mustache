@@ -9,11 +9,16 @@ source .github/scripts/fold.sh
 export PHP_VERSION=${PHP_VERSION:-"8.3"}
 export NO_INTERACTION=1
 export REPORT_EXIT_STATUS=1
+if [[ "${PHP_VERSION}" = "8.5" ]]; then
+    PHP_FORMULA=php
+else
+    PHP_FORMULA="php@${PHP_VERSION}"
+fi
 
 function install_brew_packages() (
     set -o errexit -o pipefail -o xtrace
 
-    brew install autoconf automake libtool pkg-config json-c libyaml php@$PHP_VERSION
+    brew install autoconf automake libtool pkg-config json-c libyaml nlohmann-json "${PHP_FORMULA}"
 )
 
 function install_libmustache() (
@@ -21,7 +26,7 @@ function install_libmustache() (
 
     git clone https://github.com/jbboehr/libmustache.git
     cd libmustache
-    git checkout ${LIBMUSTACHE_VERSION}
+    git checkout "${LIBMUSTACHE_VERSION}"
     autoreconf -i
     ./configure --without-mustache-spec --prefix=$HOME/buildprefix
     make
@@ -43,7 +48,7 @@ function script() (
 )
 
 cifold "install brew packages" install_brew_packages
-PHP_PREFIX="$(brew --prefix "php@$PHP_VERSION")"
+PHP_PREFIX="$(brew --prefix "${PHP_FORMULA}")"
 export PATH="$PHP_PREFIX/bin:$PHP_PREFIX/sbin:$PATH"
 export TEST_PHP_EXECUTABLE="${TEST_PHP_EXECUTABLE:-$(command -v php)}"
 cifold "install libmustache" install_libmustache
