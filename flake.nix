@@ -20,6 +20,7 @@
       url = "github:nix-community/nix-github-actions";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-phps.url = "github:fossar/nix-phps";
     libmustache = {
       url = "github:jbboehr/libmustache/develop";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -41,6 +42,7 @@
     gitignore,
     git-hooks,
     nix-github-actions,
+    nix-phps,
     libmustache,
     mustache_spec,
     ...
@@ -174,6 +176,7 @@
 
         matrix = with pkgs; {
           php = {
+            php81 = nix-phps.packages.${system}.php81;
             inherit php83 php84 php85;
           };
           stdenv = {
@@ -186,7 +189,7 @@
         # @see https://github.com/NixOS/nixpkgs/pull/110787
         buildConfs =
           (lib.cartesianProduct {
-            php = ["php83" "php84" "php85"];
+            php = ["php81" "php83" "php84" "php85"];
             stdenv = [
               "gcc"
               "clang"
@@ -197,7 +200,7 @@
             sanitizerSupport = [false];
           })
           ++ (lib.cartesianProduct {
-            php = ["php83" "php84" "php85"];
+            php = ["php81" "php83" "php84" "php85"];
             stdenv = ["gcc"];
             coverageSupport = [true];
             sanitizerSupport = [false];

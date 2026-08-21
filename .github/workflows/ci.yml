@@ -134,6 +134,11 @@ jobs:
 
             - uses: cachix/install-nix-action@v31
 
+            - name: Use nix-phps Cache
+              uses: cachix/cachix-action@v17
+              with:
+                  name: fossar
+
             - name: Import Nix Store Cache
               if: steps.nix-cache.outputs.cache-hit != ''
               run: |
