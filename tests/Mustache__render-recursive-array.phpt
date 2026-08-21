@@ -16,6 +16,8 @@ set_error_handler(static function ($severity, $message) {
 $r = $m->render('{{var}}', $data);
 restore_error_handler();
 var_dump($r);
+unset($data);
+gc_collect_cycles();
 ?>
 --EXPECT--
 Mustache::render(): Data includes circular reference

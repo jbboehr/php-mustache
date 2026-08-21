@@ -25,6 +25,9 @@ $data = new MustacheData([
 var_dump($mustache->render('{{#callback}}unused{{/callback}}{{more}}', $data));
 
 restore_error_handler();
+$data = null;
+unset($callback);
+gc_collect_cycles();
 ?>
 --EXPECT--
 MustacheData::__construct(): MustacheData is already initialized

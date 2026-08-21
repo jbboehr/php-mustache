@@ -38,6 +38,8 @@ $infiniteData = new MustacheData(INF);
 var_dump($infiniteData->toValue());
 
 restore_error_handler();
+unset($recursiveArray, $recursiveObject);
+gc_collect_cycles();
 ?>
 --EXPECT--
 MustacheData::__construct(): Mixed numeric and associative arrays are not supported

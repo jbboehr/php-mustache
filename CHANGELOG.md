@@ -24,6 +24,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Release lambda arguments and return values reliably when callbacks or string conversion fail.
 - Declare parser-error location properties with `-1` defaults for unknown locations so invalid templates do not emit PHP 8.2 deprecation notices.
 - Preserve literal format specifiers in exception messages and stop rendering as soon as a PHP lambda callback raises an exception.
+- Fix the `mustache.default_*` INI directives, which were registered under pointer-sized truncated names and read past their default literals. Existing `php.ini` and `ini_set()` values now take effect.
 
 ## [0.9.3] - 2022-11-26
 

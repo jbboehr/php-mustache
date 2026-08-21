@@ -70,6 +70,16 @@ nix-env -i -f https://github.com/jbboehr/php-mustache/archive/master.tar.gz
 
 See [Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild). You may need to add [msinttypes](https://code.google.com/p/msinttypes/) ([export](https://github.com/jbboehr/msinttypes/)) to your include directory.
 
+## Development
+
+Run the PHP 8.3 AddressSanitizer and UndefinedBehaviorSanitizer test suite with:
+
+```sh
+nix build -L .#checks.x86_64-linux.php83-gcc-sanitized
+```
+
+The raw `--enable-mustache-sanitizers` configure option instruments the extension but requires a PHP runtime built with compatible sanitizer support. The Nix check supplies compatible PHP and libmustache builds.
+
 ## Usage
 
 Example:

@@ -4,6 +4,7 @@
   stdenv,
   pkg-config,
   valgrind,
+  makeWrapper,
   autoreconfHook,
   buildPecl,
   src,
@@ -13,6 +14,7 @@
   checkSupport ? false,
   valgrindSupport ? true,
   coverageSupport ? false,
+  sanitizerSupport ? false,
 }:
 (buildPecl rec {
   pname = "mustache";
@@ -25,7 +27,8 @@
   nativeBuildInputs =
     [php.unwrapped.dev pkg-config mustache_spec]
     ++ lib.optional valgrindSupport valgrind
-    ++ lib.optional coverageSupport lcov;
+    ++ lib.optional coverageSupport lcov
+    ++ lib.optional sanitizerSupport makeWrapper;
 
   passthru = {
     inherit php stdenv;
@@ -33,7 +36,10 @@
 
   configureFlags =
     []
-    ++ lib.optional coverageSupport ["--enable-mustache-coverage"];
+    ++ lib.optional coverageSupport ["--enable-mustache-coverage"]
+    ++ lib.optional sanitizerSupport ["--enable-mustache-sanitizers"];
+
+  dontStrip = sanitizerSupport;
 
   makeFlags = ["phpincludedir=$(dev)/include"];
   outputs =
@@ -44,7 +50,9 @@
   theRealFuckingCheckPhase =
     ''
       runHook preCheck
-      REPORT_EXIT_STATUS=1 NO_INTERACTION=1 make test TEST_PHP_ARGS="-n -j$(nproc --all)" || (find tests -name '*.log' | xargs cat ; exit 1)
+      REPORT_EXIT_STATUS=1 NO_INTERACTION=1 make test \
+        ${lib.optionalString sanitizerSupport ''PHP_EXECUTABLE="$TMPDIR/php-sanitized" TEST_PHP_EXECUTABLE="$TMPDIR/php-sanitized"''} \
+        TEST_PHP_ARGS="-n -j$(nproc --all)" || (find tests -name '*.log' | xargs cat ; exit 1)
     ''
     + (lib.optionalString valgrindSupport ''
       USE_ZEND_ALLOC=0 REPORT_EXIT_STATUS=1 NO_INTERACTION=1 make test TEST_PHP_ARGS="-n -m -j$(nproc --all)" || (find tests -name '*.mem' | xargs cat ; exit 1)
@@ -53,10 +61,19 @@
       runHook postCheck
     '';
 
-  preCheck = lib.optionalString coverageSupport ''
-    lcov --directory . --zerocounters
-    lcov --no-checksum --directory . --capture --initial --no-markers --compat-libtool --output-file coverage.base
-  '';
+  preCheck =
+    lib.optionalString coverageSupport ''
+      lcov --directory . --zerocounters
+      lcov --no-checksum --directory . --capture --initial --no-markers --compat-libtool --output-file coverage.base
+    ''
+    + lib.optionalString sanitizerSupport ''
+      makeWrapper ${php.unwrapped}/bin/php "$TMPDIR/php-sanitized" \
+        --set ASAN_OPTIONS "abort_on_error=1:detect_leaks=1:halt_on_error=1" \
+        --set UBSAN_OPTIONS "abort_on_error=1:halt_on_error=1:print_stacktrace=1" \
+        --set USE_ZEND_ALLOC 0
+      "$TMPDIR/php-sanitized" -n -d extension="$PWD/modules/mustache.so" \
+        -r 'exit(extension_loaded("mustache") ? 0 : 1);'
+    '';
 
   postCheck = lib.optionalString coverageSupport ''
     lcov --no-checksum --directory . --capture --no-markers --compat-libtool --output-file coverage.run

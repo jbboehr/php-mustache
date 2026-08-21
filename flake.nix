@@ -49,6 +49,18 @@
       system: let
         pkgs = nixpkgs.legacyPackages.${system};
         lib = pkgs.lib;
+        phpSanitizerFlags = "-O1 -g -fno-omit-frame-pointer -fsanitize=address";
+        php83Sanitized =
+          (pkgs.php83.overrideAttrs (finalAttrs: previousAttrs: {
+            CFLAGS = "${previousAttrs.CFLAGS or ""} ${phpSanitizerFlags}";
+            CXXFLAGS = "${previousAttrs.CXXFLAGS or ""} ${phpSanitizerFlags}";
+            # PHP itself is ASan-only, but the process must provide the UBSan runtime
+            # used by the extension and libmustache.
+            LDFLAGS = "${previousAttrs.LDFLAGS or ""} -fsanitize=address,undefined";
+            dontStrip = true;
+          })).buildEnv {
+            extensions = _: [];
+          };
 
         src' = gitignore.lib.gitignoreSource ./.;
 
@@ -74,17 +86,27 @@
         };
 
         libmustachePackage = libmustache.packages.${system}.libmustache;
+        # Keep the sanitizer job on the same Autotools package as the normal jobs.
+        libmustacheSanitizedPackage = libmustachePackage.override {
+          debugSupport = true;
+          sanitizerSupport = true;
+        };
 
         makePackage = {
           stdenv ? pkgs.stdenv,
           php ? pkgs.php,
           coverageSupport ? false,
+          sanitizerSupport ? false,
         }:
           pkgs.callPackage ./nix/derivation.nix {
             inherit src;
             inherit stdenv php;
-            inherit coverageSupport;
-            libmustache = libmustachePackage;
+            inherit coverageSupport sanitizerSupport;
+            valgrindSupport = !sanitizerSupport;
+            libmustache =
+              if sanitizerSupport
+              then libmustacheSanitizedPackage
+              else libmustachePackage;
             mustache_spec = mustache_spec.packages.${system}.mustache-spec;
             buildPecl = pkgs.callPackage (nixpkgs + "/pkgs/build-support/php/build-pecl.nix") {
               inherit php stdenv;
@@ -172,17 +194,28 @@
               # "musl"
             ];
             coverageSupport = [false];
+            sanitizerSupport = [false];
           })
           ++ (lib.cartesianProduct {
             php = ["php83" "php84" "php85"];
             stdenv = ["gcc"];
             coverageSupport = [true];
-          });
+            sanitizerSupport = [false];
+          })
+          ++ [
+            {
+              php = "php83";
+              stdenv = "gcc";
+              coverageSupport = false;
+              sanitizerSupport = true;
+            }
+          ];
 
         buildFn = {
           php,
           stdenv,
           coverageSupport ? false,
+          sanitizerSupport ? false,
         }:
           lib.nameValuePair
           (lib.concatStringsSep "-" (lib.filter (v: v != "") [
@@ -194,12 +227,20 @@
               then "coverage"
               else ""
             )
+            (
+              if sanitizerSupport
+              then "sanitized"
+              else ""
+            )
           ]))
           (
             makePackage {
-              php = matrix.php.${php};
+              php =
+                if sanitizerSupport
+                then php83Sanitized
+                else matrix.php.${php};
               stdenv = matrix.stdenv.${stdenv};
-              inherit coverageSupport;
+              inherit coverageSupport sanitizerSupport;
             }
           );
 

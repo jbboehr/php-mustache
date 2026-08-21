@@ -56,6 +56,7 @@
    <file name="tests/MustacheAST__toArray.phpt" role="test" />
    <file name="tests/MustacheAST__rejects-invalid-serialization.phpt" role="test" />
    <file name="tests/MustacheAST__rejects-reinitialization-during-render.phpt" role="test" />
+   <file name="tests/MustacheAST__rejects-resource-limit-inputs.phpt" role="test" />
    <file name="tests/MustacheAST__roundtrips-complex-templates.phpt" role="test" />
    <file name="tests/MustacheAST____toString.phpt" role="test" />
    <file name="tests/MustacheAST____wakeup-apc.phpt" role="test" />
@@ -69,6 +70,7 @@
    <file name="tests/MustacheData__rejects-unsupported-values.phpt" role="test" />
    <file name="tests/MustacheData__scalar-types.phpt" role="test" />
    <file name="tests/MustacheData__toValue.phpt" role="test" />
+   <file name="tests/Mustache__applies-ini-defaults.phpt" role="test" />
    <file name="tests/Mustache__debugDataStructure.phpt" role="test" />
    <file name="tests/Mustache__getEscapeByDefault.phpt" role="test" />
    <file name="tests/Mustache__getStartSequence.phpt" role="test" />
@@ -111,7 +113,9 @@
    <file name="tests/Mustache__render-references.phpt" role="test" />
    <file name="tests/Mustache__render-source-and-AST-partials-equally.phpt" role="test" />
    <file name="tests/Mustache__render-tag.phpt" role="test" />
+   <file name="tests/Mustache__rejects-excessive-template-nesting.phpt" role="test" />
    <file name="tests/Mustache__rejects-invalid-templates-and-partials.phpt" role="test" />
+   <file name="tests/Mustache__reports-ini-defaults.phpt" role="test" />
    <file name="tests/Mustache__reports-parser-errors.phpt" role="test" />
    <file name="tests/Mustache__setEscapeByDefault.phpt" role="test" />
    <file name="tests/Mustache__setStartSequence.phpt" role="test" />

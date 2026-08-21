@@ -17,6 +17,9 @@ dnl Make sure that the comment is aligned:
 PHP_ARG_ENABLE(mustache-coverage, whether to enable mustache coverage support,
 [AS_HELP_STRING([--enable-mustache-coverage], [Enable mustache coverage support])], [no], [no])
 
+PHP_ARG_ENABLE(mustache-sanitizers, whether to enable mustache sanitizer support,
+[AS_HELP_STRING([--enable-mustache-sanitizers], [Enable AddressSanitizer and UndefinedBehaviorSanitizer support (requires a sanitizer-instrumented PHP; see README)])], [no], [no])
+
 dnl LIBMUSTACHE ----------------------------------------------------------------
 PHP_ARG_WITH(libmustache, libmustache location,
 dnl Make sure that the comment is aligned:
@@ -59,7 +62,7 @@ else
       break
     fi
   done
-  if test "x$LIBMUSTACHE_DIR" == "x"; then
+  if test "x$LIBMUSTACHE_DIR" = "x"; then
     AC_MSG_ERROR([libmustache not found])
   fi
 fi
@@ -72,9 +75,13 @@ if test "$PHP_MUSTACHE" != "no"; then
 #/**/undef/**/ HAVE_ASM_GOTO
 #endif
   ])
-  if test "$PHP_MUSTACHE_COVERAGE" == "yes"; then
+  if test "$PHP_MUSTACHE_COVERAGE" = "yes"; then
     CXXFLAGS="--coverage -fprofile-arcs -ftest-coverage $CXXFLAGS"
     LDFLAGS="--coverage -lgcov $LDFLAGS"
+  fi
+  if test "$PHP_MUSTACHE_SANITIZERS" = "yes"; then
+    CXXFLAGS="$CXXFLAGS -O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all"
+    LDFLAGS="$LDFLAGS -fsanitize=address,undefined -fno-sanitize-recover=all"
   fi
 
   AC_DEFINE(HAVE_MUSTACHE, 1, [Whether you have mustache support])
