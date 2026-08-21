@@ -246,19 +246,19 @@ class MustacheData
 
 class MustacheException extends Exception {}
 
-class MustacheParserException extends MustacheParserException
+class MustacheParserException extends MustacheException
 {
   /**
    * The line number of the parse error
    * 
    * @var integer
    */
-  public $templateLineNo;
+  public $templateLineNo = -1;
   
   /**
    * The character number of the parse error
    * 
    * @var integer
    */
-  public $templateCharNo;
+  public $templateCharNo = -1;
 }

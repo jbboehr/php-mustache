@@ -112,6 +112,7 @@
    <file name="tests/Mustache__render-source-and-AST-partials-equally.phpt" role="test" />
    <file name="tests/Mustache__render-tag.phpt" role="test" />
    <file name="tests/Mustache__rejects-invalid-templates-and-partials.phpt" role="test" />
+   <file name="tests/Mustache__reports-parser-errors.phpt" role="test" />
    <file name="tests/Mustache__setEscapeByDefault.phpt" role="test" />
    <file name="tests/Mustache__setStartSequence.phpt" role="test" />
    <file name="tests/Mustache__setStopSequence.phpt" role="test" />

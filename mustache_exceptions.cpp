@@ -31,6 +31,10 @@ PHP_MINIT_FUNCTION(mustache_exceptions)
     INIT_CLASS_ENTRY(mustache_parser_exception_ce, "MustacheParserException", NULL);
     MustacheParserException_ce_ptr = zend_register_internal_class_ex(&mustache_parser_exception_ce, MustacheException_ce_ptr);
     MustacheParserException_ce_ptr->create_object = MustacheException_ce_ptr->create_object;
+    zend_declare_property_long(MustacheParserException_ce_ptr,
+            "templateLineNo", sizeof("templateLineNo") - 1, -1, ZEND_ACC_PUBLIC);
+    zend_declare_property_long(MustacheParserException_ce_ptr,
+            "templateCharNo", sizeof("templateCharNo") - 1, -1, ZEND_ACC_PUBLIC);
 
     return SUCCESS;
   } catch(...) {
@@ -53,7 +57,7 @@ void mustache_exception_handler()
 
     zval ex;
     zend_object * obj = zend_throw_exception_ex(MustacheParserException_ce_ptr,
-            0, (char *) e.what(), "MustacheParserException");
+            0, "%s", e.what());
     ZVAL_OBJ(&ex, obj);
     exception = &ex;
 
@@ -66,7 +70,7 @@ void mustache_exception_handler()
 #endif
   } catch( mustache::Exception& e ) {
     zend_throw_exception_ex(MustacheException_ce_ptr, 0,
-            (char *) e.what(), "MustacheException");
+            "%s", e.what());
     //php_error_docref(NULL, E_WARNING, e.what());
   } catch( InvalidParameterException& e ) {
     // @todo change this to an exception

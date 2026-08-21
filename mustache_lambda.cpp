@@ -95,13 +95,19 @@ class ZvalArguments {
 std::string Lambda::invokeUserFunctionAsString(int param_count, zval params[])
 {
   ZvalGuard result;
-  if( invokeUserFunction(result.get(), param_count, params) != SUCCESS ||
-      EG(exception) != NULL || Z_ISUNDEF_P(result.get()) ) {
+  int status = invokeUserFunction(result.get(), param_count, params);
+  if( EG(exception) != NULL ) {
+    throw PhpInvalidParameterException();
+  }
+  if( status != SUCCESS || Z_ISUNDEF_P(result.get()) ) {
     return std::string();
   }
 
   convert_to_string(result.get());
-  if( EG(exception) != NULL || Z_TYPE_P(result.get()) != IS_STRING ) {
+  if( EG(exception) != NULL ) {
+    throw PhpInvalidParameterException();
+  }
+  if( Z_TYPE_P(result.get()) != IS_STRING ) {
     return std::string();
   }
 
