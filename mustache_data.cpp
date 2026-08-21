@@ -486,6 +486,10 @@ PHP_METHOD(MustacheData, __construct)
     _this_zval = getThis();
     struct php_obj_MustacheData * payload = php_mustache_data_object_fetch_object(_this_zval);
 
+    if( payload->data != NULL ) {
+      throw InvalidParameterException("MustacheData is already initialized");
+    }
+
     // Check if argument was given
     if( data == NULL ) {
       throw PhpInvalidParameterException();
@@ -494,7 +498,6 @@ PHP_METHOD(MustacheData, __construct)
     // Convert data
     std::unique_ptr<mustache::Data> converted =
         std::make_unique<mustache::Data>(mustache_data_from_zval(data));
-    delete payload->data;
     payload->data = converted.release();
 
   } catch(...) {

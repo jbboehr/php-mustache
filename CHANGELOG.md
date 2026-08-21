@@ -17,6 +17,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 - Reject recursive, over-deep, and over-budget data conversion without publishing a partial `MustacheData` value.
 - Retain PHP objects and closures for as long as their converted lambda values are alive.
+- Reject `MustacheData` reinitialization so callbacks cannot replace data borrowed by an active render.
 - Reject malformed, over-budget, and trailing `MustacheAST` serialization data.
 - Reject attempts to reinitialize a `MustacheAST` while its node may be borrowed by a render.
 - Invalidate retained `MustacheLambdaHelper` values safely when their callback returns.
