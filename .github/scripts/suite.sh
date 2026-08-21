@@ -86,9 +86,7 @@ function process_coverage() (
 
     lcov --no-checksum --directory . --capture --compat-libtool --output-file coverage.run
     lcov --add-tracefile coverage.base --add-tracefile coverage.run --output-file coverage.info
-    lcov --remove coverage.info "/usr*" \
-        --remove coverage.info "*/.phpenv/*" \
-        --remove coverage.info "/home/travis/build/include/*" \
+    lcov --extract coverage.info "${TRAVIS_BUILD_DIR}/*" \
         --compat-libtool \
         --output-file coverage.info
 )
