@@ -176,6 +176,7 @@
 
         matrix = with pkgs; {
           php = {
+            php80 = nix-phps.packages.${system}.php80;
             php81 = nix-phps.packages.${system}.php81;
             inherit php83 php84 php85;
           };
@@ -206,6 +207,12 @@
             sanitizerSupport = [false];
           })
           ++ [
+            {
+              php = "php80";
+              stdenv = "gcc";
+              coverageSupport = false;
+              sanitizerSupport = false;
+            }
             {
               php = "php83";
               stdenv = "gcc";
