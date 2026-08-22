@@ -121,28 +121,12 @@ jobs:
         steps:
             - uses: actions/checkout@v7
 
-            - name: Set Up Build Cache
-              uses: actions/cache@v6
-              id: nix-cache
-              with:
-                  path: /tmp/nix-store.nar
-                  key: nix-store.nar-${{ runner.os }}-${{ hashFiles('flake.lock') }}-${{ matrix.attr }}
-                  restore-keys: |
-                      nix-store.nar-${{ runner.os }}-${{ hashFiles('flake.lock') }}-${{ matrix.attr }}
-                      nix-store.nar-${{ runner.os }}-${{ hashFiles('flake.lock') }}-
-                      nix-store.nar-${{ runner.os }}-
-
             - uses: cachix/install-nix-action@v31
 
             - name: Use nix-phps Cache
               uses: cachix/cachix-action@v17
               with:
                   name: fossar
-
-            - name: Import Nix Store Cache
-              if: steps.nix-cache.outputs.cache-hit != ''
-              run: |
-                  nix-store --import < /tmp/nix-store.nar
 
             - run: nix build -L ".#${{ matrix.attr }}"
 
@@ -166,18 +150,6 @@ jobs:
                   format: lcov
                   flag-name: ${{ matrix.name }}
                   parallel: true
-
-            - name: Export Nix Store Cache
-              shell: bash
-              # partially based on https://github.com/NixOS/nix/issues/1245#issuecomment-282586759
-              run: |
-                  drv="$(nix-store -qd "$(readlink result)")"
-                  drvRefs="$( echo "$drv" | xargs nix-store -q --references )"
-                  ( echo "$drvRefs" | grep '[.]drv$' | xargs nix-store -q --outputs ;
-                    echo "$drvRefs" | grep -v '[.]drv$' ) | \
-                      xargs nix-store -r | \
-                      xargs nix-store -qR |
-                      xargs nix-store --export > /tmp/nix-store.nar
 
     coveralls-finished:
         if: always() && !cancelled()
