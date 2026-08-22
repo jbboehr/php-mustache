@@ -252,6 +252,7 @@
    <file name="tests/MustacheTemplate____wakeup-apc.phpt" role="test" />
    <file name="tests/MustacheTemplate____wakeup.phpt" role="test" />
    <file name="tests/Mustache__tokenize.phpt" role="test" />
+   <file name="tests/gh-46.phpt" role="test" />
   </dir>
  </contents>
  <dependencies>
