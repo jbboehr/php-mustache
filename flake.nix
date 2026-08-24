@@ -178,6 +178,7 @@
           php = {
             php80 = nix-phps.packages.${system}.php80;
             php81 = nix-phps.packages.${system}.php81;
+            php82 = nix-phps.packages.${system}.php82;
             inherit php83 php84 php85;
           };
           stdenv = {
@@ -190,7 +191,7 @@
         # @see https://github.com/NixOS/nixpkgs/pull/110787
         buildConfs =
           (lib.cartesianProduct {
-            php = ["php81" "php83" "php84" "php85"];
+            php = ["php81" "php82" "php83" "php84" "php85"];
             stdenv = [
               "gcc"
               "clang"
@@ -201,7 +202,7 @@
             sanitizerSupport = [false];
           })
           ++ (lib.cartesianProduct {
-            php = ["php81" "php83" "php84" "php85"];
+            php = ["php81" "php82" "php83" "php84" "php85"];
             stdenv = ["gcc"];
             coverageSupport = [true];
             sanitizerSupport = [false];
