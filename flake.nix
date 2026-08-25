@@ -220,6 +220,12 @@
               };
               MD024 = false;
             };
+            composer-validation = {
+              enable = true;
+              entry = "${pkgs.php.packages.composer}/bin/composer validate --strict";
+              files = "^composer\\.(json|lock)$";
+              pass_filenames = false;
+            };
             shellcheck.enable = true;
             shellcheck.excludes = ["^.github/scripts/(docker|fold|linux|osx|suite).sh$"];
           };

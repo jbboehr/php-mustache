@@ -1,0 +1,37 @@
+{
+    "name": "jbboehr/php-mustache",
+    "type": "php-ext",
+    "description": "Mustache templating language extension for PHP",
+    "keywords": [
+        "mustache",
+        "templating"
+    ],
+    "homepage": "https://github.com/jbboehr/php-mustache",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "John Boehr",
+            "email": "jbboehr@mailbox.org"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/jbboehr/php-mustache/issues",
+        "source": "https://github.com/jbboehr/php-mustache"
+    },
+    "require": {
+        "php": ">=8.0"
+    },
+    "php-ext": {
+        "extension-name": "mustache",
+        "os-families-exclude": [
+            "windows"
+        ],
+        "configure-options": [
+            {
+                "name": "with-libmustache",
+                "description": "Set the libmustache installation prefix.",
+                "needs-value": true
+            }
+        ]
+    }
+}

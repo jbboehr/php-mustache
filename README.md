@@ -14,6 +14,21 @@ All features of Mustache are supported EXCEPT:
 
 ## Installation
 
+### PIE
+
+Install libmustache 0.6.0 or newer, then install the extension with
+[PIE](https://github.com/php/pie):
+
+```sh
+pie install jbboehr/php-mustache
+```
+
+If libmustache is installed under a non-standard prefix, pass it explicitly:
+
+```sh
+pie install jbboehr/php-mustache --with-libmustache=/path/to/prefix
+```
+
 ### Linux/OSX
 
 #### Source

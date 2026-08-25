@@ -6,6 +6,10 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ## [Unreleased]
 
+### Added
+
+- Add PIE package metadata while retaining the existing PECL package metadata.
+
 ### Changed
 
 - Preserve PHP null, boolean, integer, and floating-point data as typed libmustache values. Their rendered spelling now follows libmustache's typed-value rules.
