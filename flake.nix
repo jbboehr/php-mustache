@@ -63,7 +63,43 @@
           })).buildEnv {
             extensions = _: [];
           };
-
+        php83FuzzerUnwrapped = ((pkgs.php83.override {
+            stdenv = pkgs.llvmPackages.stdenv;
+            cgiSupport = false;
+            fpmSupport = false;
+            pearSupport = false;
+            pharSupport = false;
+            phpdbgSupport = false;
+            argon2Support = false;
+            systemdSupport = false;
+            valgrindSupport = false;
+          })
+              .unwrapped)
+          .overrideAttrs (finalAttrs: previousAttrs: {
+          CFLAGS = "${previousAttrs.CFLAGS or ""} -O1 -g -fno-omit-frame-pointer";
+          CXXFLAGS = "${previousAttrs.CXXFLAGS or ""} -O1 -g -fno-omit-frame-pointer";
+          configureFlags =
+            (previousAttrs.configureFlags or [])
+            ++ [
+              "--enable-fuzzer"
+              "--with-pic"
+              "--enable-debug-assertions"
+              "--enable-address-sanitizer"
+              "--enable-undefined-sanitizer"
+            ];
+          patches = (previousAttrs.patches or []) ++ [./nix/php-fuzzer-target.patch];
+          postPatch =
+            (previousAttrs.postPatch or "")
+            + ''
+              cp ${./fuzz/php_mustache_fuzzer.c} sapi/fuzzer/fuzzer-mustache.c
+            '';
+          postInstall =
+            (previousAttrs.postInstall or "")
+            + ''
+              install -Dm755 sapi/fuzzer/php-fuzz-mustache "$out/bin/php-fuzz-mustache"
+            '';
+          dontStrip = true;
+        });
         src' = gitignore.lib.gitignoreSource ./.;
 
         src = pkgs.lib.cleanSourceWith {
@@ -83,22 +119,36 @@
               *.md
               *.nix
               flake.*
+              fuzz/
+              nix/php-fuzzer-target.patch
             '';
           };
         };
 
         libmustachePackage = libmustache.packages.${system}.libmustache;
+        libmustacheCmakePackage = libmustache.packages.${system}.libmustache-cmake;
         # Keep the sanitizer job on the same Autotools package as the normal jobs.
         libmustacheSanitizedPackage = libmustachePackage.override {
           debugSupport = true;
           sanitizerSupport = true;
         };
+        # The Autotools build rejects the Clang toolchain's assembler-only flag
+        # under -Werror, so use the upstream CMake package for fuzz instrumentation.
+        libmustacheFuzzPackage =
+          (libmustacheCmakePackage.override {
+            stdenv = pkgs.llvmPackages.stdenv;
+            debugSupport = true;
+            sanitizerSupport = true;
+          }).overrideAttrs (finalAttrs: previousAttrs: {
+            CXXFLAGS = "${previousAttrs.CXXFLAGS or ""} -fsanitize=fuzzer-no-link";
+          });
 
         makePackage = {
           stdenv ? pkgs.stdenv,
           php ? pkgs.php,
           coverageSupport ? false,
           sanitizerSupport ? false,
+          libmustacheOverride ? null,
         }:
           pkgs.callPackage ./nix/derivation.nix {
             inherit src;
@@ -106,7 +156,9 @@
             inherit coverageSupport sanitizerSupport;
             valgrindSupport = !sanitizerSupport;
             libmustache =
-              if sanitizerSupport
+              if libmustacheOverride != null
+              then libmustacheOverride
+              else if sanitizerSupport
               then libmustacheSanitizedPackage
               else libmustachePackage;
             mustache_spec = mustache_spec.packages.${system}.mustache-spec;
@@ -119,6 +171,35 @@
           package.override {
             checkSupport = true;
           };
+
+        phpMustacheFuzzPackage =
+          (makePackage {
+            stdenv = pkgs.llvmPackages.stdenv;
+            php = php83FuzzerUnwrapped;
+            sanitizerSupport = true;
+            libmustacheOverride = libmustacheFuzzPackage;
+          }).overrideAttrs (finalAttrs: previousAttrs: {
+            CXXFLAGS = "${previousAttrs.CXXFLAGS or ""} -fsanitize=fuzzer-no-link";
+          });
+
+        phpMustacheFuzzer = pkgs.writeShellApplication {
+          name = "php-mustache-fuzz";
+          text = ''
+            if (( $# == 0 )); then
+              echo "usage: php-mustache-fuzz [libFuzzer options] CORPUS_DIRECTORY" >&2
+              exit 2
+            fi
+
+            export MUSTACHE_FUZZ_EXTENSION=${phpMustacheFuzzPackage}/lib/php/extensions/mustache.so
+            export ASAN_OPTIONS="abort_on_error=1:detect_leaks=1:halt_on_error=1"
+            export UBSAN_OPTIONS="abort_on_error=1:halt_on_error=1:print_stacktrace=1"
+            exec ${php83FuzzerUnwrapped}/bin/php-fuzz-mustache \
+              -max_len=4096 \
+              -timeout=5 \
+              -dict=${./fuzz/mustache.dict} \
+              "$@"
+          '';
+        };
 
         pre-commit-check = git-hooks.lib.${system}.run {
           src = src';
@@ -269,6 +350,11 @@
         checks =
           {inherit pre-commit-check;}
           // (builtins.mapAttrs (name: package: makeCheck package) packages');
+
+        apps.php83-clang-fuzzer = flake-utils.lib.mkApp {
+          drv = phpMustacheFuzzer;
+          exePath = "/bin/php-mustache-fuzz";
+        };
 
         formatter = pkgs.alejandra;
       }

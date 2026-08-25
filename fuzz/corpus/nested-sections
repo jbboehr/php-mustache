@@ -1,0 +1,1 @@
+{{#show}}{{#items}}[{{.}}]{{/items}}{{/show}}

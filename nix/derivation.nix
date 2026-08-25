@@ -25,7 +25,7 @@
 
   buildInputs = [libmustache];
   nativeBuildInputs =
-    [php.unwrapped.dev pkg-config mustache_spec]
+    [(php.unwrapped or php).dev pkg-config mustache_spec]
     ++ lib.optional valgrindSupport valgrind
     ++ lib.optional coverageSupport lcov
     ++ lib.optional sanitizerSupport makeWrapper;
@@ -67,7 +67,7 @@
       lcov --no-checksum --directory . --capture --initial --no-markers --compat-libtool --output-file coverage.base
     ''
     + lib.optionalString sanitizerSupport ''
-      makeWrapper ${php.unwrapped}/bin/php "$TMPDIR/php-sanitized" \
+      makeWrapper ${php.unwrapped or php}/bin/php "$TMPDIR/php-sanitized" \
         --set ASAN_OPTIONS "abort_on_error=1:detect_leaks=1:halt_on_error=1" \
         --set UBSAN_OPTIONS "abort_on_error=1:halt_on_error=1:print_stacktrace=1" \
         --set USE_ZEND_ALLOC 0

@@ -1,0 +1,14 @@
+diff --git a/sapi/fuzzer/Makefile.frag b/sapi/fuzzer/Makefile.frag
+index a429384..7b66f97 100644
+--- a/sapi/fuzzer/Makefile.frag
++++ b/sapi/fuzzer/Makefile.frag
+@@ -4,0 +5,3 @@
++$(SAPI_FUZZER_PATH)/php-fuzz-mustache: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(PHP_FUZZER_MUSTACHE_OBJS)
++	$(FUZZER_BUILD) $(PHP_FUZZER_MUSTACHE_OBJS) -o $@
++
+diff --git a/sapi/fuzzer/config.m4 b/sapi/fuzzer/config.m4
+index 5adf78c..4a79073 100644
+--- a/sapi/fuzzer/config.m4
++++ b/sapi/fuzzer/config.m4
+@@ -54,0 +55 @@
++  PHP_FUZZER_TARGET([mustache], PHP_FUZZER_MUSTACHE_OBJS)
