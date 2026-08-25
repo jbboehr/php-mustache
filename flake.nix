@@ -148,13 +148,13 @@
           php ? pkgs.php,
           coverageSupport ? false,
           sanitizerSupport ? false,
+          valgrindSupport ? false,
           libmustacheOverride ? null,
         }:
           pkgs.callPackage ./nix/derivation.nix {
             inherit src;
             inherit stdenv php;
-            inherit coverageSupport sanitizerSupport;
-            valgrindSupport = !sanitizerSupport;
+            inherit coverageSupport sanitizerSupport valgrindSupport;
             libmustache =
               if libmustacheOverride != null
               then libmustacheOverride
@@ -343,15 +343,25 @@
           );
 
         packages' = builtins.listToAttrs (builtins.map buildFn buildConfs);
-        packages =
+        php83GccValgrind = makeCheck (makePackage {
+          php = matrix.php.php83;
+          stdenv = matrix.stdenv.gcc;
+          valgrindSupport = true;
+        });
+        developmentPackages =
           packages'
           // {
-            default = packages.php83-gcc;
+            default = packages'.php83-gcc;
+          };
+        packages =
+          developmentPackages
+          // {
+            php83-gcc-valgrind = php83GccValgrind;
           };
       in {
         inherit packages;
 
-        devShells = builtins.mapAttrs (name: package: makeDevShell package) packages;
+        devShells = builtins.mapAttrs (name: package: makeDevShell package) developmentPackages;
 
         checks =
           {inherit pre-commit-check;}

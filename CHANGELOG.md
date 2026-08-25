@@ -12,6 +12,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Changed
 
+- Keep Valgrind out of the default flake checks and expose it as an explicit PHP 8.3 build.
 - Preserve PHP null, boolean, integer, and floating-point data as typed libmustache values. Their rendered spelling now follows libmustache's typed-value rules.
 - Compile source templates and source partials through libmustache's owning template handles while preserving configured delimiters.
 - Store `MustacheAST` values with explicit ownership and bounded serialization.

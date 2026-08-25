@@ -12,7 +12,7 @@
   mustache_spec,
   libmustache,
   checkSupport ? false,
-  valgrindSupport ? true,
+  valgrindSupport ? false,
   coverageSupport ? false,
   sanitizerSupport ? false,
 }:
