@@ -34,11 +34,11 @@ class Data extends Parent_Data {
 
 $m = new Mustache();
 $r = $m->render($tmpl, new Data());
-var_dump($r);
+echo '<render>', $r, '</render>';
 ?>
 --EXPECT--
-string(67) "a: child_a
+<render>a: child_a
 b: parent_b
 c: child_c
 parent_public_var: x
-upper: UPPER"
+upper: UPPER</render>

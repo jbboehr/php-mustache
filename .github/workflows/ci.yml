@@ -97,6 +97,24 @@ jobs:
                   PHP_VERSION: ${{ matrix.PHP_VERSION }}
               run: bash ./.github/scripts/osx.sh
 
+    windows:
+        runs-on: windows-2022
+        steps:
+            - uses: actions/checkout@v7
+
+            - id: libmustache
+              name: Build libmustache
+              shell: pwsh
+              run: ./.github/scripts/windows.ps1
+
+            - name: Build and test extension
+              uses: php/php-windows-builder/extension@36b2fc0672ba93bfa75bdd393edf2ef652961b4a
+              with:
+                  php-version: "8.4"
+                  arch: x64
+                  ts: nts
+                  args: --enable-mustache --with-libmustache=${{ steps.libmustache.outputs.prefix }}
+
     nix-matrix:
         runs-on: ubuntu-latest
         outputs:

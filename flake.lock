@@ -143,11 +143,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787245606,
-        "narHash": "sha256-nSygbcyn6J1Ymm1BDy4oU1ewf/3XJ1sjTN1LUChZ53o=",
+        "lastModified": 1787718242,
+        "narHash": "sha256-eCHTrS2Tz7XPpojo3IqDfm7Z/1PxujpuzfXHyvedQHQ=",
         "owner": "jbboehr",
         "repo": "libmustache",
-        "rev": "c84ab14e6ac54a0e97ab2a1e247fb643e8c81b8d",
+        "rev": "29fb5a349b390abc7888369684c5aa4bb6aac401",
         "type": "github"
       },
       "original": {
