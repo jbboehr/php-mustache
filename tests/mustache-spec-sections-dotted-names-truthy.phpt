@@ -23,7 +23,7 @@ $test = array (
   'expected' => '"Here" == "Here"',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-"Here"\s*\=\=\s*"Here"
+--EXPECT--
+<render>"Here" == "Here"</render>

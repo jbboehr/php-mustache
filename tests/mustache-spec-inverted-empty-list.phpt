@@ -19,7 +19,7 @@ $test = array (
   'expected' => '"Yay lists!"',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-"Yay\s*lists\!"
+--EXPECT--
+<render>"Yay lists!"</render>

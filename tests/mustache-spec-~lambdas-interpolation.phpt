@@ -17,7 +17,7 @@ $test = array (
   'expected' => 'Hello, world!',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-Hello,\s*world\!
+--EXPECT--
+<render>Hello, world!</render>

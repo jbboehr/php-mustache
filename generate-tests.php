@@ -71,29 +71,14 @@ foreach( $specData as $spec => $data ) {
     $output .= '$test = ' . str_replace('\'lambda\' => true,', '\'lambda\' => function ($text = \'\') { ' . $lambda . ' },', var_export($test, true)) . ';' . MY_EOL;
     $output .= '$mustache = new Mustache();' . MY_EOL;
     if( !empty($test['partials']) && is_array($test['partials']) ) {
-      $output .= 'echo $mustache->render($test["template"], $test["data"], $test["partials"]);' . MY_EOL;
+      $output .= 'echo "<render>", $mustache->render($test["template"], $test["data"], $test["partials"]), "</render>";' . MY_EOL;
     } else {
-      $output .= 'echo $mustache->render($test["template"], $test["data"]);' . MY_EOL;
+      $output .= 'echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";' . MY_EOL;
     }
     // END MAIN
     $output .= '?>' . MY_EOL;
-//    $output .= '--EXPECT--' . MY_EOL;
-//    $output .= $test['expected'];
-    $output .= '--EXPECTREGEX--' . MY_EOL;
-    $tmp = array();
-    foreach( preg_split('/\s+/', $test['expected']) as $chunk ) {
-      $tmp[] = preg_quote($chunk, '/');
-    }
-    $expected = join("\s*", $tmp);
-    // Hack in XFAIL
-    if( ($spec == 'partials' && $test['name'] == 'Standalone Line Endings') ||
-        ($spec == 'partials' && $test['name'] == 'Standalone Without Previous Line') ) {
-      //$output .= MY_EOL;
-      //$output .= '--XFAIL--' . MY_EOL;
-      //$output .= 'This extension does not follow the spec\'s whitespace rules.';
-      $expected = "\s*" . join("\s*", str_split(preg_replace('/\s+/', '', $test['expected']), 1)) . "\s*";
-    }
-    $output .= $expected;
+    $output .= '--EXPECT--' . MY_EOL;
+    $output .= '<render>' . $test['expected'] . '</render>';
     
     $cleanName = strtolower(trim(preg_replace('/[^a-zA-Z0-9]+/', '-', $test['name']), '-'));
     file_put_contents('./tests/mustache-spec-' . $spec . '-' . $cleanName . '.phpt', $output);

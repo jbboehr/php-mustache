@@ -25,7 +25,10 @@ $test = array (
 ',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-\|\s*This\s*Is\s*\|\s*\|\s*A\s*Line\s*
+--EXPECT--
+<render>| This Is
+|
+| A Line
+</render>

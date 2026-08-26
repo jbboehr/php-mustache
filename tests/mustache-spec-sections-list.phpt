@@ -31,7 +31,7 @@ $test = array (
   'expected' => '"123"',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-"123"
+--EXPECT--
+<render>"123"</render>

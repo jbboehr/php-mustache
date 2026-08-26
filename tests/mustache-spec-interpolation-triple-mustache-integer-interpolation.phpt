@@ -17,7 +17,7 @@ $test = array (
   'expected' => '"85 miles an hour!"',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-"85\s*miles\s*an\s*hour\!"
+--EXPECT--
+<render>"85 miles an hour!"</render>

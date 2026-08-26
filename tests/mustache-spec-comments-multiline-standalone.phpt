@@ -23,7 +23,9 @@ End.
 ',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-Begin\.\s*End\.\s*
+--EXPECT--
+<render>Begin.
+End.
+</render>

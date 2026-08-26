@@ -17,7 +17,7 @@ $test = array (
   'expected' => '__FILE__ != __LINE__',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-__FILE__\s*\!\=\s*__LINE__
+--EXPECT--
+<render>__FILE__ != __LINE__</render>

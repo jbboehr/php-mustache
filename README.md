@@ -8,9 +8,8 @@ C++ implementation of [Mustache](http://mustache.github.com/) as a PHP extension
 
 ## Features
 
-All features of Mustache are supported EXCEPT:
-
-* Whitespace rules. All whitespace is kept as it is in the input template.
+Mustache standalone tags follow the specification's whitespace rules, including
+partial indentation.
 
 ## Installation
 

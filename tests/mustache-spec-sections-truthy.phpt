@@ -17,7 +17,7 @@ $test = array (
   'expected' => '"This should be rendered."',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-"This\s*should\s*be\s*rendered\."
+--EXPECT--
+<render>"This should be rendered."</render>

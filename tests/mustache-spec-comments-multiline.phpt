@@ -21,7 +21,8 @@ $test = array (
 ',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-1234567890\s*
+--EXPECT--
+<render>1234567890
+</render>

@@ -16,7 +16,7 @@ $test = array (
   'expected' => '妙法蓮華経',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-妙法蓮華経
+--EXPECT--
+<render>妙法蓮華経</render>

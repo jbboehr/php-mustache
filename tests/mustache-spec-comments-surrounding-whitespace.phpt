@@ -16,7 +16,7 @@ $test = array (
   'expected' => '12345  67890',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-12345\s*67890
+--EXPECT--
+<render>12345  67890</render>

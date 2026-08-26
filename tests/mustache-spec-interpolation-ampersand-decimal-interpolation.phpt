@@ -17,7 +17,7 @@ $test = array (
   'expected' => '"1.21 jiggawatts!"',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-"1\.21\s*jiggawatts\!"
+--EXPECT--
+<render>"1.21 jiggawatts!"</render>

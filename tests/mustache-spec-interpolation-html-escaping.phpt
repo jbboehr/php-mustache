@@ -19,7 +19,8 @@ $test = array (
 ',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-These\s*characters\s*should\s*be\s*HTML\s*escaped\:\s*&amp;\s*&quot;\s*&lt;\s*&gt;\s*
+--EXPECT--
+<render>These characters should be HTML escaped: &amp; &quot; &lt; &gt;
+</render>

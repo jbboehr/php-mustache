@@ -18,7 +18,7 @@ $test = array (
   'expected' => '紅豆生南國 春來發幾枝 願君多采擷 此物最相思',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-紅豆生南國\s*春來發幾枝\s*願君多采擷\s*此物最相思
+--EXPECT--
+<render>紅豆生南國 春來發幾枝 願君多采擷 此物最相思</render>

@@ -21,7 +21,9 @@ $test = array (
 ',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-\s*YES\s*GOOD\s*
+--EXPECT--
+<render> YES
+ GOOD
+</render>

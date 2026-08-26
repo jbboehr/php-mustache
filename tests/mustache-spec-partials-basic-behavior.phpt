@@ -20,7 +20,7 @@ $test = array (
   'expected' => '"from partial"',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"], $test["partials"]);
+echo "<render>", $mustache->render($test["template"], $test["data"], $test["partials"]), "</render>";
 ?>
---EXPECTREGEX--
-"from\s*partial"
+--EXPECT--
+<render>"from partial"</render>

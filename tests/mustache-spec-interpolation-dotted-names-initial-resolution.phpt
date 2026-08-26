@@ -45,7 +45,7 @@ $test = array (
   'expected' => '"Phil" == "Phil"',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-"Phil"\s*\=\=\s*"Phil"
+--EXPECT--
+<render>"Phil" == "Phil"</render>

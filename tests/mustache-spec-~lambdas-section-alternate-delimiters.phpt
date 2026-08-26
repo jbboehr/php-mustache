@@ -18,7 +18,7 @@ $test = array (
   'expected' => '<-{{planet}} => Earth->',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-\<\-\{\{planet\}\}\s*\=\>\s*Earth\-\>
+--EXPECT--
+<render><-{{planet}} => Earth-></render>

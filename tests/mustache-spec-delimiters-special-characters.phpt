@@ -17,7 +17,7 @@ $test = array (
   'expected' => '(It worked!)',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-\(It\s*worked\!\)
+--EXPECT--
+<render>(It worked!)</render>

@@ -17,7 +17,7 @@ $test = array (
   'expected' => '1 == 2 == 3',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-1\s*\=\=\s*2\s*\=\=\s*3
+--EXPECT--
+<render>1 == 2 == 3</render>

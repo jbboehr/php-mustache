@@ -20,7 +20,7 @@ $test = array (
   'expected' => '"Joe" == "Joe"',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-"Joe"\s*\=\=\s*"Joe"
+--EXPECT--
+<render>"Joe" == "Joe"</render>

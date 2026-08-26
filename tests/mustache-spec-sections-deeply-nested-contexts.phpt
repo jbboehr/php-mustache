@@ -64,7 +64,16 @@ $test = array (
 ',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-1\s*121\s*12321\s*1234321\s*123454321\s*1234321\s*12321\s*121\s*1\s*
+--EXPECT--
+<render>1
+121
+12321
+1234321
+123454321
+1234321
+12321
+121
+1
+</render>

@@ -17,7 +17,7 @@ $test = array (
   'expected' => '<&gt;>',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-\<&gt;\>
+--EXPECT--
+<render><&gt;></render>

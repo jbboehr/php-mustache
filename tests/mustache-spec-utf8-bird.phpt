@@ -17,7 +17,7 @@ $test = array (
   'expected' => '鳥は卵の中から抜け出ようと戦う。卵は世界だ。生まれようと欲する物は、一つの世界を破壊しなければならない。鳥は神に向かって飛ぶ。神の名はＡｂｒａｘａｓと言う。',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-鳥は卵の中から抜け出ようと戦う。卵は世界だ。生まれようと欲する物は、一つの世界を破壊しなければならない。鳥は神に向かって飛ぶ。神の名はＡｂｒａｘａｓと言う。
+--EXPECT--
+<render>鳥は卵の中から抜け出ようと戦う。卵は世界だ。生まれようと欲する物は、一つの世界を破壊しなければならない。鳥は神に向かって飛ぶ。神の名はＡｂｒａｘａｓと言う。</render>

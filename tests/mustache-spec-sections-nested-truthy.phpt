@@ -17,7 +17,7 @@ $test = array (
   'expected' => '| A B C D E |',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-\|\s*A\s*B\s*C\s*D\s*E\s*\|
+--EXPECT--
+<render>| A B C D E |</render>

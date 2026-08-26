@@ -24,7 +24,7 @@ $test = array (
   'expected' => '"(1)(2)(3)(4)(5)"',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-"\(1\)\(2\)\(3\)\(4\)\(5\)"
+--EXPECT--
+<render>"(1)(2)(3)(4)(5)"</render>

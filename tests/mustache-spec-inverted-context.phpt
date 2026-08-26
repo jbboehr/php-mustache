@@ -20,7 +20,7 @@ $test = array (
   'expected' => '""',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-""
+--EXPECT--
+<render>""</render>

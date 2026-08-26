@@ -18,7 +18,8 @@ $test = array (
 ',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-Hello\s*from\s*\{Mustache\}\!\s*
+--EXPECT--
+<render>Hello from {Mustache}!
+</render>

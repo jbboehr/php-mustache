@@ -21,7 +21,7 @@ $test = array (
   'expected' => '|[]|',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"], $test["partials"]);
+echo "<render>", $mustache->render($test["template"], $test["data"], $test["partials"]), "</render>";
 ?>
---EXPECTREGEX--
-\|\[\]\|
+--EXPECT--
+<render>|[]|</render>

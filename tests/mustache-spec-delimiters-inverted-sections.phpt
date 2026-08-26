@@ -37,7 +37,14 @@ $test = array (
 ',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-\[\s*I\s*got\s*interpolated\.\s*\|data\|\s*\{\{data\}\}\s*I\s*got\s*interpolated\.\s*\]\s*
+--EXPECT--
+<render>[
+  I got interpolated.
+  |data|
+
+  {{data}}
+  I got interpolated.
+]
+</render>

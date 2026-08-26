@@ -16,7 +16,7 @@ $test = array (
   'expected' => 'I () be seen!',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-I\s*\(\)\s*be\s*seen\!
+--EXPECT--
+<render>I () be seen!</render>

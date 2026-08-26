@@ -19,7 +19,7 @@ $test = array (
   'expected' => '"Not Here" == "Not Here"',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-"Not\s*Here"\s*\=\=\s*"Not\s*Here"
+--EXPECT--
+<render>"Not Here" == "Not Here"</render>

@@ -1,2 +1,2 @@
 /.github/*                      linguist-documentation=true
-/tests/mustache-spec*.phpt      linguist-generated=true
+/tests/mustache-spec*.phpt      linguist-generated=true -whitespace

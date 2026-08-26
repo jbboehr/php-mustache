@@ -19,7 +19,7 @@ Hello, (|&lambda|)!',
   'expected' => 'Hello, (|planet| => world)!',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-Hello,\s*\(\|planet\|\s*\=\>\s*world\)\!
+--EXPECT--
+<render>Hello, (|planet| => world)!</render>

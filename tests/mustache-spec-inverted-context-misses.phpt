@@ -16,7 +16,7 @@ $test = array (
   'expected' => '[Cannot find key \'missing\'!]',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-\[Cannot\s*find\s*key\s*'missing'\!\]
+--EXPECT--
+<render>[Cannot find key 'missing'!]</render>

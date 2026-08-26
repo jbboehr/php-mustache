@@ -28,7 +28,10 @@ $test = array (
 ',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"]);
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
 ?>
---EXPECTREGEX--
-\*\s*first\s*\*\s*second\s*\*\s*third\s*
+--EXPECT--
+<render>* first
+* second
+* third
+</render>

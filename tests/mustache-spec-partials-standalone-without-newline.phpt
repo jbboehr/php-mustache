@@ -24,7 +24,9 @@ $test = array (
   >',
 );
 $mustache = new Mustache();
-echo $mustache->render($test["template"], $test["data"], $test["partials"]);
+echo "<render>", $mustache->render($test["template"], $test["data"], $test["partials"]), "</render>";
 ?>
---EXPECTREGEX--
-\>\s*\>\s*\>
+--EXPECT--
+<render>>
+  >
+  ></render>
