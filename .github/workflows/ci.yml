@@ -115,6 +115,19 @@ jobs:
                   ts: nts
                   args: --enable-mustache --with-libmustache=${{ steps.libmustache.outputs.prefix }}
 
+    pie:
+        runs-on: ubuntu-latest
+        permissions:
+            attestations: read
+            contents: read
+        steps:
+            - uses: actions/checkout@v7
+
+            - name: Install and load with PIE
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: bash ./.github/scripts/pie.sh
+
     nix-matrix:
         runs-on: ubuntu-latest
         outputs:
