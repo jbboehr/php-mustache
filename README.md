@@ -6,17 +6,12 @@
 
 C++ implementation of [Mustache](http://mustache.github.com/) as a PHP extension.
 
-## Features
-
-Mustache standalone tags follow the specification's whitespace rules, including
-partial indentation.
-
 ## Installation
 
 ### PIE
 
-Install libmustache 0.6.0 or newer, then install the extension with
-[PIE](https://github.com/php/pie):
+[PIE](https://github.com/php/pie) requires PHP 8.1 or newer to run, but it can
+install the extension for PHP 8.0. Install libmustache 0.6.0 or newer, then run:
 
 ```sh
 pie install jbboehr/php-mustache
@@ -28,71 +23,63 @@ If libmustache is installed under a non-standard prefix, pass it explicitly:
 pie install jbboehr/php-mustache --with-libmustache=/path/to/prefix
 ```
 
-### Linux/OSX
+### Source
 
-#### Source
+Requirements:
 
-Prerequisite packages are:
+* PHP 8.0 or newer, including the development headers and tools
+* A C++17 compiler
+* GNU Make, Automake, Autoconf, and Libtool
+* `pkg-config`
+* [`libmustache`](https://github.com/jbboehr/libmustache) 0.6.0 or newer
 
-* PHP development headers and tools
-* `gcc` >= 4.4 | `clang` >= 3.x | `vc` >= 11
-* GNU `make` >= 3.81
-* `automake`
-* `autoconf`
-* [`libmustache`](https://github.com/jbboehr/libmustache)
-
-``` sh
-git clone git://github.com/jbboehr/php-mustache.git --recursive
+```sh
+git clone https://github.com/jbboehr/php-mustache.git
 cd php-mustache
 phpize
 ./configure --enable-mustache
 make
+make test
 sudo make install
 ```
 
-Add the extension to your *php.ini*:
+If libmustache is installed under a non-standard prefix, pass
+`--with-libmustache=/path/to/prefix` to `configure`.
+
+Add the extension to `php.ini`:
 
 ```ini
-echo extension=mustache.so | tee -a /path/to/your/php.ini
+extension=mustache.so
 ```
 
-### Fedora/RHEL/CentOS
+### Nix
 
-RPM packages of the extension are available in [Remi's repository](https://rpms.remirepo.net/).
+Use the flake package to build a PHP environment with the extension enabled:
 
-**Fedora** (change 24 to match your Fedora version)
+```nix
+{
+  inputs.php-mustache.url = "github:jbboehr/php-mustache";
 
-``` sh
-dnf install https://rpms.remirepo.net/fedora/remi-release-24.rpm
-dnf install --enablerepo=remi php-pecl-mustache
+  outputs = {php-mustache, ...}: let
+    system = "x86_64-linux";
+    mustache = php-mustache.packages.${system}.default;
+  in {
+    packages.${system}.default = mustache.php.buildEnv {
+      extensions = ({enabled, ...}: enabled ++ [mustache]);
+    };
+  };
+}
 ```
 
-**RHEL/CentOS** (for default PHP in base repository)
-
-``` sh
-yum install https://rpms.remirepo.net/enterprise/remi-release-7.rpm
-yum install php-pecl-mustache
-```
-
-### Nix/NixOS
-
-``` sh
-nix-env -i -f https://github.com/jbboehr/php-mustache/archive/master.tar.gz
-```
+The default package uses PHP 8.3. Replace `default` with a matrix package such
+as `php85-gcc` to select another PHP version.
 
 ### Windows
 
-See [Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild). You may need to add [msinttypes](https://code.google.com/p/msinttypes/) ([export](https://github.com/jbboehr/msinttypes/)) to your include directory.
-
-## Development
-
-Run the PHP 8.3 AddressSanitizer and UndefinedBehaviorSanitizer test suite with:
-
-```sh
-nix build -L .#checks.x86_64-linux.php83-gcc-sanitized
-```
-
-The raw `--enable-mustache-sanitizers` configure option instruments the extension but requires a PHP runtime built with compatible sanitizer support. The Nix check supplies compatible PHP and libmustache builds.
+Windows source builds require the PHP SDK, Visual Studio 2022, CMake, and a
+static libmustache build. The [Windows CI script](.github/scripts/windows.ps1)
+contains the setup currently used to build the extension. Pre-built PIE DLLs
+are not currently published, so PIE installation is not available on Windows.
 
 ## Usage
 
@@ -123,18 +110,10 @@ Produces:
 ```text
 Hello John
 You have just won 10000 dollars!
-
 Well, 6000 dollars, after taxes.
-
 ```
 
 See also: [template loader example](examples.md)
-
-## Credits
-
-* [John Boehr](https://github.com/jbboehr)
-* [Adam Baratz](https://github.com/adambaratz)
-* [All Contributors](../../contributors)
 
 ## License
 

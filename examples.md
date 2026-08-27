@@ -1,74 +1,94 @@
-
 # Examples
 
-You can adapt this Mustache_Template_Loader class or use it as an
-example of how to interface with whatever framework you use. The MustacheAST
-type for example can serialized/unserialized to APCU or other cache.
+## Loading templates from a directory
+
+This loader treats every `.mustache` file under a directory as a template or
+partial. Nested paths become partial names such as `shared/header`.
 
 ```php
-class Mustache_Template_Loader {
-  public $partials = [];
-  public $partial_pathname_resolver = false;
-  public $mustache_instance = false;
+final class MustacheTemplateLoader
+{
+    private Mustache $mustache;
+    private string $directory;
 
-  /**
-   * Loads and renders a template from a path.
-   *
-   * @param string   $tmplpath The input template filesystem path.
-   * @param mixed    $data     The data argument to Mustache::render.
-   * @param callable $callback Resolves a partial name to its filesystem path.
-   *
-   * @return false|string The string output, or false on failure
-   */
-  public static function load_and_render($tmplpath, $data, $callback) {
-    $loader = new Mustache_Template_Loader();
-    $loader->mustache_instance = new \Mustache();
-    $loader->partial_pathname_resolver = $callback;
-    $template_string = file_get_contents($tmplpath);
-    $template_ast = $loader->mustache_instance->parse($template_string);
-    $template_ast_array = $template_ast->toArray();
-    $loader->resolve_partials($template_ast_array);
-    return $loader->mustache_instance->render($template_ast, $data, $loader->partials);
-  }
-
-  public function resolve_partials($ast_array) {
-    if (($ast_array['type'] ?? null) === 512) {
-      // The libmustache src/node.hpp has enum Type TypePartial = 512
-      $partial_name = $ast_array['data'];
-      $partial_ast = $this->partials[$partial_name] ?? null;
-      if ($partial_ast !== null) {
-        // this check prevents the performing of extra work
-        // and by corollary protects against indefinite recursion.
-        return;
-      }
-      $this->partials[$partial_name] = "";
-      $partial_pathname = ($this->partial_pathname_resolver)($partial_name);
-      $partial_string = file_get_contents($partial_pathname);
-      $partial_ast = $this->mustache_instance->parse($partial_string);
-      $this->partials[$partial_name] = $partial_ast;
-      $this->resolve_partials($partial_ast->toArray());
-    } else {
-      // For simplicity the AST node types are ignored here.
-      foreach ($ast_array as $ast_array_value) {
-        if (is_array($ast_array_value)) {
-          $this->resolve_partials($ast_array_value);
+    public function __construct(string $directory, ?Mustache $mustache = null)
+    {
+        $resolvedDirectory = realpath($directory);
+        if ($resolvedDirectory === false || !is_dir($resolvedDirectory)) {
+            throw new InvalidArgumentException('Template directory does not exist: ' . $directory);
         }
-      }
+
+        $this->directory = $resolvedDirectory;
+        $this->mustache = $mustache ?? new Mustache();
     }
-  }
+
+    public function render(string $template, mixed $data): string|false
+    {
+        $templates = $this->loadTemplates();
+        if (!array_key_exists($template, $templates)) {
+            throw new InvalidArgumentException('Template does not exist: ' . $template);
+        }
+
+        return $this->mustache->render($templates[$template], $data, $templates);
+    }
+
+    /** @return array<string, string> */
+    private function loadTemplates(): array
+    {
+        $templates = [];
+        $directoryPrefix = rtrim($this->directory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($this->directory, FilesystemIterator::SKIP_DOTS),
+        );
+
+        foreach ($files as $file) {
+            if (!$file->isFile() || $file->getExtension() !== 'mustache') {
+                continue;
+            }
+
+            $relativePath = substr($file->getPathname(), strlen($directoryPrefix));
+            $template = substr($relativePath, 0, -strlen('.mustache'));
+            $template = str_replace(DIRECTORY_SEPARATOR, '/', $template);
+            $source = file_get_contents($file->getPathname());
+            if ($source === false) {
+                throw new RuntimeException('Could not read template: ' . $file->getPathname());
+            }
+
+            $templates[$template] = $source;
+        }
+
+        return $templates;
+    }
 }
 ```
 
-An example use of this class:
+Given `/usr/local/lib/templates/topview.mustache`:
+
+```mustache
+Hello {{name}}
+{{> shared/footer}}
+```
+
+And `/usr/local/lib/templates/shared/footer.mustache`:
+
+```mustache
+You have just won {{value}} dollars!
+```
+
+Render `topview` with:
 
 ```php
-function template_pathname($partial_name) {
-  return '/usr/local/lib/templates/' . $partial_name . '.mustache';
-}
+$loader = new MustacheTemplateLoader('/usr/local/lib/templates');
 
-echo Mustache_Template_Loader::load_and_render(
-       template_pathname('topview'),
-       $data,
-       'template_pathname'
-     );
+echo $loader->render('topview', [
+    'name' => 'John',
+    'value' => 10000,
+]);
+```
+
+The result is:
+
+```text
+Hello John
+You have just won 10000 dollars!
 ```

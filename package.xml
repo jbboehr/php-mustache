@@ -26,6 +26,7 @@
  <contents>
   <dir name="/">
    <file name="CHANGELOG.md" role="doc" />
+   <file name="examples.md" role="doc" />
    <file name="LICENSE.md" role="doc" />
    <file name="README.md" role="doc" />
    <file name="config.m4" role="src" />
