@@ -4,10 +4,6 @@
 
 #include "mustache_lambda.hpp"
 
-#ifdef __cplusplus
-   extern "C" {
-#endif
-
 class ClassMethodLambda : public Lambda {
   private:
     zval object;
@@ -29,9 +25,5 @@ class ClassMethodLambda : public Lambda {
     ClassMethodLambda& operator=(ClassMethodLambda&&) = delete;
     ~ClassMethodLambda();
 };
-
-#ifdef __cplusplus
-  } // extern "C"
-#endif
 
 #endif /* PHP_MUSTACHE_CLASS_METHOD_LAMBDA_HPP */

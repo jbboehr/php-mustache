@@ -4,10 +4,6 @@
 
 #include "mustache/mustache.hpp"
 
-#ifdef __cplusplus
-   extern "C" {
-#endif
-
 struct php_obj_Mustache {
     mustache::Mustache * mustache;
     zend_object std;
@@ -32,9 +28,5 @@ PHP_METHOD(Mustache, parse);
 PHP_METHOD(Mustache, render);
 PHP_METHOD(Mustache, tokenize);
 PHP_METHOD(Mustache, debugDataStructure);
-
-#ifdef __cplusplus
-  } // extern "C" 
-#endif
 
 #endif /* PHP_MUSTACHE_MUSTACHE_HPP */

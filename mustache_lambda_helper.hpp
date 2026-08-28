@@ -4,10 +4,6 @@
 
 #include <mustache/lambda.hpp>
 
-#ifdef __cplusplus
-   extern "C" {
-#endif
-
 struct php_mustache_lambda_helper_state {
     mustache::LambdaRenderContext context;
 };
@@ -25,9 +21,5 @@ extern PHP_MINIT_FUNCTION(mustache_lambda_helper);
 
 extern PHP_METHOD(MustacheLambdaHelper, __construct);
 extern PHP_METHOD(MustacheLambdaHelper, render);
-
-#ifdef __cplusplus
-  } // extern "C"
-#endif
 
 #endif /* PHP_MUSTACHE_LAMBDA_HELPER_HPP */

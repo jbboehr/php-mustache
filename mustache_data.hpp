@@ -4,10 +4,6 @@
 
 #include <mustache/mustache.hpp>
 
-#ifdef __cplusplus
-   extern "C" {
-#endif
-
 struct php_obj_MustacheData {
     mustache::Data * data;
     zend_object std;
@@ -24,9 +20,5 @@ void mustache_data_to_zval(const mustache::Data& node, zval * current);
 
 PHP_METHOD(MustacheData, __construct);
 PHP_METHOD(MustacheData, toValue);
-
-#ifdef __cplusplus
-  } // extern "C" 
-#endif
 
 #endif /* PHP_MUSTACHE_DATA_HPP */

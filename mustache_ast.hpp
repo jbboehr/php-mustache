@@ -6,10 +6,6 @@
 #include <memory>
 #include <string>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 struct php_mustache_ast_state {
     std::unique_ptr<mustache::Node> node;
 };
@@ -34,9 +30,5 @@ PHP_METHOD(MustacheAST, __sleep);
 PHP_METHOD(MustacheAST, toArray);
 PHP_METHOD(MustacheAST, __toString);
 PHP_METHOD(MustacheAST, __wakeup);
-
-#ifdef __cplusplus
-} // extern "C" 
-#endif
 
 #endif /* PHP_MUSTACHE_AST_HPP */
