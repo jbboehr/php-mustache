@@ -566,7 +566,7 @@ PHP_METHOD(Mustache, setEscapeByDefault)
 {
   try {
     // Custom parameters
-    long flag = 0;
+    zend_long flag = 0;
 
     // Check parameters
     zval * _this_zval = NULL;

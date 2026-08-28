@@ -119,6 +119,7 @@
    <file name="tests/Mustache__rejects-invalid-templates-and-partials.phpt" role="test" />
    <file name="tests/Mustache__reports-ini-defaults.phpt" role="test" />
    <file name="tests/Mustache__reports-parser-errors.phpt" role="test" />
+   <file name="tests/Mustache__setEscapeByDefault-large-integer.phpt" role="test" />
    <file name="tests/Mustache__setEscapeByDefault.phpt" role="test" />
    <file name="tests/Mustache__setStartSequence.phpt" role="test" />
    <file name="tests/Mustache__setStopSequence.phpt" role="test" />
