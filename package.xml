@@ -104,6 +104,7 @@
    <file name="tests/Mustache__render-lambda-invokable-section.phpt" role="test" />
    <file name="tests/Mustache__render-lambda-invokable-variable.phpt" role="test" />
    <file name="tests/Mustache__render-lambda-object-method-invisible.phpt" role="test" />
+   <file name="tests/Mustache__render-lambda-object-method-mixed-case.phpt" role="test" />
    <file name="tests/Mustache__render-lambda-object-method.phpt" role="test" />
    <file name="tests/Mustache__render-lambda-parameter-arities.phpt" role="test" />
    <file name="tests/Mustache__render-lambda-return-values.phpt" role="test" />

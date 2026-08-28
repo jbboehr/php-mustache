@@ -16,13 +16,12 @@ ClassMethodLambda::~ClassMethodLambda()
 int ClassMethodLambda::getUserFunctionParamCount()
 {
   zend_class_entry * ce = Z_OBJCE(object);
-  zval * zv = NULL;
   zend_function * function_entry = NULL;
 
-  if( ce != NULL && &ce->function_table != NULL ) {
-    zv = zend_hash_find(&ce->function_table, Z_STR(function_name));
-    if( zv != NULL ) {
-      function_entry = (zend_function *) Z_PTR_P(zv);
+  if( ce != NULL ) {
+    function_entry = (zend_function *) zend_hash_find_ptr_lc(
+        &ce->function_table, Z_STR(function_name));
+    if( function_entry != NULL ) {
       return function_entry->common.num_args;
     }
   }
