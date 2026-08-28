@@ -21,6 +21,7 @@ concurrency:
 jobs:
     linux:
         runs-on: ubuntu-latest
+        timeout-minutes: 20
         strategy:
             fail-fast: false
             matrix:
@@ -49,6 +50,7 @@ jobs:
 
     docker:
         runs-on: ubuntu-latest
+        timeout-minutes: 20
         strategy:
             fail-fast: false
             matrix:
@@ -71,6 +73,7 @@ jobs:
 
     docker-fedora:
         runs-on: ubuntu-latest
+        timeout-minutes: 20
         steps:
             - uses: actions/checkout@v7
             - name: I am tired of writing this shit in YAML and learning a new DSL for every CI service so I am putting everything in a FSCKING BASH SCRIPT
@@ -81,6 +84,7 @@ jobs:
 
     osx:
         runs-on: macos-latest
+        timeout-minutes: 20
         strategy:
             fail-fast: false
             matrix:
@@ -100,6 +104,7 @@ jobs:
     windows:
         name: "windows (PHP ${{ matrix.PHP.version }}, ${{ matrix.PHP_THREAD_SAFETY }}, x64)"
         runs-on: windows-2022
+        timeout-minutes: 20
         strategy:
             fail-fast: false
             matrix:
@@ -129,6 +134,7 @@ jobs:
 
     pie:
         runs-on: ubuntu-latest
+        timeout-minutes: 20
         permissions:
             attestations: read
             contents: read
@@ -142,6 +148,7 @@ jobs:
 
     nix-matrix:
         runs-on: ubuntu-latest
+        timeout-minutes: 10
         outputs:
             matrix: ${{ steps.set-matrix.outputs.matrix }}
         steps:
@@ -157,6 +164,7 @@ jobs:
     nix:
         name: "nix (${{ matrix.name }})"
         runs-on: ${{ matrix.os }}
+        timeout-minutes: 60
         needs: nix-matrix
         strategy:
             fail-fast: false
@@ -200,6 +208,7 @@ jobs:
             - linux
             - nix
         runs-on: ubuntu-latest
+        timeout-minutes: 10
         steps:
             - name: Finish Coveralls build
               uses: coverallsapp/github-action@v2
