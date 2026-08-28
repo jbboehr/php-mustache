@@ -23,8 +23,8 @@ ZEND_DECLARE_MODULE_GLOBALS(mustache)
 /* {{{ php.ini directive registration */
 PHP_INI_BEGIN()
   STD_PHP_INI_BOOLEAN("mustache.default_escape", "1", PHP_INI_ALL, OnUpdateBool, default_escape_by_default, zend_mustache_globals, mustache_globals)
-  STD_PHP_INI_ENTRY("mustache.default_start", "{{", PHP_INI_ALL, OnUpdateString, default_start_sequence, zend_mustache_globals, mustache_globals)
-  STD_PHP_INI_ENTRY("mustache.default_stop", "}}", PHP_INI_ALL, OnUpdateString, default_stop_sequence, zend_mustache_globals, mustache_globals)
+  STD_PHP_INI_ENTRY("mustache.default_start", "{{", PHP_INI_ALL, OnUpdateStringUnempty, default_start_sequence, zend_mustache_globals, mustache_globals)
+  STD_PHP_INI_ENTRY("mustache.default_stop", "}}", PHP_INI_ALL, OnUpdateStringUnempty, default_stop_sequence, zend_mustache_globals, mustache_globals)
 PHP_INI_END()
 /* }}} */
 
