@@ -1,264 +1,203 @@
 <?php
 
+/**
+ * Renders and compiles Mustache templates.
+ */
 class Mustache
 {
-  /**
-   * Constructor
-   */
-  public function __construct() {}
-  
-  /**
-   * Gets whether to escape HTML by default. Defaults to true
-   * 
-   * @return boolean Whether to escapt HTML by default 
-   */
-  public function getEscapeByDefault() {}
-  
-  /**
-   * Gets the start delimiter. Defaults to "{{"
-   * 
-   * @return string The start delimiter
-   */
-  public function getStartSequence() {}
-  
-  /**
-   * Gets the stop delimiter. Defaults to "}}"
-   * 
-   * @return string The stop delimiter
-   */
-  public function getStopSequence() {}
-  
-  /**
-   * Sets whether to escape HTML by default
-   * 
-   * @param boolean $flag 
-   * @return boolean true on success, false on failure
-   */
-  public function setEscapeByDefault($flag) {}
-  
-  /**
-   * Sets the start delimiter.
-   * 
-   * @param type $start 
-   * @return boolean true on success, false on failure
-   */
-  public function setStartSequence($start) {}
-  
-  /**
-   * Sets the stop delimiter.
-   * 
-   * @param string $stop 
-   * @return boolean true on success, false on failure
-   */
-  public function setStopSequence($stop) {}
-  
-  /**
-   * Tokenizes and parses a template and returns a class representing it.
-   * 
-   * @param mixed $tmpl The input template. May be a string or an instance 
-   *                    of MustacheTemplate
-   * @return MustacheAST The compiled template
-   */
-  public function parse($tmpl) {}
-  
-  /**
-   * Renders a template
-   * 
-   * @param mixed $tmpl The input template. May be a string, or an instance of
-   *                    MustacheTemplate or MustacheAST
-   * @param mixed $data The input data. May be any array, scalar, or object, 
-   *                    or an instance of MustacheData
-   * @param mixed $partials (Optional) The template partials. Must be an array
-   *                        with each value either a string, or an instance of
-   *                        MustacheTemplate or MustacheAST
-   * @return false|string The string output, or false on failure
-   */
-  public function render($tmpl, $data, $partials = null) {}
-  
-  /**
-   * Compiles a template and returns an array representing the internal 
-   * structure.
-   * 
-   * @param string $tmpl The input template
-   * @return array The compiled template structure
-   */
-  public function tokenize($tmpl) {}
-  
-  /**
-   * Converts an array into the internal data structure and back. Used for
-   * debugging.
-   * 
-   * @param array $data The input data
-   * @return array The converted data structure
-   */
-  public function debugDataStructure(array $data) {}
+    public function __construct()
+    {
+    }
+
+    /**
+     * Returns whether interpolation is escaped by default.
+     */
+    public function getEscapeByDefault(): bool
+    {
+    }
+
+    /**
+     * Returns the opening delimiter. The default is "{{".
+     */
+    public function getStartSequence(): string
+    {
+    }
+
+    /**
+     * Returns the closing delimiter. The default is "}}".
+     */
+    public function getStopSequence(): string
+    {
+    }
+
+    /**
+     * Sets whether interpolation is escaped by default.
+     */
+    public function setEscapeByDefault(bool|int $escapeByDefault): bool
+    {
+    }
+
+    /**
+     * Sets the opening delimiter.
+     */
+    public function setStartSequence(string $startSequence): bool
+    {
+    }
+
+    /**
+     * Sets the closing delimiter.
+     */
+    public function setStopSequence(string $stopSequence): bool
+    {
+    }
+
+    /**
+     * Parses a template into an AST.
+     *
+     * Passing an existing MustacheTemplate or MustacheAST validates it and
+     * returns true. Invalid template values return false.
+     */
+    public function parse(string|MustacheTemplate|MustacheAST $tmpl): MustacheAST|bool
+    {
+    }
+
+    /**
+     * Renders a template with the supplied data and partials.
+     *
+     * @param array<string, string|MustacheTemplate|MustacheAST>|null $partials
+     */
+    public function render(
+        string|MustacheTemplate|MustacheAST $str,
+        mixed $vars,
+        ?array $partials = null,
+    ): string|false {
+    }
+
+    /**
+     * Tokenizes a source template into its internal tree representation.
+     *
+     * @return array<string, mixed>
+     */
+    public function tokenize(string $tmpl): array
+    {
+    }
+
+    /**
+     * Converts data to libmustache's internal representation and back.
+     */
+    public function debugDataStructure(mixed $vars): mixed
+    {
+    }
 }
 
 /**
- * Represents the parsed AST
+ * Owns a parsed Mustache template tree.
  */
 class MustacheAST
 {
-  /**
-   * Constructor.
-   * 
-   * @param string $binaryString The serialized AST string
-   */
-  public function __construct($binaryString = null) {}
-  
-  /**
-   * Stores the AST in a string property
-   * 
-   * @return array
-   */
-  public function __sleep() {}
-  
-  /**
-   * Compiles a template and returns an array representing the internal 
-   * structure. Alias of Mustache::tokenize()
-   * 
-   * @return array The compiled template structure
-   */
-  public function toArray() {}
-  
-  /**
-   * Gets the serialized binary AST
-   * 
-   * @return string The template string 
-   */
-  public function __toString() {}
-  
-  /**
-   * Restores the string properies to the internal C structure
-   * 
-   * @return void
-   */
-  public function __wakeup() {}
+    /** @var string|null Serialized AST storage used by PHP serialization. */
+    protected $binaryString = null;
+
+    /**
+     * Constructs an AST from libmustache's binary representation.
+     */
+    public function __construct(?string $vars = null)
+    {
+    }
+
+    /**
+     * Stores the binary AST for PHP serialization.
+     *
+     * @return list<string>
+     */
+    public function __sleep(): array
+    {
+    }
+
+    /**
+     * Returns the parsed template tree.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+    }
+
+    /**
+     * Returns libmustache's binary AST representation.
+     */
+    public function __toString(): string
+    {
+    }
+
+    /**
+     * Restores the native AST after PHP unserialization.
+     */
+    public function __wakeup(): void
+    {
+    }
 }
 
-class MustacheCode
-{
-  /**
-   * Constructor
-   * 
-   * @param string $codeString
-   */
-  public function __construct($codeString) {}
-  
-  /**
-   * Returns a readable version of the bytecode
-   * 
-   * @return string
-   */
-  public function toReadableString() {}
-  
-  /**
-   * Stores the bytecode in a string property for serialization
-   * 
-   * @return array
-   */
-  public function __sleep() {}
-  
-  /**
-   * Converts the bytecode to a string
-   */
-  public function __toString() {}
-  
-  /**
-   * Restores the string properies to the internal C structure
-   * 
-   * @return void
-   */
-  public function __wakeup() {}
-}
-
+/**
+ * Wraps a source template.
+ */
 class MustacheTemplate
 {
-  /**
-   * Constructor.
-   * 
-   * @param string $tmpl The input template
-   */
-  public function __construct($tmpl = null) {}
-  
-  /**
-   * Stores the C uncompiled and compiled templates in string properties
-   * 
-   * @return array
-   */
-  public function __sleep() {}
-  
-  /**
-   * Sets the internal compiled template to a binary string representing the 
-   * internal structure.
-   * 
-   * @return void
-   */
-  public function setFromBinary($binaryString) {}
-  
-  /**
-   * Compiles a template and returns an array representing the internal 
-   * structure. Alias of Mustache::tokenize()
-   * 
-   * @return array The compiled template structure
-   */
-  public function toArray() {}
-  
-  /**
-   * Compiles a template and returns a binary string representing the internal 
-   * structure.
-   * 
-   * @return string The serialized compiled template structure
-   */
-  public function toBinary() {}
-  
-  /**
-   * Gets the string version of the template
-   * 
-   * @return string The template string 
-   */
-  public function __toString() {}
-  
-  /**
-   * Restores the string properies to the internal C structure
-   * 
-   * @return void
-   */
-  public function __wakeup() {}
+    /** @var string|null */
+    protected $template = null;
+
+    public function __construct(?string $vars = null)
+    {
+    }
+
+    public function __toString(): string
+    {
+    }
 }
 
+/**
+ * Owns data converted to libmustache's native representation.
+ */
 class MustacheData
 {
-  /**
-   * Constructor
-   * 
-   * @param mixed $data The input data
-   */
-  public function __construct($data) {}
-  
-  /**
-   * Gets the internal data
-   * 
-   * @return mixed The internal data 
-   */
-  public function toValue() {}
+    public function __construct(mixed $tmpl)
+    {
+    }
+
+    /**
+     * Converts the native data back to a PHP value.
+     */
+    public function toValue(): mixed
+    {
+    }
 }
 
-class MustacheException extends Exception {}
+/**
+ * Renders source text from inside a section lambda.
+ *
+ * Instances are created by the extension and are valid only for the duration
+ * of the lambda callback.
+ */
+class MustacheLambdaHelper
+{
+    private function __construct()
+    {
+    }
+
+    public function render(string $tmpl): string
+    {
+    }
+}
+
+class MustacheException extends Exception
+{
+}
 
 class MustacheParserException extends MustacheException
 {
-  /**
-   * The line number of the parse error
-   * 
-   * @var integer
-   */
-  public $templateLineNo = -1;
-  
-  /**
-   * The character number of the parse error
-   * 
-   * @var integer
-   */
-  public $templateCharNo = -1;
+    /** @var int One-based template line, or -1 when unavailable. */
+    public $templateLineNo = -1;
+
+    /** @var int One-based template character, or -1 when unavailable. */
+    public $templateCharNo = -1;
 }
