@@ -1,3 +1,8 @@
+param(
+    [ValidateSet('v142', 'v143')]
+    [string] $Toolset = 'v143'
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
@@ -31,7 +36,7 @@ try {
     Pop-Location
 }
 
-& cmake -S $source -B $build -G 'Visual Studio 17 2022' -A x64 `
+& cmake -S $source -B $build -G 'Visual Studio 17 2022' -A x64 -T $Toolset `
     -DMUSTACHE_BUILD_CLI=OFF `
     -DMUSTACHE_ENABLE_TESTS=OFF `
     -DMUSTACHE_ENABLE_JSON=OFF `

@@ -98,21 +98,33 @@ jobs:
               run: bash ./.github/scripts/osx.sh
 
     windows:
+        name: "windows (PHP ${{ matrix.PHP.version }}, ${{ matrix.PHP_THREAD_SAFETY }}, x64)"
         runs-on: windows-2022
+        strategy:
+            fail-fast: false
+            matrix:
+                PHP:
+                    - version: "8.1"
+                      toolset: v142
+                    - version: "8.5"
+                      toolset: v143
+                PHP_THREAD_SAFETY:
+                    - nts
+                    - ts
         steps:
             - uses: actions/checkout@v7
 
             - id: libmustache
               name: Build libmustache
               shell: pwsh
-              run: ./.github/scripts/windows.ps1
+              run: ./.github/scripts/windows.ps1 -Toolset '${{ matrix.PHP.toolset }}'
 
             - name: Build and test extension
               uses: php/php-windows-builder/extension@36b2fc0672ba93bfa75bdd393edf2ef652961b4a
               with:
-                  php-version: "8.4"
+                  php-version: ${{ matrix.PHP.version }}
                   arch: x64
-                  ts: nts
+                  ts: ${{ matrix.PHP_THREAD_SAFETY }}
                   args: --enable-mustache --with-libmustache=${{ steps.libmustache.outputs.prefix }}
 
     pie:
