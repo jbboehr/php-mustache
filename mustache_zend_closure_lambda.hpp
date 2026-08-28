@@ -16,6 +16,7 @@ class ZendClosureLambda : public Lambda {
     ZendClosureLambda(zval * closure_value) {
       ZVAL_COPY(&closure, closure_value);
     };
+    void addGcValues(zend_get_gc_buffer * gc_buffer) override;
     ZendClosureLambda(const ZendClosureLambda&) = delete;
     ZendClosureLambda& operator=(const ZendClosureLambda&) = delete;
     ZendClosureLambda(ZendClosureLambda&&) = delete;

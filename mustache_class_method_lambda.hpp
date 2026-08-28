@@ -22,6 +22,7 @@ class ClassMethodLambda : public Lambda {
       ZVAL_COPY(&object, object_value);
       ZVAL_STRINGL(&function_name, function_name_string, function_name_length);
     };
+    void addGcValues(zend_get_gc_buffer * gc_buffer) override;
     ClassMethodLambda(const ClassMethodLambda&) = delete;
     ClassMethodLambda& operator=(const ClassMethodLambda&) = delete;
     ClassMethodLambda(ClassMethodLambda&&) = delete;

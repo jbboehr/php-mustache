@@ -16,6 +16,11 @@ ZendClosureLambda::~ZendClosureLambda()
   zval_ptr_dtor(&closure);
 }
 
+void ZendClosureLambda::addGcValues(zend_get_gc_buffer * gc_buffer)
+{
+  zend_get_gc_buffer_add_zval(gc_buffer, &closure);
+}
+
 int ZendClosureLambda::getUserFunctionParamCount()
 {
 #if PHP_VERSION_ID < 80000

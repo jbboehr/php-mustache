@@ -8,6 +8,7 @@
 #include "php_mustache.h"
 #include "mustache_private.hpp"
 #include <Zend/zend_closures.h>
+#include <Zend/zend_gc.h>
 #include "mustache_class_method_lambda.hpp"
 #include "mustache_exceptions.hpp"
 #include "mustache_lambda.hpp"
@@ -23,6 +24,12 @@
 zend_class_entry * MustacheData_ce_ptr;
 static zend_object_handlers MustacheData_obj_handlers;
 /* }}} */
+
+namespace {
+
+void addGcValues(const mustache::Data& data, zend_get_gc_buffer * gc_buffer);
+
+}
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(MustacheData____construct_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
@@ -50,6 +57,21 @@ static inline struct php_obj_MustacheData * php_mustache_data_fetch_object(zend_
 struct php_obj_MustacheData * php_mustache_data_object_fetch_object(zval * zv)
 {
   return php_mustache_data_fetch_object(Z_OBJ_P(zv));
+}
+/* }}} */
+
+/* {{{ MustacheData_obj_get_gc */
+static HashTable * MustacheData_obj_get_gc(zend_object * object, zval ** table, int * n)
+{
+  struct php_obj_MustacheData * payload = php_mustache_data_fetch_object(object);
+  zend_get_gc_buffer * gc_buffer = zend_get_gc_buffer_create();
+
+  if( payload->data != NULL ) {
+    addGcValues(*payload->data, gc_buffer);
+  }
+  zend_get_gc_buffer_use(gc_buffer, table, n);
+
+  return zend_std_get_properties(object);
 }
 /* }}} */
 
@@ -99,6 +121,7 @@ PHP_MINIT_FUNCTION(mustache_data)
   memcpy(&MustacheData_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
   MustacheData_obj_handlers.offset = XtOffsetOf(struct php_obj_MustacheData, std);
   MustacheData_obj_handlers.free_obj = MustacheData_obj_free;
+  MustacheData_obj_handlers.get_gc = MustacheData_obj_get_gc;
   MustacheData_obj_handlers.clone_obj = NULL;
 
   return SUCCESS;
@@ -106,6 +129,36 @@ PHP_MINIT_FUNCTION(mustache_data)
 /* }}} */
 
 namespace {
+
+void addGcValues(const mustache::Data& data, zend_get_gc_buffer * gc_buffer)
+{
+  switch( data.type() ) {
+    case mustache::Data::TypeList:
+      for( const mustache::Data& value : data.listItems() ) {
+        addGcValues(value, gc_buffer);
+      }
+      break;
+    case mustache::Data::TypeMap:
+      for( const auto& value : data.objectItems() ) {
+        addGcValues(value.second, gc_buffer);
+      }
+      break;
+    case mustache::Data::TypeArray:
+      for( const mustache::Data& value : data.arrayItems() ) {
+        addGcValues(value, gc_buffer);
+      }
+      break;
+    case mustache::Data::TypeLambda: {
+      Lambda * lambda = dynamic_cast<Lambda *>(data.lambdaValue());
+      if( lambda != NULL ) {
+        lambda->addGcValues(gc_buffer);
+      }
+      break;
+    }
+    default:
+      break;
+  }
+}
 
 struct DataConversionLimits {
     size_t maxNestingDepth = 32;

@@ -13,6 +13,11 @@ ClassMethodLambda::~ClassMethodLambda()
   zval_dtor(&function_name);
 }
 
+void ClassMethodLambda::addGcValues(zend_get_gc_buffer * gc_buffer)
+{
+  zend_get_gc_buffer_add_zval(gc_buffer, &object);
+}
+
 int ClassMethodLambda::getUserFunctionParamCount()
 {
   zend_class_entry * ce = Z_OBJCE(object);
