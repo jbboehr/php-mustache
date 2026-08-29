@@ -15,6 +15,7 @@
   valgrindSupport ? false,
   coverageSupport ? false,
   sanitizerSupport ? false,
+  archiveBenchmarkSupport ? false,
 }:
 (buildPecl rec {
   pname = "mustache";
@@ -37,7 +38,8 @@
   configureFlags =
     []
     ++ lib.optional coverageSupport ["--enable-mustache-coverage"]
-    ++ lib.optional sanitizerSupport ["--enable-mustache-sanitizers"];
+    ++ lib.optional sanitizerSupport ["--enable-mustache-sanitizers"]
+    ++ lib.optional archiveBenchmarkSupport ["--enable-mustache-archive-benchmark"];
 
   dontStrip = sanitizerSupport;
 

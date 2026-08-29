@@ -16,6 +16,12 @@
 #include <string_view>
 #include <utility>
 
+#if defined(PHP_MUSTACHE_ARCHIVE_BENCHMARK)
+#include <mustache/archived_template.hpp>
+#include <cstdint>
+#include <vector>
+#endif
+
 /* {{{ ZE2 OO definitions */
 zend_class_entry * Mustache_ce_ptr;
 static zend_object_handlers Mustache_obj_handlers;
@@ -63,6 +69,18 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(Mustache__debugDataStructure_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
         ZEND_ARG_INFO(0, vars)
 ZEND_END_ARG_INFO()
+
+#if defined(PHP_MUSTACHE_ARCHIVE_BENCHMARK)
+ZEND_BEGIN_ARG_INFO_EX(Mustache__benchmarkSerializeArchive_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+        ZEND_ARG_INFO(0, tmpl)
+        ZEND_ARG_ARRAY_INFO(0, partials, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(Mustache__benchmarkRenderArchive_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 2)
+        ZEND_ARG_INFO(0, archive)
+        ZEND_ARG_INFO(0, vars)
+ZEND_END_ARG_INFO()
+#endif
 /* }}} */
 
 /* {{{ Mustache_methods */
@@ -78,6 +96,10 @@ static zend_function_entry Mustache_methods[] = {
   PHP_ME(Mustache, render, Mustache__render_args, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, tokenize, Mustache__tokenize_args, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, debugDataStructure, Mustache__debugDataStructure_args, ZEND_ACC_PUBLIC)
+#if defined(PHP_MUSTACHE_ARCHIVE_BENCHMARK)
+  PHP_ME(Mustache, benchmarkSerializeArchive, Mustache__benchmarkSerializeArchive_args, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, benchmarkRenderArchive, Mustache__benchmarkRenderArchive_args, ZEND_ACC_PUBLIC)
+#endif
   { NULL, NULL, NULL }
 };
 /* }}} */
@@ -461,6 +483,20 @@ static void mustache_parse_partials(zval * partials_value, mustache::Mustache * 
   } ZEND_HASH_FOREACH_END();
 }
 
+#if defined(PHP_MUSTACHE_ARCHIVE_BENCHMARK)
+static mustache::ArchivedTemplateLimits mustache_archive_benchmark_limits()
+{
+  mustache::ArchivedTemplateLimits limits;
+  limits.maxInputBytes = size_t{16} * 1024 * 1024;
+  limits.maxNestingDepth = 64;
+  limits.maxNodes = 100000;
+  limits.maxStringBytes = size_t{16} * 1024 * 1024;
+  limits.maxDataPartsPerNode = 256;
+  limits.maxDataParts = 100000;
+  return limits;
+}
+#endif
+
 } // namespace
 
 /* {{{ proto void Mustache::__construct() */
@@ -839,3 +875,64 @@ PHP_METHOD(Mustache, debugDataStructure)
   }
 }
 /* }}} Mustache::debugDataStructure */
+
+#if defined(PHP_MUSTACHE_ARCHIVE_BENCHMARK)
+/* {{{ proto string Mustache::benchmarkSerializeArchive(string template, array partials = []) */
+PHP_METHOD(Mustache, benchmarkSerializeArchive)
+{
+  try {
+    char * templateStr = NULL;
+    size_t templateLen = 0;
+    zval * partials = NULL;
+    zval * _this_zval = NULL;
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "Os|a/",
+            &_this_zval, Mustache_ce_ptr, &templateStr, &templateLen, &partials) == FAILURE) {
+      throw PhpInvalidParameterException();
+    }
+
+    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
+    mustache::Node root;
+    payload->mustache->tokenize(std::string_view(templateStr, templateLen), &root);
+
+    mustache::Node::Partials templatePartials;
+    mustache_parse_partials(partials, payload->mustache, templatePartials);
+    const std::vector<std::uint8_t> archive = mustache::serializeArchivedTemplate(
+        root, templatePartials, mustache_archive_benchmark_limits());
+    RETVAL_STRINGL(reinterpret_cast<const char *>(archive.data()), archive.size());
+  } catch(...) {
+    mustache_exception_handler();
+  }
+}
+/* }}} Mustache::benchmarkSerializeArchive */
+
+/* {{{ proto string Mustache::benchmarkRenderArchive(string archive, mixed data) */
+PHP_METHOD(Mustache, benchmarkRenderArchive)
+{
+  try {
+    char * archiveStr = NULL;
+    size_t archiveLen = 0;
+    zval * data = NULL;
+    zval * _this_zval = NULL;
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "Osz",
+            &_this_zval, Mustache_ce_ptr, &archiveStr, &archiveLen, &data) == FAILURE) {
+      throw PhpInvalidParameterException();
+    }
+
+    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
+    mustache::Data templateData;
+    mustache::Data * templateDataPtr = &templateData;
+    if( !mustache_parse_data_param(data, payload->mustache, &templateDataPtr) ) {
+      RETURN_FALSE;
+      return;
+    }
+
+    const mustache::ArchivedTemplateView archived = mustache::loadArchivedTemplate(
+        std::string_view(archiveStr, archiveLen), mustache_archive_benchmark_limits());
+    const std::string output = payload->mustache->render(archived, *templateDataPtr);
+    RETVAL_STRINGL(output.c_str(), output.length());
+  } catch(...) {
+    mustache_exception_handler();
+  }
+}
+/* }}} Mustache::benchmarkRenderArchive */
+#endif

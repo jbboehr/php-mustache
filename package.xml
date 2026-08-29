@@ -72,6 +72,8 @@
    <file name="tests/MustacheData__scalar-types.phpt" role="test" />
    <file name="tests/MustacheData__toValue.phpt" role="test" />
    <file name="tests/Mustache__applies-ini-defaults.phpt" role="test" />
+   <file name="tests/Mustache__archive-benchmark-bridge.phpt" role="test" />
+   <file name="tests/Mustache__archive-benchmark-default-api-absence.phpt" role="test" />
    <file name="tests/Mustache__debugDataStructure.phpt" role="test" />
    <file name="tests/Mustache__getEscapeByDefault.phpt" role="test" />
    <file name="tests/Mustache__getStartSequence.phpt" role="test" />

@@ -149,12 +149,13 @@
           coverageSupport ? false,
           sanitizerSupport ? false,
           valgrindSupport ? false,
+          archiveBenchmarkSupport ? false,
           libmustacheOverride ? null,
         }:
           pkgs.callPackage ./nix/derivation.nix {
             inherit src;
             inherit stdenv php;
-            inherit coverageSupport sanitizerSupport valgrindSupport;
+            inherit coverageSupport sanitizerSupport valgrindSupport archiveBenchmarkSupport;
             libmustache =
               if libmustacheOverride != null
               then libmustacheOverride
@@ -348,6 +349,37 @@
           stdenv = matrix.stdenv.gcc;
           valgrindSupport = true;
         });
+        php83ArchiveBenchmark = makeCheck (makePackage {
+          php = matrix.php.php83;
+          stdenv = matrix.stdenv.gcc;
+          archiveBenchmarkSupport = true;
+        });
+        php83ArchiveBenchmarkClang = makeCheck (makePackage {
+          php = matrix.php.php83;
+          stdenv = matrix.stdenv.clang;
+          archiveBenchmarkSupport = true;
+        });
+        php83ArchiveBenchmarkSanitized = makeCheck (makePackage {
+          php = php83Sanitized;
+          stdenv = matrix.stdenv.gcc;
+          sanitizerSupport = true;
+          archiveBenchmarkSupport = true;
+        });
+        php83ArchiveBenchmarkRunner = pkgs.writeShellApplication {
+          name = "php-mustache-archive-benchmark";
+          text = ''
+            export BENCH_APCU_EXTENSION=${pkgs.php83.extensions.apcu}/lib/php/extensions/apcu.so
+            export BENCH_MUSTACHE_EXTENSION=${php83ArchiveBenchmark}/lib/php/extensions/mustache.so
+            export BENCH_LIBMUSTACHE_REVISION=${libmustache.rev or libmustache.dirtyRev or "dirty"}
+            export BENCH_PHP_MUSTACHE_REVISION=${self.rev or self.dirtyRev or "dirty"}
+            exec ${matrix.php.php83}/bin/php \
+              -n \
+              -d extension="$BENCH_APCU_EXTENSION" \
+              -d apc.enable_cli=1 \
+              -d extension="$BENCH_MUSTACHE_EXTENSION" \
+              ${./benchmarks/archive-cache-vs-source.php} "$@"
+          '';
+        };
         developmentPackages =
           packages'
           // {
@@ -356,6 +388,9 @@
         packages =
           developmentPackages
           // {
+            php83-archive-benchmark = php83ArchiveBenchmark;
+            php83-archive-benchmark-clang = php83ArchiveBenchmarkClang;
+            php83-archive-benchmark-sanitized = php83ArchiveBenchmarkSanitized;
             php83-gcc-valgrind = php83GccValgrind;
           };
       in {
@@ -370,6 +405,11 @@
         apps.php83-clang-fuzzer = flake-utils.lib.mkApp {
           drv = phpMustacheFuzzer;
           exePath = "/bin/php-mustache-fuzz";
+        };
+
+        apps.php83-archive-benchmark = flake-utils.lib.mkApp {
+          drv = php83ArchiveBenchmarkRunner;
+          exePath = "/bin/php-mustache-archive-benchmark";
         };
 
         formatter = pkgs.alejandra;

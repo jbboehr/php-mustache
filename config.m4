@@ -20,6 +20,9 @@ PHP_ARG_ENABLE(mustache-coverage, whether to enable mustache coverage support,
 PHP_ARG_ENABLE(mustache-sanitizers, whether to enable mustache sanitizer support,
 [AS_HELP_STRING([--enable-mustache-sanitizers], [Enable AddressSanitizer and UndefinedBehaviorSanitizer support (requires a sanitizer-instrumented PHP; see README)])], [no], [no])
 
+PHP_ARG_ENABLE(mustache-archive-benchmark, whether to enable the archived-template benchmark bridge,
+[AS_HELP_STRING([--enable-mustache-archive-benchmark], [Enable the experimental archived-template benchmark bridge])], [no], [no])
+
 dnl LIBMUSTACHE ----------------------------------------------------------------
 PHP_ARG_WITH(libmustache, libmustache location,
 dnl Make sure that the comment is aligned:
@@ -110,6 +113,27 @@ if test "$PHP_MUSTACHE" != "no"; then
     AC_MSG_RESULT([no])
     AC_MSG_ERROR([libmustache >= 0.6.0 and a C++17 compiler are required])
   ])
+
+  if test "$PHP_MUSTACHE_ARCHIVE_BENCHMARK" = "yes"; then
+    AC_MSG_CHECKING([whether libmustache provides archived templates])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <mustache/archived_template.hpp>
+
+#if !defined(MUSTACHE_HAVE_ARCHIVED_TEMPLATES)
+# error libmustache archived templates are unavailable
+#endif
+    ]], [[
+      mustache::ArchivedTemplateLimits limits;
+      return limits.maxInputBytes == 0;
+    ]])], [
+      AC_MSG_RESULT([yes])
+      AC_DEFINE(PHP_MUSTACHE_ARCHIVE_BENCHMARK, 1,
+        [Whether the experimental archived-template benchmark bridge is enabled])
+    ], [
+      AC_MSG_RESULT([no])
+      AC_MSG_ERROR([--enable-mustache-archive-benchmark requires libmustache archived-template support])
+    ])
+  fi
   CXXFLAGS="$PHP_MUSTACHE_SAVED_CXXFLAGS"
   AC_LANG_POP([C++])
 

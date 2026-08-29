@@ -29,4 +29,9 @@ PHP_METHOD(Mustache, render);
 PHP_METHOD(Mustache, tokenize);
 PHP_METHOD(Mustache, debugDataStructure);
 
+#if defined(PHP_MUSTACHE_ARCHIVE_BENCHMARK)
+PHP_METHOD(Mustache, benchmarkSerializeArchive);
+PHP_METHOD(Mustache, benchmarkRenderArchive);
+#endif
+
 #endif /* PHP_MUSTACHE_MUSTACHE_HPP */
