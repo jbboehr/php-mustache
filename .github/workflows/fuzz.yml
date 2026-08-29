@@ -1,0 +1,97 @@
+name: Fuzz
+
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: "17 9 1 * *"
+
+permissions:
+    actions: read
+    contents: read
+
+concurrency:
+    group: fuzz-${{ github.workflow }}
+    cancel-in-progress: true
+
+jobs:
+    fuzz:
+        runs-on: ubuntu-latest
+        timeout-minutes: 60
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: cachix/install-nix-action@v31
+
+            - name: Use nix-phps Cache
+              uses: cachix/cachix-action@v17
+              with:
+                  name: fossar
+
+            - name: Restore fuzz corpus
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  set -Eeu -o pipefail
+
+                  corpus="$RUNNER_TEMP/fuzz-corpus"
+                  mkdir -p "$corpus"
+
+                  previous_run_ids="$(
+                      gh run list \
+                          --workflow fuzz.yml \
+                          --status completed \
+                          --limit 10 \
+                          --json databaseId \
+                          --jq '.[].databaseId'
+                  )"
+                  found_previous_run=false
+                  restored_corpus=false
+                  while IFS= read -r previous_run_id; do
+                      [[ -n "$previous_run_id" ]] || continue
+                      found_previous_run=true
+                      previous_corpus="$RUNNER_TEMP/previous-fuzz-corpus-$previous_run_id"
+                      if gh run download "$previous_run_id" \
+                          --name fuzz-corpus \
+                          --dir "$previous_corpus"; then
+                          cp -R "$previous_corpus"/. "$corpus"/
+                          restored_corpus=true
+                          break
+                      fi
+                  done <<< "$previous_run_ids"
+                  if [[ "$found_previous_run" = true && "$restored_corpus" = false ]]; then
+                      echo "::warning::Unable to restore a previous fuzz corpus"
+                  fi
+
+                  cp -R fuzz/corpus/. "$corpus"/
+
+            - name: Run fuzz campaign
+              run: |
+                  set -Eeu -o pipefail
+
+                  artifacts="$RUNNER_TEMP/fuzz-artifacts"
+                  mkdir -p "$artifacts"
+
+                  nix run .#php83-clang-fuzzer -- \
+                      -max_total_time=600 \
+                      -print_final_stats=1 \
+                      -artifact_prefix="$artifacts/" \
+                      "$RUNNER_TEMP/fuzz-corpus"
+
+            - name: Upload fuzz findings
+              if: failure()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: fuzz-findings-${{ github.run_id }}-${{ github.run_attempt }}
+                  path: ${{ runner.temp }}/fuzz-artifacts
+                  if-no-files-found: ignore
+                  retention-days: 90
+
+            - name: Save fuzz corpus
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: fuzz-corpus
+                  path: ${{ runner.temp }}/fuzz-corpus
+                  if-no-files-found: warn
+                  retention-days: 90
+                  overwrite: true
