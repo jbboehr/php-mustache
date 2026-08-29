@@ -135,6 +135,7 @@
    <file name="tests/mustache-spec-comments-standalone-without-newline.phpt" role="test" />
    <file name="tests/mustache-spec-comments-standalone-without-previous-line.phpt" role="test" />
    <file name="tests/mustache-spec-comments-surrounding-whitespace.phpt" role="test" />
+   <file name="tests/mustache-spec-comments-variable-name-collision.phpt" role="test" />
    <file name="tests/mustache-spec-delimiters-indented-standalone-tag.phpt" role="test" />
    <file name="tests/mustache-spec-delimiters-inverted-sections.phpt" role="test" />
    <file name="tests/mustache-spec-delimiters-outlying-whitespace-inline.phpt" role="test" />
@@ -152,6 +153,7 @@
    <file name="tests/mustache-spec-interpolation-ampersand-context-miss-interpolation.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-ampersand-decimal-interpolation.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-ampersand-integer-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-ampersand-null-interpolation.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-ampersand.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-ampersand-standalone.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-ampersand-surrounding-whitespace.phpt" role="test" />
@@ -160,6 +162,7 @@
    <file name="tests/mustache-spec-interpolation-basic-decimal-interpolation.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-basic-integer-interpolation.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-basic-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-basic-null-interpolation.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-dotted-names-ampersand-interpolation.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-dotted-names-arbitrary-depth.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-dotted-names-basic-interpolation.phpt" role="test" />
@@ -169,6 +172,11 @@
    <file name="tests/mustache-spec-interpolation-dotted-names-initial-resolution.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-dotted-names-triple-mustache-interpolation.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-html-escaping.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-implicit-iterators-ampersand.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-implicit-iterators-basic-integer-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-implicit-iterators-basic-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-implicit-iterators-html-escaping.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-implicit-iterators-triple-mustache.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-interpolation-standalone.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-interpolation-surrounding-whitespace.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-interpolation-with-padding.phpt" role="test" />
@@ -176,6 +184,7 @@
    <file name="tests/mustache-spec-interpolation-triple-mustache-context-miss-interpolation.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-triple-mustache-decimal-interpolation.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-triple-mustache-integer-interpolation.phpt" role="test" />
+   <file name="tests/mustache-spec-interpolation-triple-mustache-null-interpolation.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-triple-mustache.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-triple-mustache-standalone.phpt" role="test" />
    <file name="tests/mustache-spec-interpolation-triple-mustache-surrounding-whitespace.phpt" role="test" />
@@ -193,6 +202,7 @@
    <file name="tests/mustache-spec-inverted-list.phpt" role="test" />
    <file name="tests/mustache-spec-inverted-nested-falsey.phpt" role="test" />
    <file name="tests/mustache-spec-inverted-nested-truthy.phpt" role="test" />
+   <file name="tests/mustache-spec-inverted-null-is-falsey.phpt" role="test" />
    <file name="tests/mustache-spec-inverted-padding.phpt" role="test" />
    <file name="tests/mustache-spec-inverted-standalone-indented-lines.phpt" role="test" />
    <file name="tests/mustache-spec-inverted-standalone-line-endings.phpt" role="test" />
@@ -231,22 +241,27 @@
    <file name="tests/mustache-spec-sections-doubled.phpt" role="test" />
    <file name="tests/mustache-spec-sections-empty-list.phpt" role="test" />
    <file name="tests/mustache-spec-sections-falsey.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-implicit-iterator-array.phpt" role="test" />
    <file name="tests/mustache-spec-sections-implicit-iterator-decimal.phpt" role="test" />
    <file name="tests/mustache-spec-sections-implicit-iterator-integer.phpt" role="test" />
    <file name="tests/mustache-spec-sections-implicit-iterator-string.phpt" role="test" />
    <file name="tests/mustache-spec-sections-indented-inline-sections.phpt" role="test" />
    <file name="tests/mustache-spec-sections-indented-standalone-lines.phpt" role="test" />
    <file name="tests/mustache-spec-sections-internal-whitespace.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-list-contexts.phpt" role="test" />
    <file name="tests/mustache-spec-sections-list.phpt" role="test" />
    <file name="tests/mustache-spec-sections-nested-falsey.phpt" role="test" />
    <file name="tests/mustache-spec-sections-nested-truthy.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-null-is-falsey.phpt" role="test" />
    <file name="tests/mustache-spec-sections-padding.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-parent-contexts.phpt" role="test" />
    <file name="tests/mustache-spec-sections-standalone-line-endings.phpt" role="test" />
    <file name="tests/mustache-spec-sections-standalone-lines.phpt" role="test" />
    <file name="tests/mustache-spec-sections-standalone-without-newline.phpt" role="test" />
    <file name="tests/mustache-spec-sections-standalone-without-previous-line.phpt" role="test" />
    <file name="tests/mustache-spec-sections-surrounding-whitespace.phpt" role="test" />
    <file name="tests/mustache-spec-sections-truthy.phpt" role="test" />
+   <file name="tests/mustache-spec-sections-variable-test.phpt" role="test" />
    <file name="tests/mustache-spec-utf8-bird.phpt" role="test" />
    <file name="tests/mustache-spec-utf8-lotus.phpt" role="test" />
    <file name="tests/mustache-spec-utf8-red-bean.phpt" role="test" />

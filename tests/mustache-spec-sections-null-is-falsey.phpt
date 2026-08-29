@@ -1,0 +1,23 @@
+--TEST--
+Null is falsey
+--DESCRIPTION--
+Null is falsey.
+--SKIPIF--
+<?php if(!extension_loaded('mustache')) die('skip '); ?>
+--FILE--
+<?php
+$test = array (
+  'name' => 'Null is falsey',
+  'desc' => 'Null is falsey.',
+  'data' => 
+  array (
+    'null' => NULL,
+  ),
+  'template' => '"{{#null}}This should not be rendered.{{/null}}"',
+  'expected' => '""',
+);
+$mustache = new Mustache();
+echo "<render>", $mustache->render($test["template"], $test["data"]), "</render>";
+?>
+--EXPECT--
+<render>""</render>
