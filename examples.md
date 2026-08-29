@@ -22,7 +22,7 @@ final class MustacheTemplateLoader
         $this->mustache = $mustache ?? new Mustache();
     }
 
-    public function render(string $template, mixed $data): string|false
+    public function render(string $template, mixed $data): string
     {
         $templates = $this->loadTemplates();
         if (!array_key_exists($template, $templates)) {

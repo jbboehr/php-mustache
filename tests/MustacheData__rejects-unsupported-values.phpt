@@ -15,12 +15,20 @@ var_dump($nestedData->toValue());
 $resource = fopen('php://memory', 'r');
 $resourceData = new MustacheData($resource);
 var_dump($resourceData->toValue());
-(new Mustache())->render('unused', $resource);
+try {
+  (new Mustache())->render('unused', $resource);
+} catch (Throwable $error) {
+  echo get_class($error), "\n";
+}
 fclose($resource);
 
 $emptyData = (new ReflectionClass(MustacheData::class))->newInstanceWithoutConstructor();
 var_dump($emptyData->toValue());
-(new Mustache())->render('unused', $emptyData);
+try {
+  (new Mustache())->render('unused', $emptyData);
+} catch (Throwable $error) {
+  echo get_class($error), "\n";
+}
 
 $lambdaData = new MustacheData([
   'closure' => static function () {
@@ -45,10 +53,10 @@ bool(false)
 MustacheData::__construct(): Invalid data type
 MustacheData::toValue(): MustacheData was not initialized properly
 bool(false)
-Mustache::render(): Invalid data type
+TypeError
 MustacheData::toValue(): MustacheData was not initialized properly
 bool(false)
-Mustache::render(): MustacheData was not initialized properly
+ValueError
 Lambda data cannot be converted to a PHP value
 Lambda data cannot be converted to a PHP value
 array(2) {

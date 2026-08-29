@@ -115,6 +115,7 @@
    <file name="tests/Mustache__render-recursive-array.phpt" role="test" />
    <file name="tests/Mustache__render-recursive-object.phpt" role="test" />
    <file name="tests/Mustache__render-references.phpt" role="test" />
+   <file name="tests/Mustache__render-rejects-invalid-inputs-atomically.phpt" role="test" />
    <file name="tests/Mustache__render-source-and-AST-partials-equally.phpt" role="test" />
    <file name="tests/Mustache__render-tag.phpt" role="test" />
    <file name="tests/Mustache__rejects-excessive-template-nesting.phpt" role="test" />

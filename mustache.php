@@ -55,7 +55,11 @@ class Mustache
      * Parses a template into an AST.
      *
      * Passing an existing MustacheTemplate or MustacheAST validates it and
-     * returns true. Invalid template values return false.
+     * returns true.
+     *
+     * @throws TypeError If the template has an unsupported PHP type.
+     * @throws ValueError If the template object is not initialized.
+     * @throws MustacheParserException If the template source is invalid.
      */
     public function parse(string|MustacheTemplate|MustacheAST $tmpl): MustacheAST|bool
     {
@@ -65,12 +69,17 @@ class Mustache
      * Renders a template with the supplied data and partials.
      *
      * @param array<string, string|MustacheTemplate|MustacheAST>|null $partials
+     *
+     * @throws TypeError If the template or data has an unsupported PHP type.
+     * @throws ValueError If the template, data, or partial map is invalid.
+     * @throws MustacheParserException If template or partial source is invalid.
+     * @throws MustacheException If rendering fails.
      */
     public function render(
         string|MustacheTemplate|MustacheAST $str,
         mixed $vars,
         ?array $partials = null,
-    ): string|false {
+    ): string {
     }
 
     /**

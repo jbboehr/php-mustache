@@ -10,15 +10,20 @@ if(!extension_loaded('mustache')) die('skip ');
 $m = new Mustache();
 $data = array();
 $data['var'] = &$data;
-set_error_handler(static function ($severity, $message) {
-  echo $message, "\n";
+set_error_handler(function ($severity, $message) {
+  echo "warning:", $message, "\n";
+  return true;
 });
-$r = $m->render('{{var}}', $data);
+try {
+  $m->render('{{var}}', $data);
+} catch (ValueError) {
+  echo "ValueError\n";
+}
 restore_error_handler();
-var_dump($r);
 unset($data);
 gc_collect_cycles();
+echo "collected\n";
 ?>
 --EXPECT--
-Mustache::render(): Data includes circular reference
-NULL
+ValueError
+collected

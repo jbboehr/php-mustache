@@ -19,9 +19,12 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Compile source templates and source partials through libmustache's owning template handles while preserving configured delimiters.
 - Store `MustacheAST` values with explicit ownership and bounded serialization.
 - Clone AST-backed partials into each compatibility render so ownership never aliases PHP objects.
+- Make `Mustache::render()` and invalid-input paths in `Mustache::parse()` throw `TypeError` or `ValueError` instead of emitting warnings or returning `false`, `null`, or partial output. Successful renders now always return strings.
 
 ### Fixed
 
+- Accept explicit `null` for the optional partial map, matching the public signature and an omitted argument.
+- Reject `MustacheTemplate` values whose stored source is not a string instead of coercing them with a warning.
 - Reject recursive, over-deep, and over-budget data conversion without publishing a partial `MustacheData` value.
 - Retain PHP objects and closures for as long as their converted lambda values are alive.
 - Reject `MustacheData` reinitialization so callbacks cannot replace data borrowed by an active render.
