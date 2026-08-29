@@ -136,6 +136,13 @@ class MustacheAST
     }
 
     /**
+     * Creates an AST from libmustache's binary representation.
+     */
+    public static function fromBinary(string $binary): static
+    {
+    }
+
+    /**
      * Stores the binary AST for PHP serialization.
      *
      * @return list<string>
@@ -155,6 +162,15 @@ class MustacheAST
 
     /**
      * Returns libmustache's binary AST representation.
+     */
+    public function toBinary(): string
+    {
+    }
+
+    /**
+     * Returns libmustache's binary AST representation.
+     *
+     * @deprecated Use toBinary() instead.
      */
     public function __toString(): string
     {

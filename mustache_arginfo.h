@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 65c27fdc4bc7b4df13b6e1080999307794b44563 */
+ * Stub hash: 20f41ae837c0e560b3206065ffbbab7fafa0b685 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Mustache___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -60,10 +60,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MustacheAST___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, vars, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_MustacheAST_fromBinary, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, binary, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_MustacheAST___sleep, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_MustacheAST_toArray arginfo_class_MustacheAST___sleep
+
+#define arginfo_class_MustacheAST_toBinary arginfo_class_Mustache_getStartSequence
 
 #define arginfo_class_MustacheAST___toString arginfo_class_Mustache_getStartSequence
 

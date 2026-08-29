@@ -92,3 +92,21 @@ The result is:
 Hello John
 You have just won 10000 dollars!
 ```
+
+## Persisting parsed templates
+
+Parsed templates can be cached as binary strings and restored without parsing
+the source again:
+
+```php
+$mustache = new Mustache();
+$ast = $mustache->parse('Hello {{name}}');
+
+$cache->set('greeting', $ast->toBinary());
+
+$cached = MustacheAST::fromBinary($cache->get('greeting'));
+echo $mustache->render($cached, ['name' => 'John']);
+```
+
+The binary format is provided by libmustache. Cache entries should therefore be
+invalidated when libmustache is upgraded.

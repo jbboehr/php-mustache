@@ -46,8 +46,9 @@ function describeMethod(string $class, string $methodName): void
     }
 
     printf(
-        "%s %s::%s(%s):%s\n",
+        "%s%s %s::%s(%s):%s\n",
         $visibility,
+        $method->isStatic() ? ' static' : '',
         $class,
         $methodName,
         implode(', ', $parameters),
@@ -69,7 +70,15 @@ $methods = [
         'tokenize',
         'debugDataStructure',
     ],
-    'MustacheAST' => ['__construct', '__sleep', 'toArray', '__toString', '__wakeup'],
+    'MustacheAST' => [
+        '__construct',
+        'fromBinary',
+        '__sleep',
+        'toArray',
+        'toBinary',
+        '__toString',
+        '__wakeup',
+    ],
     'MustacheTemplate' => ['__construct', '__toString'],
     'MustacheData' => ['__construct', 'toValue'],
     'MustacheLambdaHelper' => ['__construct', 'render'],
@@ -94,8 +103,10 @@ public Mustache::render(str:MustacheAST|MustacheTemplate|string, vars:mixed, par
 public Mustache::tokenize(tmpl:string):array
 public Mustache::debugDataStructure(vars:mixed):mixed
 public MustacheAST::__construct(vars:null|string=NULL):-
+public static MustacheAST::fromBinary(binary:string):static
 public MustacheAST::__sleep():array
 public MustacheAST::toArray():array
+public MustacheAST::toBinary():string
 public MustacheAST::__toString():string
 public MustacheAST::__wakeup():void
 public MustacheTemplate::__construct(vars:null|string=NULL):-

@@ -57,6 +57,10 @@
    <file name="tests/arginfo-reflection.phpt" role="test" />
    <file name="tests/MustacheAST____construct.phpt" role="test" />
    <file name="tests/MustacheAST____sleep.phpt" role="test" />
+   <file name="tests/MustacheAST__binary-api.phpt" role="test" />
+   <file name="tests/MustacheAST__fromBinary-boundaries-and-recovery.phpt" role="test" />
+   <file name="tests/MustacheAST__fromBinary-initializes-subclass-properties.phpt" role="test" />
+   <file name="tests/MustacheAST__fromBinary-rejects-abstract-subclass.phpt" role="test" />
    <file name="tests/MustacheAST__toArray.phpt" role="test" />
    <file name="tests/MustacheAST__rejects-invalid-serialization.phpt" role="test" />
    <file name="tests/MustacheAST__rejects-reinitialization-during-render.phpt" role="test" />

@@ -22,8 +22,10 @@ static zend_object_handlers MustacheAST_obj_handlers;
 /* {{{ MustacheAST_methods */
 static zend_function_entry MustacheAST_methods[] = {
   PHP_ME(MustacheAST, __construct, arginfo_class_MustacheAST___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+  PHP_ME(MustacheAST, fromBinary, arginfo_class_MustacheAST_fromBinary, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
   PHP_ME(MustacheAST, __sleep, arginfo_class_MustacheAST___sleep, ZEND_ACC_PUBLIC)
   PHP_ME(MustacheAST, toArray, arginfo_class_MustacheAST_toArray, ZEND_ACC_PUBLIC)
+  PHP_ME(MustacheAST, toBinary, arginfo_class_MustacheAST_toBinary, ZEND_ACC_PUBLIC)
   PHP_ME(MustacheAST, __toString, arginfo_class_MustacheAST___toString, ZEND_ACC_PUBLIC)
   PHP_ME(MustacheAST, __wakeup, arginfo_class_MustacheAST___wakeup, ZEND_ACC_PUBLIC)
   { NULL, NULL, NULL }
@@ -155,6 +157,7 @@ static zend_object * MustacheAST_obj_create(zend_class_entry * ce)
         std::make_unique<php_mustache_ast_state>();
     intern = (struct php_obj_MustacheAST *) ecalloc(1, sizeof(struct php_obj_MustacheAST) + zend_object_properties_size(ce));
     zend_object_std_init(&intern->std, ce);
+    object_properties_init(&intern->std, ce);
     intern->std.handlers = &MustacheAST_obj_handlers;
     intern->state = state.release();
     return &intern->std;
@@ -229,6 +232,45 @@ PHP_METHOD(MustacheAST, __construct)
 }
 /* }}} MustacheAST::__construct */
 
+/* {{{ proto static MustacheAST MustacheAST::fromBinary(string binary) */
+PHP_METHOD(MustacheAST, fromBinary)
+{
+  try {
+    char * str = NULL;
+    size_t str_len = 0;
+
+    if( zend_parse_parameters(ZEND_NUM_ARGS(), (char *) "s", &str, &str_len) == FAILURE ) {
+      throw PhpInvalidParameterException();
+    }
+
+    std::unique_ptr<mustache::Node> node =
+        mustache_node_from_binary_string(str, str_len);
+
+    zend_class_entry * called_scope = zend_get_called_scope(execute_data);
+    if( called_scope == NULL ||
+        !instanceof_function(called_scope, MustacheAST_ce_ptr) ) {
+      throw InvalidParameterException("MustacheAST factory called outside its class scope");
+    }
+
+    if( object_init_ex(return_value, called_scope) != SUCCESS ) {
+      return;
+    }
+    struct php_obj_MustacheAST * payload =
+        php_mustache_ast_object_fetch_object(return_value);
+    if( payload->state == NULL ) {
+      throw InvalidParameterException("MustacheAST state was not initialized properly");
+    }
+    if( payload->state->node != NULL ) {
+      throw InvalidParameterException("MustacheAST is already initialized");
+    }
+
+    payload->state->node = std::move(node);
+  } catch(...) {
+    mustache_exception_handler();
+  }
+}
+/* }}} MustacheAST::fromBinary */
+
 /* {{{ proto void MustacheAST::__sleep() */
 PHP_METHOD(MustacheAST, __sleep)
 {
@@ -294,6 +336,31 @@ PHP_METHOD(MustacheAST, toArray)
   }
 }
 /* }}} MustacheAST::toArray */
+
+/* {{{ proto string MustacheAST::toBinary() */
+PHP_METHOD(MustacheAST, toBinary)
+{
+  try {
+    zval * _this_zval = NULL;
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "O",
+            &_this_zval, MustacheAST_ce_ptr) == FAILURE) {
+      throw PhpInvalidParameterException();
+    }
+
+    _this_zval = getThis();
+    struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(_this_zval);
+
+    if( payload->state == NULL || payload->state->node == NULL ) {
+      throw InvalidParameterException("MustacheAST was not initialized properly");
+    }
+
+    std::string serial = mustache_node_to_binary_string(*payload->state->node);
+    RETVAL_STRINGL(serial.data(), serial.size());
+  } catch(...) {
+    mustache_exception_handler();
+  }
+}
+/* }}} MustacheAST::toBinary */
 
 /* {{{ proto string MustacheAST::__toString() */
 PHP_METHOD(MustacheAST, __toString)

@@ -9,6 +9,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ### Added
 
 - Add PIE package metadata while retaining the existing PECL package metadata.
+- Add explicit `MustacheAST::toBinary()` and `MustacheAST::fromBinary()` APIs for persistent parsed-template caches.
 
 ### Changed
 
@@ -21,6 +22,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Clone AST-backed partials into each compatibility render so ownership never aliases PHP objects.
 - Make `Mustache::render()` and invalid-input paths in `Mustache::parse()` throw `TypeError` or `ValueError` instead of emitting warnings or returning `false`, `null`, or partial output. Successful renders now always return strings.
 - Expose the documented method signatures through native reflection and ship the canonical PHP stub with source packages.
+- Deprecate `MustacheAST::__toString()` in the tooling stub in favor of the explicit binary export API.
 
 ### Fixed
 
