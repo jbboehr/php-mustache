@@ -54,14 +54,14 @@ class Mustache
     /**
      * Parses a template into an AST.
      *
-     * Passing an existing MustacheTemplate or MustacheAST validates it and
-     * returns true.
+     * Passing an existing MustacheAST returns the same object. A
+     * MustacheTemplate is compiled into a new AST.
      *
      * @throws TypeError If the template has an unsupported PHP type.
      * @throws ValueError If the template object is not initialized.
      * @throws MustacheParserException If the template source is invalid.
      */
-    public function parse(string|MustacheTemplate|MustacheAST $tmpl): MustacheAST|bool
+    public function parse(string|MustacheTemplate|MustacheAST $tmpl): MustacheAST
     {
     }
 

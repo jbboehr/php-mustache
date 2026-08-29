@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 20f41ae837c0e560b3206065ffbbab7fafa0b685 */
+ * Stub hash: d95fa7cc68a1501735ffab5e0aa27b5a36bfe3f4 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Mustache___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -24,7 +24,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Mustache_setStopSequence, 
 	ZEND_ARG_TYPE_INFO(0, stopSequence, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Mustache_parse, 0, 1, MustacheAST, MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Mustache_parse, 0, 1, MustacheAST, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, tmpl, MustacheTemplate|MustacheAST, MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 

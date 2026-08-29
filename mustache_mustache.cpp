@@ -650,7 +650,7 @@ PHP_METHOD(Mustache, setStopSequence)
 }
 /* }}} Mustache::setStartSequence */
 
-/* {{{ proto MustacheAST Mustache::parse(string template) */
+/* {{{ proto MustacheAST Mustache::parse(string|MustacheTemplate|MustacheAST template) */
 PHP_METHOD(Mustache, parse)
 {
   try {
@@ -673,33 +673,36 @@ PHP_METHOD(Mustache, parse)
     const mustache::Node * templateNodePtr = NULL;
     mustache_parse_template_param(tmpl, payload->mustache, templateNode, &templateNodePtr, 1);
 
-    // Handle return value
+    // Existing ASTs are already parsed. Preserve their identity so parse()
+    // remains safe to use in generic template-normalization paths.
     zval * templateValue = mustache_dereference_zval(tmpl);
-    if( templateValue != NULL && Z_TYPE_P(templateValue) == IS_STRING ) {
-      if( MustacheAST_ce_ptr == NULL ) {
-        php_error_docref(NULL, E_WARNING, "Class MustacheAST does not exist");
-        RETURN_FALSE;
-        return;
-      }
-
-      // Initialize new object
-      object_init_ex(return_value, MustacheAST_ce_ptr);
-      struct php_obj_MustacheAST * intern = php_mustache_ast_object_fetch_object(return_value);
-      if( intern->state == NULL ) {
-        throw InvalidParameterException("MustacheAST state was not initialized properly");
-      }
-      intern->state->node =
-          std::make_unique<mustache::Node>(std::move(templateNode));
-
-    // Ref - not sure if this is required
-//    Z_SET_REFCOUNT_P(return_value, 1);
-//    Z_SET_ISREF_P(return_value);
-
-    } else if( templateValue != NULL && Z_TYPE_P(templateValue) == IS_OBJECT ) {
-      // Handle return value for object parameter
-      // @todo return the object itself?
-      RETURN_TRUE;
+    if( mustache_is_ast(templateValue) ) {
+      ZVAL_COPY(return_value, templateValue);
+      return;
     }
+
+    // Strings and MustacheTemplate values compile into a new owned AST.
+    if( object_init_ex(return_value, MustacheAST_ce_ptr) != SUCCESS ) {
+      if( EG(exception) == NULL ) {
+        zend_throw_error(NULL, "Failed to initialize MustacheAST");
+      }
+      RETURN_THROWS();
+    }
+    struct php_obj_MustacheAST * intern = php_mustache_ast_object_fetch_object(return_value);
+    if( intern->state == NULL ) {
+      zval_ptr_dtor(return_value);
+      ZVAL_UNDEF(return_value);
+      zend_throw_error(NULL, "MustacheAST state was not initialized properly");
+      RETURN_THROWS();
+    }
+    if( intern->state->node != NULL ) {
+      zval_ptr_dtor(return_value);
+      ZVAL_UNDEF(return_value);
+      zend_throw_error(NULL, "MustacheAST is already initialized");
+      RETURN_THROWS();
+    }
+    intern->state->node =
+        std::make_unique<mustache::Node>(std::move(templateNode));
 
   } catch(...) {
     mustache_exception_handler();

@@ -19,9 +19,13 @@ $template = new DerivedMustacheTemplate('Hello {{name}}');
 $ast = new DerivedMustacheAST((string) $mustache->parse('Hello {{name}}'));
 
 var_dump($mustache->render($template, ['name' => 'Ada']));
-var_dump($mustache->parse($template));
+$templateAST = $mustache->parse($template);
+var_dump($templateAST instanceof MustacheAST);
+if ($templateAST instanceof MustacheAST) {
+    var_dump($mustache->render($templateAST, ['name' => 'Ada']));
+}
 var_dump($mustache->render($ast, ['name' => 'Ada']));
-var_dump($mustache->parse($ast));
+var_dump($mustache->parse($ast) === $ast);
 
 var_dump($mustache->render(
     'Before {{>value}} after',
@@ -37,6 +41,7 @@ var_dump($mustache->render(
 --EXPECT--
 string(9) "Hello Ada"
 bool(true)
+string(9) "Hello Ada"
 string(9) "Hello Ada"
 bool(true)
 string(16) "Before Ada after"

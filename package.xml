@@ -94,6 +94,9 @@
    <file name="tests/MustacheLambdaHelper__nested-contexts.phpt" role="test" />
    <file name="tests/MustacheLambdaHelper__rejects-use-after-callback.phpt" role="test" />
    <file name="tests/Mustache__parse.phpt" role="test" />
+   <file name="tests/Mustache__parse-owns-compiled-inputs.phpt" role="test" />
+   <file name="tests/Mustache__parse-preserves-referenced-AST-lifetime.phpt" role="test" />
+   <file name="tests/Mustache__parse-validates-and-recovers.phpt" role="test" />
    <file name="tests/Mustache__render-accepts-class-instance.phpt" role="test" />
    <file name="tests/Mustache__render-accepts-MustacheAST.phpt" role="test" />
    <file name="tests/Mustache__render-accepts-MustacheData.phpt" role="test" />

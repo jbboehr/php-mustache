@@ -98,7 +98,7 @@ public Mustache::getStopSequence():string
 public Mustache::setEscapeByDefault(escapeByDefault:bool|int):bool
 public Mustache::setStartSequence(startSequence:string):bool
 public Mustache::setStopSequence(stopSequence:string):bool
-public Mustache::parse(tmpl:MustacheAST|MustacheTemplate|string):MustacheAST|bool
+public Mustache::parse(tmpl:MustacheAST|MustacheTemplate|string):MustacheAST
 public Mustache::render(str:MustacheAST|MustacheTemplate|string, vars:mixed, partials:array|null=NULL):string
 public Mustache::tokenize(tmpl:string):array
 public Mustache::debugDataStructure(vars:mixed):mixed
