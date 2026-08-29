@@ -15,5 +15,5 @@ var_dump($r);
 var_dump($data->var);
 ?>
 --EXPECT--
-string(18) "1.2344999999999999"
+string(6) "1.2345"
 float(1.2345)

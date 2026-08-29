@@ -2,8 +2,6 @@
 Implicit Iterator - Decimal
 --DESCRIPTION--
 Implicit iterators should cast decimals to strings and interpolate.
---XFAIL--
-Typed libmustache doubles currently use a non-spec rendering.
 --SKIPIF--
 <?php if(!extension_loaded('mustache')) die('skip '); ?>
 --FILE--
