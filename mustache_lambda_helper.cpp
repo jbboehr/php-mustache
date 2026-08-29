@@ -4,6 +4,7 @@
 #endif
 
 #include "php_mustache.h"
+#include "mustache_arginfo.h"
 #include "mustache_private.hpp"
 #include "mustache_exceptions.hpp"
 #include "mustache_lambda_helper.hpp"
@@ -17,19 +18,10 @@ zend_class_entry * MustacheLambdaHelper_ce_ptr;
 static zend_object_handlers MustacheLambdaHelper_obj_handlers;
 /* }}} */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(MustacheLambdaHelper____construct_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(MustacheLambdaHelper__render_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-    ZEND_ARG_INFO(0, tmpl)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ MustacheLambdaHelper_methods */
 static zend_function_entry MustacheLambdaHelper_methods[] = {
-  PHP_ME(MustacheLambdaHelper, __construct, MustacheLambdaHelper____construct_args, ZEND_ACC_PRIVATE | ZEND_ACC_CTOR)
-  PHP_ME(MustacheLambdaHelper, render, MustacheLambdaHelper__render_args, ZEND_ACC_PUBLIC)
+  PHP_ME(MustacheLambdaHelper, __construct, arginfo_class_MustacheLambdaHelper___construct, ZEND_ACC_PRIVATE | ZEND_ACC_CTOR)
+  PHP_ME(MustacheLambdaHelper, render, arginfo_class_MustacheLambdaHelper_render, ZEND_ACC_PUBLIC)
   { NULL, NULL, NULL }
 };
 /* }}} */

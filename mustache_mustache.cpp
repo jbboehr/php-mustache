@@ -4,6 +4,7 @@
 #endif
 
 #include "php_mustache.h"
+#include "mustache_arginfo.h"
 #include "mustache_private.hpp"
 #include "mustache_ast.hpp"
 #include "mustache_data.hpp"
@@ -27,78 +28,22 @@ zend_class_entry * Mustache_ce_ptr;
 static zend_object_handlers Mustache_obj_handlers;
 /* }}} */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(Mustache____construct_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__getEscapeByDefault_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__getStartSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__getStopSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__setEscapeByDefault_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, escapeByDefault)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__setStartSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, startSequence)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__setStopSequence_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, stopSequence)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__parse_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, tmpl)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__render_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 3)
-	ZEND_ARG_INFO(0, str)
-        ZEND_ARG_INFO(0, vars)
-        ZEND_ARG_INFO(0, partials)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__tokenize_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, tmpl)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__debugDataStructure_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-        ZEND_ARG_INFO(0, vars)
-ZEND_END_ARG_INFO()
-
-#if defined(PHP_MUSTACHE_ARCHIVE_BENCHMARK)
-ZEND_BEGIN_ARG_INFO_EX(Mustache__benchmarkSerializeArchive_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-        ZEND_ARG_INFO(0, tmpl)
-        ZEND_ARG_ARRAY_INFO(0, partials, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(Mustache__benchmarkRenderArchive_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 2)
-        ZEND_ARG_INFO(0, archive)
-        ZEND_ARG_INFO(0, vars)
-ZEND_END_ARG_INFO()
-#endif
-/* }}} */
-
 /* {{{ Mustache_methods */
 static zend_function_entry Mustache_methods[] = {
-  PHP_ME(Mustache, __construct, Mustache____construct_args, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-  PHP_ME(Mustache, getEscapeByDefault, Mustache__getEscapeByDefault_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, getStartSequence, Mustache__getStartSequence_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, getStopSequence, Mustache__getStopSequence_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, setEscapeByDefault, Mustache__setEscapeByDefault_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, setStartSequence, Mustache__setStartSequence_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, setStopSequence, Mustache__setStopSequence_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, parse, Mustache__parse_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, render, Mustache__render_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, tokenize, Mustache__tokenize_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, debugDataStructure, Mustache__debugDataStructure_args, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, __construct, arginfo_class_Mustache___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+  PHP_ME(Mustache, getEscapeByDefault, arginfo_class_Mustache_getEscapeByDefault, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, getStartSequence, arginfo_class_Mustache_getStartSequence, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, getStopSequence, arginfo_class_Mustache_getStopSequence, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, setEscapeByDefault, arginfo_class_Mustache_setEscapeByDefault, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, setStartSequence, arginfo_class_Mustache_setStartSequence, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, setStopSequence, arginfo_class_Mustache_setStopSequence, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, parse, arginfo_class_Mustache_parse, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, render, arginfo_class_Mustache_render, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, tokenize, arginfo_class_Mustache_tokenize, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, debugDataStructure, arginfo_class_Mustache_debugDataStructure, ZEND_ACC_PUBLIC)
 #if defined(PHP_MUSTACHE_ARCHIVE_BENCHMARK)
-  PHP_ME(Mustache, benchmarkSerializeArchive, Mustache__benchmarkSerializeArchive_args, ZEND_ACC_PUBLIC)
-  PHP_ME(Mustache, benchmarkRenderArchive, Mustache__benchmarkRenderArchive_args, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, benchmarkSerializeArchive, arginfo_class_Mustache_benchmarkSerializeArchive, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, benchmarkRenderArchive, arginfo_class_Mustache_benchmarkRenderArchive, ZEND_ACC_PUBLIC)
 #endif
   { NULL, NULL, NULL }
 };
@@ -261,7 +206,7 @@ static bool mustache_is_ast(zval * value)
 {
   value = mustache_dereference_zval(value);
   return value != NULL && Z_TYPE_P(value) == IS_OBJECT &&
-      Z_OBJCE_P(value) == MustacheAST_ce_ptr;
+      instanceof_function(Z_OBJCE_P(value), MustacheAST_ce_ptr);
 }
 
 static const mustache::Node * mustache_ast_node(zval * value, uint32_t argument)
@@ -306,7 +251,7 @@ static void mustache_template_source(zval * value, std::string& source, uint32_t
     mustache_argument_type_error(
         argument, "string|MustacheTemplate|MustacheAST", value);
   }
-  if( Z_OBJCE_P(value) != MustacheTemplate_ce_ptr ) {
+  if( !instanceof_function(Z_OBJCE_P(value), MustacheTemplate_ce_ptr) ) {
     mustache_argument_type_error(
         argument, "string|MustacheTemplate|MustacheAST", value);
   }
@@ -325,7 +270,7 @@ static void mustache_partial_source(zval * value, std::string& source, uint32_t 
     return;
   }
   if( value != NULL && Z_TYPE_P(value) == IS_OBJECT ) {
-    if( Z_OBJCE_P(value) == MustacheTemplate_ce_ptr ) {
+    if( instanceof_function(Z_OBJCE_P(value), MustacheTemplate_ce_ptr) ) {
       source = mustache_template_object_source(value, argument);
       if( source.empty() ) {
         mustache_argument_value_error(argument, "must not contain an empty MustacheTemplate");
@@ -610,13 +555,27 @@ PHP_METHOD(Mustache, setEscapeByDefault)
 {
   try {
     // Custom parameters
-    zend_long flag = 0;
+    zval * flag = NULL;
 
     // Check parameters
     zval * _this_zval = NULL;
-    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "Ol",
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "Oz",
             &_this_zval, Mustache_ce_ptr, &flag) == FAILURE) {
       throw PhpInvalidParameterException();
+    }
+
+    zval * flagValue = mustache_dereference_zval(flag);
+    bool escapeByDefault = false;
+    if( flagValue != NULL
+        && (Z_TYPE_P(flagValue) == IS_TRUE || Z_TYPE_P(flagValue) == IS_FALSE) ) {
+      escapeByDefault = zend_is_true(flagValue);
+    } else {
+      zend_long integerFlag = 0;
+      if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "Ol",
+              &_this_zval, Mustache_ce_ptr, &integerFlag) == FAILURE) {
+        throw PhpInvalidParameterException();
+      }
+      escapeByDefault = integerFlag != 0;
     }
 
     // Class parameters
@@ -624,7 +583,7 @@ PHP_METHOD(Mustache, setEscapeByDefault)
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
 
     // Main
-    payload->mustache->setEscapeByDefault((bool) flag != 0);
+    payload->mustache->setEscapeByDefault(escapeByDefault);
     RETURN_TRUE;
 
   } catch(...) {

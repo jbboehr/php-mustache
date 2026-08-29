@@ -31,6 +31,8 @@
    <file name="README.md" role="doc" />
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
+   <file name="mustache.stub.php" role="src" />
+   <file name="mustache_arginfo.h" role="src" />
    <file name="mustache_ast.cpp" role="src" />
    <file name="mustache_ast.hpp" role="src" />
    <file name="mustache_class_method_lambda.cpp" role="src" />
@@ -52,6 +54,7 @@
    <file name="mustache_zend_closure_lambda.hpp" role="src" />
    <file name="php_mustache.cpp" role="src" />
    <file name="php_mustache.h" role="src" />
+   <file name="tests/arginfo-reflection.phpt" role="test" />
    <file name="tests/MustacheAST____construct.phpt" role="test" />
    <file name="tests/MustacheAST____sleep.phpt" role="test" />
    <file name="tests/MustacheAST__toArray.phpt" role="test" />
@@ -62,6 +65,7 @@
    <file name="tests/MustacheAST____toString.phpt" role="test" />
    <file name="tests/MustacheAST____wakeup-apc.phpt" role="test" />
    <file name="tests/MustacheAST____wakeup.phpt" role="test" />
+   <file name="tests/MustacheAST__construct-explicit-null.phpt" role="test" />
    <file name="tests/Mustache____construct.phpt" role="test" />
    <file name="tests/MustacheData____construct.phpt" role="test" />
    <file name="tests/MustacheData__conversion-errors-are-transactional.phpt" role="test" />
@@ -71,7 +75,9 @@
    <file name="tests/MustacheData__rejects-unsupported-values.phpt" role="test" />
    <file name="tests/MustacheData__scalar-types.phpt" role="test" />
    <file name="tests/MustacheData__toValue.phpt" role="test" />
+   <file name="tests/Mustache__accepts-template-wrapper-subclasses.phpt" role="test" />
    <file name="tests/Mustache__applies-ini-defaults.phpt" role="test" />
+   <file name="tests/Mustache__archive-benchmark-arginfo.phpt" role="test" />
    <file name="tests/Mustache__archive-benchmark-bridge.phpt" role="test" />
    <file name="tests/Mustache__archive-benchmark-default-api-absence.phpt" role="test" />
    <file name="tests/Mustache__debugDataStructure.phpt" role="test" />
@@ -124,6 +130,8 @@
    <file name="tests/Mustache__reports-ini-defaults.phpt" role="test" />
    <file name="tests/Mustache__reports-parser-errors.phpt" role="test" />
    <file name="tests/Mustache__setEscapeByDefault-large-integer.phpt" role="test" />
+   <file name="tests/Mustache__setEscapeByDefault-strict-types.phpt" role="test" />
+   <file name="tests/Mustache__setEscapeByDefault-weak-coercion.phpt" role="test" />
    <file name="tests/Mustache__setEscapeByDefault.phpt" role="test" />
    <file name="tests/Mustache__setStartSequence.phpt" role="test" />
    <file name="tests/Mustache__setStopSequence.phpt" role="test" />
@@ -273,6 +281,7 @@
    <file name="tests/MustacheTemplate____toString.phpt" role="test" />
    <file name="tests/MustacheTemplate____wakeup-apc.phpt" role="test" />
    <file name="tests/MustacheTemplate____wakeup.phpt" role="test" />
+   <file name="tests/MustacheTemplate__construct-explicit-null.phpt" role="test" />
    <file name="tests/Mustache__tokenize.phpt" role="test" />
    <file name="tests/gh-46.phpt" role="test" />
   </dir>

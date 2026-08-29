@@ -20,10 +20,12 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Store `MustacheAST` values with explicit ownership and bounded serialization.
 - Clone AST-backed partials into each compatibility render so ownership never aliases PHP objects.
 - Make `Mustache::render()` and invalid-input paths in `Mustache::parse()` throw `TypeError` or `ValueError` instead of emitting warnings or returning `false`, `null`, or partial output. Successful renders now always return strings.
+- Expose the documented method signatures through native reflection and ship the canonical PHP stub with source packages.
 
 ### Fixed
 
 - Accept explicit `null` for the optional partial map, matching the public signature and an omitted argument.
+- Accept `MustacheTemplate` and `MustacheAST` subclasses wherever their base classes are supported.
 - Reject `MustacheTemplate` values whose stored source is not a string instead of coercing them with a warning.
 - Reject recursive, over-deep, and over-budget data conversion without publishing a partial `MustacheData` value.
 - Retain PHP objects and closures for as long as their converted lambda values are alive.

@@ -35,6 +35,9 @@ printException('render-empty-template', function () use ($mustache) {
 printException('parse-int', function () use ($mustache) {
   $mustache->parse(123);
 });
+printException('parse-object', function () use ($mustache) {
+  $mustache->parse(new stdClass());
+});
 
 $emptyAST = (new ReflectionClass(MustacheAST::class))->newInstanceWithoutConstructor();
 printException('render-empty-ast', function () use ($mustache, $emptyAST) {
@@ -78,6 +81,7 @@ render-int:TypeError warnings=0
 render-object:TypeError warnings=0
 render-empty-template:ValueError warnings=0
 parse-int:TypeError warnings=0
+parse-object:TypeError warnings=0
 render-empty-ast:ValueError warnings=0
 parse-empty-ast:ValueError warnings=0
 source-numeric-partial:ValueError warnings=0

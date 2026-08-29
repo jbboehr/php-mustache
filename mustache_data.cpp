@@ -6,6 +6,7 @@
 #include <mustache/mustache.hpp>
 #include <mustache/lambda.hpp>
 #include "php_mustache.h"
+#include "mustache_arginfo.h"
 #include "mustache_private.hpp"
 #include <Zend/zend_closures.h>
 #include <Zend/zend_gc.h>
@@ -31,19 +32,10 @@ void addGcValues(const mustache::Data& data, zend_get_gc_buffer * gc_buffer);
 
 }
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(MustacheData____construct_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-    ZEND_ARG_INFO(0, tmpl)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(MustacheData__toValue_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ MustacheData_methods */
 static zend_function_entry MustacheData_methods[] = {
-  PHP_ME(MustacheData, __construct, MustacheData____construct_args, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-  PHP_ME(MustacheData, toValue, MustacheData__toValue_args, ZEND_ACC_PUBLIC)
+  PHP_ME(MustacheData, __construct, arginfo_class_MustacheData___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+  PHP_ME(MustacheData, toValue, arginfo_class_MustacheData_toValue, ZEND_ACC_PUBLIC)
   { NULL, NULL, NULL }
 };
 /* }}} */

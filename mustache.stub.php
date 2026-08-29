@@ -68,7 +68,7 @@ class Mustache
     /**
      * Renders a template with the supplied data and partials.
      *
-     * @param array<string, string|MustacheTemplate|MustacheAST>|null $partials
+     * @phpstan-param array<string, string|MustacheTemplate|MustacheAST>|null $partials
      *
      * @throws TypeError If the template or data has an unsupported PHP type.
      * @throws ValueError If the template, data, or partial map is invalid.
@@ -97,6 +97,27 @@ class Mustache
     public function debugDataStructure(mixed $vars): mixed
     {
     }
+
+#if defined(PHP_MUSTACHE_ARCHIVE_BENCHMARK)
+    /**
+     * Serializes a template for archived-template benchmarking.
+     *
+     * @internal
+     * @phpstan-param array<string, string|MustacheTemplate|MustacheAST> $partials
+     */
+    public function benchmarkSerializeArchive(string $tmpl, array $partials = []): string
+    {
+    }
+
+    /**
+     * Renders an archived template for benchmarking.
+     *
+     * @internal
+     */
+    public function benchmarkRenderArchive(string $archive, mixed $vars): ?string
+    {
+    }
+#endif
 }
 
 /**
