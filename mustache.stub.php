@@ -95,8 +95,12 @@ class Mustache
     }
 
     /**
-     * Tokenizes a source template into its internal tree representation.
+     * Returns libmustache's internal parse tree for diagnostics.
      *
+     * The array shape is not part of the compatibility contract and may change
+     * between releases.
+     *
+     * @internal
      * @return array<string, mixed>
      */
     public function tokenize(string $tmpl): array
@@ -104,7 +108,11 @@ class Mustache
     }
 
     /**
-     * Converts data to libmustache's internal representation and back.
+     * Converts data to libmustache's internal representation and back for diagnostics.
+     *
+     * The result is not part of the compatibility contract and is lossy for lambdas.
+     *
+     * @internal
      */
     public function debugDataStructure(mixed $vars): mixed
     {
@@ -164,8 +172,12 @@ class MustacheAST
     }
 
     /**
-     * Returns the parsed template tree.
+     * Returns libmustache's internal parse tree for diagnostics.
      *
+     * The array shape is not part of the compatibility contract and may change
+     * between releases. Use toBinary() for persistent parsed-template caches.
+     *
+     * @internal
      * @return array<string, mixed>
      */
     public function toArray(): array

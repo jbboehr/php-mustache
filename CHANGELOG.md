@@ -24,6 +24,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Make `Mustache::parse()` consistently return a `MustacheAST`, preserving the identity of existing AST values and compiling `MustacheTemplate` values.
 - Expose the documented method signatures through native reflection and ship the canonical PHP stub with source packages.
 - Deprecate `MustacheAST::__toString()` in the tooling stub in favor of the explicit binary export API.
+- Mark `Mustache::tokenize()`, `Mustache::debugDataStructure()`, and `MustacheAST::toArray()` as unstable diagnostic APIs.
 
 ### Fixed
 
