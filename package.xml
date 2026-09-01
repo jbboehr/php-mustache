@@ -88,6 +88,7 @@
    <file name="tests/Mustache__getEscapeByDefault.phpt" role="test" />
    <file name="tests/Mustache__getStartSequence.phpt" role="test" />
    <file name="tests/Mustache__getStopSequence.phpt" role="test" />
+   <file name="tests/Mustache__rejects-unsupported-serialization.phpt" role="test" />
    <file name="tests/MustacheLambdaHelper__render-closure.phpt" role="test" />
    <file name="tests/MustacheLambdaHelper__render-object.phpt" role="test" />
    <file name="tests/MustacheLambdaHelper__nested-exception-contexts.phpt" role="test" />

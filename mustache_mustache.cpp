@@ -6,6 +6,10 @@
 #include "php_mustache.h"
 #include "mustache_arginfo.h"
 #include "mustache_private.hpp"
+#if PHP_VERSION_ID < 80100
+#include <Zend/zend_exceptions.h>
+#include <Zend/zend_interfaces.h>
+#endif
 #include "mustache_ast.hpp"
 #include "mustache_data.hpp"
 #include "mustache_exceptions.hpp"
@@ -28,8 +32,28 @@ zend_class_entry * Mustache_ce_ptr;
 static zend_object_handlers Mustache_obj_handlers;
 /* }}} */
 
+#if PHP_VERSION_ID < 80100
+PHP_METHOD(Mustache, __serialize)
+{
+  zend_throw_exception(zend_ce_exception,
+      "Serialization of 'Mustache' is not allowed", 0);
+  RETURN_THROWS();
+}
+
+PHP_METHOD(Mustache, __unserialize)
+{
+  zend_throw_exception(zend_ce_exception,
+      "Serialization of 'Mustache' is not allowed", 0);
+  RETURN_THROWS();
+}
+#endif
+
 /* {{{ Mustache_methods */
 static zend_function_entry Mustache_methods[] = {
+#if PHP_VERSION_ID < 80100
+  PHP_ME(Mustache, __serialize, arginfo_class_Mustache___serialize, ZEND_ACC_PUBLIC | ZEND_ACC_FINAL)
+  PHP_ME(Mustache, __unserialize, arginfo_class_Mustache___unserialize, ZEND_ACC_PUBLIC | ZEND_ACC_FINAL)
+#endif
   PHP_ME(Mustache, __construct, arginfo_class_Mustache___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
   PHP_ME(Mustache, getEscapeByDefault, arginfo_class_Mustache_getEscapeByDefault, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, getStartSequence, arginfo_class_Mustache_getStartSequence, ZEND_ACC_PUBLIC)
@@ -106,6 +130,12 @@ PHP_MINIT_FUNCTION(mustache_mustache)
 
     INIT_CLASS_ENTRY(ce, "Mustache", Mustache_methods);
     ce.create_object = Mustache_obj_create;
+#if PHP_VERSION_ID < 80100
+    ce.serialize = zend_class_serialize_deny;
+    ce.unserialize = zend_class_unserialize_deny;
+#else
+    ce.ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+#endif
     Mustache_ce_ptr = zend_register_internal_class(&ce);
     memcpy(&Mustache_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
     Mustache_obj_handlers.offset = XtOffsetOf(php_obj_Mustache, std);

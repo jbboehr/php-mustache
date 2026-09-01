@@ -1,5 +1,16 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d95fa7cc68a1501735ffab5e0aa27b5a36bfe3f4 */
+ * Stub hash: fac02b30b36d9836d2daebfa14ee7d559cebee25 */
+
+#if PHP_VERSION_ID < 80100
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Mustache___serialize, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if PHP_VERSION_ID < 80100
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Mustache___unserialize, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Mustache___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -79,6 +90,14 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_MustacheTemplate___construct arginfo_class_MustacheAST___construct
 
 #define arginfo_class_MustacheTemplate___toString arginfo_class_Mustache_getStartSequence
+
+#if PHP_VERSION_ID < 80100
+#define arginfo_class_MustacheData___serialize arginfo_class_Mustache___serialize
+#endif
+
+#if PHP_VERSION_ID < 80100
+#define arginfo_class_MustacheData___unserialize arginfo_class_Mustache___unserialize
+#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MustacheData___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, tmpl, IS_MIXED, 0)

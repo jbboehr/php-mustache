@@ -8,6 +8,10 @@
 #include "php_mustache.h"
 #include "mustache_arginfo.h"
 #include "mustache_private.hpp"
+#if PHP_VERSION_ID < 80100
+#include <Zend/zend_exceptions.h>
+#include <Zend/zend_interfaces.h>
+#endif
 #include <Zend/zend_closures.h>
 #include <Zend/zend_gc.h>
 #include "mustache_class_method_lambda.hpp"
@@ -26,6 +30,22 @@ zend_class_entry * MustacheData_ce_ptr;
 static zend_object_handlers MustacheData_obj_handlers;
 /* }}} */
 
+#if PHP_VERSION_ID < 80100
+PHP_METHOD(MustacheData, __serialize)
+{
+  zend_throw_exception(zend_ce_exception,
+      "Serialization of 'MustacheData' is not allowed", 0);
+  RETURN_THROWS();
+}
+
+PHP_METHOD(MustacheData, __unserialize)
+{
+  zend_throw_exception(zend_ce_exception,
+      "Serialization of 'MustacheData' is not allowed", 0);
+  RETURN_THROWS();
+}
+#endif
+
 namespace {
 
 void addGcValues(const mustache::Data& data, zend_get_gc_buffer * gc_buffer);
@@ -34,6 +54,10 @@ void addGcValues(const mustache::Data& data, zend_get_gc_buffer * gc_buffer);
 
 /* {{{ MustacheData_methods */
 static zend_function_entry MustacheData_methods[] = {
+#if PHP_VERSION_ID < 80100
+  PHP_ME(MustacheData, __serialize, arginfo_class_MustacheData___serialize, ZEND_ACC_PUBLIC | ZEND_ACC_FINAL)
+  PHP_ME(MustacheData, __unserialize, arginfo_class_MustacheData___unserialize, ZEND_ACC_PUBLIC | ZEND_ACC_FINAL)
+#endif
   PHP_ME(MustacheData, __construct, arginfo_class_MustacheData___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
   PHP_ME(MustacheData, toValue, arginfo_class_MustacheData_toValue, ZEND_ACC_PUBLIC)
   { NULL, NULL, NULL }
@@ -109,6 +133,12 @@ PHP_MINIT_FUNCTION(mustache_data)
 
   INIT_CLASS_ENTRY(ce, "MustacheData", MustacheData_methods);
   ce.create_object = MustacheData_obj_create;
+#if PHP_VERSION_ID < 80100
+  ce.serialize = zend_class_serialize_deny;
+  ce.unserialize = zend_class_unserialize_deny;
+#else
+  ce.ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+#endif
   MustacheData_ce_ptr = zend_register_internal_class(&ce);
   memcpy(&MustacheData_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
   MustacheData_obj_handlers.offset = XtOffsetOf(struct php_obj_MustacheData, std);

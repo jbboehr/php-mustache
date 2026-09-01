@@ -5,6 +5,18 @@
  */
 class Mustache
 {
+#if PHP_VERSION_ID < 80100
+    /** @internal PHP 8.0 serialization-denial hook. */
+    final public function __serialize(): array
+    {
+    }
+
+    /** @internal PHP 8.0 serialization-denial hook. */
+    final public function __unserialize(array $data): void
+    {
+    }
+#endif
+
     public function __construct()
     {
     }
@@ -206,6 +218,18 @@ class MustacheTemplate
  */
 class MustacheData
 {
+#if PHP_VERSION_ID < 80100
+    /** @internal PHP 8.0 serialization-denial hook. */
+    final public function __serialize(): array
+    {
+    }
+
+    /** @internal PHP 8.0 serialization-denial hook. */
+    final public function __unserialize(array $data): void
+    {
+    }
+#endif
+
     public function __construct(mixed $tmpl)
     {
     }

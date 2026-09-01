@@ -37,6 +37,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Reject attempts to reinitialize a `MustacheAST` while its node may be borrowed by a render.
 - Invalidate retained `MustacheLambdaHelper` values safely when their callback returns.
 - Release lambda arguments and return values reliably when callbacks or string conversion fail.
+- Reject serialization of `Mustache` and `MustacheData` instead of restoring objects with reset or missing native state.
 - Declare parser-error location properties with `-1` defaults for unknown locations so invalid templates do not emit PHP 8.2 deprecation notices.
 - Preserve literal format specifiers in exception messages and stop rendering as soon as a PHP lambda callback raises an exception.
 - Fix the `mustache.default_*` INI directives, which were registered under pointer-sized truncated names and read past their default literals. Existing `php.ini` and `ini_set()` values now take effect.
