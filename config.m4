@@ -124,7 +124,7 @@ if test "$PHP_MUSTACHE" != "no"; then
 #endif
     ]], [[
       mustache::ArchivedTemplateLimits limits;
-      return limits.maxInputBytes == 0;
+      return limits.maxArchiveBytes == 0;
     ]])], [
       AC_MSG_RESULT([yes])
       AC_DEFINE(PHP_MUSTACHE_ARCHIVE_BENCHMARK, 1,

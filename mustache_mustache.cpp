@@ -470,12 +470,12 @@ static void mustache_parse_partials(zval * partials_value, mustache::Mustache * 
 static mustache::ArchivedTemplateLimits mustache_archive_benchmark_limits()
 {
   mustache::ArchivedTemplateLimits limits;
-  limits.maxInputBytes = size_t{16} * 1024 * 1024;
+  limits.maxArchiveBytes = size_t{16} * 1024 * 1024;
   limits.maxNestingDepth = 64;
   limits.maxNodes = 100000;
-  limits.maxStringBytes = size_t{16} * 1024 * 1024;
+  limits.maxTotalStringBytes = size_t{16} * 1024 * 1024;
   limits.maxDataPartsPerNode = 256;
-  limits.maxDataParts = 100000;
+  limits.maxTotalDataParts = 100000;
   return limits;
 }
 #endif
@@ -890,13 +890,22 @@ PHP_METHOD(Mustache, benchmarkSerializeArchive)
     }
 
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
-    mustache::Node root;
-    payload->mustache->tokenize(std::string_view(templateStr, templateLen), &root);
-
-    mustache::Node::Partials templatePartials;
-    mustache_parse_partials(partials, payload->mustache, templatePartials, 2);
-    const std::vector<std::uint8_t> archive = mustache::serializeArchivedTemplate(
-        root, templatePartials, mustache_archive_benchmark_limits());
+    std::vector<std::uint8_t> archive;
+    if( mustache_partials_include_ast(partials) ) {
+      mustache::Node root;
+      payload->mustache->tokenize(std::string_view(templateStr, templateLen), &root);
+      mustache::Node::Partials templatePartials;
+      mustache_parse_partials(partials, payload->mustache, templatePartials, 2);
+      archive = mustache::serializeArchivedTemplate(
+          root, templatePartials, mustache_archive_benchmark_limits());
+    } else {
+      const mustache::CompiledTemplate compiled = payload->mustache->compile(
+          std::string_view(templateStr, templateLen));
+      mustache::PartialMap compiledPartials;
+      mustache_compile_partials(partials, payload->mustache, compiledPartials, 2);
+      archive = mustache::serializeArchivedTemplate(
+          compiled, compiledPartials, mustache_archive_benchmark_limits());
+    }
     RETVAL_STRINGL(reinterpret_cast<const char *>(archive.data()), archive.size());
   } catch(...) {
     mustache_exception_handler();
@@ -925,7 +934,7 @@ PHP_METHOD(Mustache, benchmarkRenderArchive)
       return;
     }
 
-    const mustache::ArchivedTemplateView archived = mustache::loadArchivedTemplate(
+    const mustache::ArchivedTemplate archived = mustache::loadArchivedTemplate(
         std::string_view(archiveStr, archiveLen), mustache_archive_benchmark_limits());
     const std::string output = payload->mustache->render(archived, *templateDataPtr);
     RETVAL_STRINGL(output.c_str(), output.length());

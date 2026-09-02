@@ -45,12 +45,21 @@ var_dump(
 $configured = new Mustache();
 $configured->setStartSequence('<%');
 $configured->setStopSequence('%>');
-$configuredTemplate = '<%name%>';
-$configuredArchive = $configured->benchmarkSerializeArchive($configuredTemplate);
-var_dump(
-    $configured->benchmarkRenderArchive($configuredArchive, $data)
-    === $configured->render($configuredTemplate, $data, [])
+$configuredTemplate = '<%>layout%>';
+$configuredPartials = [
+    'layout' => '[<%>card%>]',
+    'card' => '<%name%>',
+];
+$configuredArchive = $configured->benchmarkSerializeArchive(
+    $configuredTemplate,
+    $configuredPartials,
 );
+$configuredFromArchive = $configured->benchmarkRenderArchive($configuredArchive, $data);
+var_dump(
+    $configuredFromArchive
+    === $configured->render($configuredTemplate, $data, $configuredPartials)
+);
+var_dump($configuredFromArchive);
 
 try {
     $mustache->benchmarkRenderArchive(substr($archive, 0, -1), []);
@@ -67,4 +76,5 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+string(5) "[Ada]"
 MustacheException

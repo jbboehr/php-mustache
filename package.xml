@@ -82,6 +82,8 @@
    <file name="tests/Mustache__accepts-template-wrapper-subclasses.phpt" role="test" />
    <file name="tests/Mustache__applies-ini-defaults.phpt" role="test" />
    <file name="tests/Mustache__archive-benchmark-arginfo.phpt" role="test" />
+   <file name="tests/Mustache__archive-benchmark-ast-partial.phpt" role="test" />
+   <file name="tests/Mustache__archive-benchmark-boundaries.phpt" role="test" />
    <file name="tests/Mustache__archive-benchmark-bridge.phpt" role="test" />
    <file name="tests/Mustache__archive-benchmark-default-api-absence.phpt" role="test" />
    <file name="tests/Mustache__debugDataStructure.phpt" role="test" />
