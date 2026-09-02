@@ -4,7 +4,7 @@ source .github/scripts/vars.sh
 source .github/scripts/fold.sh
 
 export COVERAGE=${COVERAGE:-true}
-export TRAVIS_BUILD_DIR=${TRAVIS_BUILD_DIR:-`pwd`}
+export REPOSITORY_ROOT="${REPOSITORY_ROOT:-$PWD}"
 export INSTALL_PREFIX=${HOME}/build
 export PKG_CONFIG_PATH="${INSTALL_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
 export LD_LIBRARY_PATH="${INSTALL_PREFIX}/lib:${LD_LIBRARY_PATH}"
@@ -25,12 +25,6 @@ function install_libmustache() (
     make all install
 )
 
-function before_install() (
-    set -o errexit -o pipefail
-
-    return 0
-)
-
 function build_php_mustache() (
     set -o errexit -o pipefail -o xtrace
 
@@ -47,26 +41,11 @@ function build_php_mustache() (
     make clean all
 )
 
-function install() (
-    set -o errexit -o pipefail
-
-    cifold "install libmustache" install_libmustache
-    cifold "main build step" build_php_mustache
-)
-
 function initialize_coverage() (
     set -o errexit -o pipefail -o xtrace
 
     lcov --directory . --zerocounters
     lcov --no-checksum --directory . --capture --compat-libtool --initial --output-file coverage.base
-)
-
-function before_script() (
-    set -e -o pipefail
-
-    if [[ "${COVERAGE}" = "true" ]]; then
-        cifold "initialize coverage" initialize_coverage
-    fi
 )
 
 function test_php_mustache() (
@@ -75,28 +54,14 @@ function test_php_mustache() (
     ${TEST_PHP_EXECUTABLE} run-tests.php -n -d extension=modules/mustache.so -j$(nproc --all) ./tests/*.phpt
 )
 
-function script() (
-    set -o errexit -o pipefail
-
-    cifold "main test suite" test_php_mustache
-)
-
 function process_coverage() (
     set -o errexit -o pipefail -o xtrace
 
     lcov --no-checksum --directory . --capture --compat-libtool --output-file coverage.run
     lcov --add-tracefile coverage.base --add-tracefile coverage.run --output-file coverage.info
-    lcov --extract coverage.info "${TRAVIS_BUILD_DIR}/*" \
+    lcov --extract coverage.info "${REPOSITORY_ROOT}/*" \
         --compat-libtool \
         --output-file coverage.info
-)
-
-function after_success() (
-    set -o errexit -o pipefail
-
-    if [[ "${COVERAGE}" = "true" ]]; then
-        cifold "upload coverage" process_coverage
-    fi
 )
 
 function after_failure() (
@@ -115,11 +80,16 @@ function after_failure() (
 )
 
 function run_all() (
-    set -e
+    set -e -o pipefail
     trap after_failure ERR
-    before_install
-    install
-    before_script
-    script
-    after_success
+
+    cifold "install libmustache" install_libmustache
+    cifold "main build step" build_php_mustache
+    if [[ "${COVERAGE}" = "true" ]]; then
+        cifold "initialize coverage" initialize_coverage
+    fi
+    cifold "main test suite" test_php_mustache
+    if [[ "${COVERAGE}" = "true" ]]; then
+        cifold "upload coverage" process_coverage
+    fi
 )

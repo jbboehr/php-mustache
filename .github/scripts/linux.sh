@@ -19,6 +19,6 @@ function install_apt_packages() (
 
 cifold "install apt packages" install_apt_packages
 
-# source and execute script used in travis
+# source and execute the shared build and test suite
 source .github/scripts/suite.sh
 run_all
