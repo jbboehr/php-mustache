@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 27d151256e0d24788a3f074e6d561b1f81097179 */
+ * Stub hash: 571fbb4a8e3285cf395953fe0e45cf3416c29666 */
 
 #if PHP_VERSION_ID < 80100
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Mustache___serialize, 0, 0, IS_ARRAY, 0)
@@ -75,17 +75,18 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_MustacheAST_fromBinary, 0,
 	ZEND_ARG_TYPE_INFO(0, binary, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_MustacheAST___sleep, 0, 0, IS_ARRAY, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_MustacheAST___serialize, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_MustacheAST_toArray arginfo_class_MustacheAST___sleep
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_MustacheAST___unserialize, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_MustacheAST_toArray arginfo_class_MustacheAST___serialize
 
 #define arginfo_class_MustacheAST_toBinary arginfo_class_Mustache_getStartSequence
 
 #define arginfo_class_MustacheAST___toString arginfo_class_Mustache_getStartSequence
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_MustacheAST___wakeup, 0, 0, IS_VOID, 0)
-ZEND_END_ARG_INFO()
 
 #define arginfo_class_MustacheTemplate___construct arginfo_class_MustacheAST___construct
 

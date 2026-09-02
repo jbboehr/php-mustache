@@ -25,6 +25,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Expose the documented method signatures through native reflection and ship the canonical PHP stub with source packages.
 - Deprecate `MustacheAST::__toString()` in the tooling stub in favor of the explicit binary export API.
 - Mark `Mustache::tokenize()`, `Mustache::debugDataStructure()`, and `MustacheAST::toArray()` as unstable diagnostic APIs.
+- Replace `MustacheAST::__sleep()` and `MustacheAST::__wakeup()` with `__serialize()` and `__unserialize()` while continuing to accept existing serialized payloads.
 
 ### Fixed
 

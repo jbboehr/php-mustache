@@ -73,11 +73,11 @@ $methods = [
     'MustacheAST' => [
         '__construct',
         'fromBinary',
-        '__sleep',
+        '__serialize',
+        '__unserialize',
         'toArray',
         'toBinary',
         '__toString',
-        '__wakeup',
     ],
     'MustacheTemplate' => ['__construct', '__toString'],
     'MustacheData' => ['__construct', 'toValue'],
@@ -104,11 +104,11 @@ public Mustache::tokenize(tmpl:string):array
 public Mustache::debugDataStructure(vars:mixed):mixed
 public MustacheAST::__construct(vars:null|string=NULL):-
 public static MustacheAST::fromBinary(binary:string):static
-public MustacheAST::__sleep():array
+public MustacheAST::__serialize():array
+public MustacheAST::__unserialize(data:array):void
 public MustacheAST::toArray():array
 public MustacheAST::toBinary():string
 public MustacheAST::__toString():string
-public MustacheAST::__wakeup():void
 public MustacheTemplate::__construct(vars:null|string=NULL):-
 public MustacheTemplate::__toString():string
 public MustacheData::__construct(tmpl:mixed):-

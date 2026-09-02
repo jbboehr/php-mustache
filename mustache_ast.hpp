@@ -27,10 +27,10 @@ PHP_MINIT_FUNCTION(mustache_ast);
 
 PHP_METHOD(MustacheAST, __construct);
 PHP_METHOD(MustacheAST, fromBinary);
-PHP_METHOD(MustacheAST, __sleep);
+PHP_METHOD(MustacheAST, __serialize);
+PHP_METHOD(MustacheAST, __unserialize);
 PHP_METHOD(MustacheAST, toArray);
 PHP_METHOD(MustacheAST, toBinary);
 PHP_METHOD(MustacheAST, __toString);
-PHP_METHOD(MustacheAST, __wakeup);
 
 #endif /* PHP_MUSTACHE_AST_HPP */

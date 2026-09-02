@@ -7,27 +7,25 @@ MustacheAST rejects reinitialization during render
 $mustache = new Mustache();
 $ast = $mustache->parse('{{#reset}}x{{/reset}}{{tail}}');
 $binary = (string) $ast;
-serialize($ast);
+$serializedData = $ast->__serialize();
 
-$warning = null;
-set_error_handler(function ($level, $message) use (&$warning) {
-  $warning = $message;
-  return true;
-});
-$result = $mustache->render($ast, array(
-  'reset' => function () use ($ast) {
-    $ast->__wakeup();
-    return '';
-  },
-  'tail' => 'y',
-));
-restore_error_handler();
+try {
+  $mustache->render($ast, array(
+    'reset' => function () use ($ast, $serializedData) {
+      $ast->__unserialize($serializedData);
+      return '';
+    },
+    'tail' => 'y',
+  ));
+  echo "accepted\n";
+} catch (ValueError $exception) {
+  echo "rejected\n";
+}
 
-var_dump(strpos($warning, 'MustacheAST is already initialized') !== false);
-var_dump($result);
 var_dump((string) $ast === $binary);
+var_dump($mustache->render($ast, ['tail' => 'y']));
 ?>
 --EXPECT--
+rejected
 bool(true)
 string(1) "y"
-bool(true)

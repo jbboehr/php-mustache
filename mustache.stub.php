@@ -145,9 +145,6 @@ class Mustache
  */
 class MustacheAST
 {
-    /** @var string|null Serialized AST storage used by PHP serialization. */
-    protected $binaryString = null;
-
     /**
      * Constructs an AST from libmustache's binary representation.
      */
@@ -163,11 +160,20 @@ class MustacheAST
     }
 
     /**
-     * Stores the binary AST for PHP serialization.
+     * Returns the data used by PHP serialization.
      *
-     * @return list<string>
+     * @return array{binary: string}
      */
-    public function __sleep(): array
+    public function __serialize(): array
+    {
+    }
+
+    /**
+     * Restores the native AST from PHP serialization data.
+     *
+     * Legacy payloads produced by __sleep() are also accepted.
+     */
+    public function __unserialize(array $data): void
     {
     }
 
@@ -200,12 +206,6 @@ class MustacheAST
     {
     }
 
-    /**
-     * Restores the native AST after PHP unserialization.
-     */
-    public function __wakeup(): void
-    {
-    }
 }
 
 /**
