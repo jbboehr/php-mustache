@@ -6,11 +6,6 @@ ini_set('memory_limit', '256M');
 ini_set('display_errors', true);
 define('MY_EOL', "\n"); // PHP_EOL
 
-if( !extension_loaded('yaml') ) {
-  echo 'Requires php-yaml' . PHP_EOL;
-  exit(1);
-}
-
 // Argv
 if( !empty($argv[1]) && is_dir($argv[1]) ) {
   $specDir = $argv[1];
@@ -21,21 +16,17 @@ if( !empty($argv[1]) && is_dir($argv[1]) ) {
   exit(1);
 }
 
-$specs = array();
 $specData = array();
 foreach( scandir($specDir) as $file ) {
-  //if( strlen($file) > 5 && substr($file, -5) ==  '.json' ) {
-  if( strlen($file) > 4 && substr($file, -4) == '.yml' ) {
-    $spec = substr($file, 0, -4);
-    $specs[] = $spec;
-    
+  if( strlen($file) > 5 && substr($file, -5) == '.json' ) {
+    $spec = substr($file, 0, -5);
+
     $contents = file_get_contents($specDir . DIRECTORY_SEPARATOR . $file);
-    //$specData[$spec] = json_decode($contents, true);
-    $specData[$spec] = yaml_parse($contents);
+    $specData[$spec] = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
   }
 }
 
-if( empty($specs) ) {
+if( empty($specData) ) {
   echo 'No specs found in specified directory' . MY_EOL;
   exit(1);
 }
