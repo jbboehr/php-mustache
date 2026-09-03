@@ -6,7 +6,6 @@
 #define NOMINMAX
 
 #include "php_mustache.h"
-#include "mustache_private.hpp"
 #include <algorithm>
 #include "mustache_exceptions.hpp"
 #include "mustache_lambda_helper.hpp"
@@ -44,19 +43,13 @@ class ZvalGuard {
 
 class ZvalArguments {
   private:
-    zval * values;
+    zval values[2];
     int count;
 
   public:
     explicit ZvalArguments(int argument_count) :
-        values(NULL),
         count(argument_count)
     {
-      if( count == 0 ) {
-        return;
-      }
-
-      values = (zval *) safe_emalloc(count, sizeof(zval), 0);
       for( int i = 0; i < count; i++ ) {
         ZVAL_UNDEF(&values[i]);
       }
@@ -64,16 +57,11 @@ class ZvalArguments {
 
     ~ZvalArguments()
     {
-      if( values == NULL ) {
-        return;
-      }
-
       for( int i = count - 1; i >= 0; i-- ) {
         if( !Z_ISUNDEF(values[i]) ) {
           zval_ptr_dtor(&values[i]);
         }
       }
-      efree(values);
     }
 
     ZvalArguments(const ZvalArguments&) = delete;
@@ -81,7 +69,7 @@ class ZvalArguments {
 
     zval * data()
     {
-      return values;
+      return count == 0 ? NULL : values;
     }
 
     zval& operator[](int index)
@@ -122,7 +110,7 @@ std::string Lambda::invoke()
 std::string Lambda::invoke(
     std::string_view text, mustache::LambdaRenderContext context)
 {
-  int param_count = std::max(0, std::min(getUserFunctionParamCount(), 2));
+  int param_count = std::clamp(getUserFunctionParamCount(), 0, 2);
   ZvalArguments params(param_count);
   if( param_count >= 1 ) {
     ZVAL_STRINGL(&params[0], text.data(), text.size());

@@ -8,7 +8,6 @@
 #include <Zend/zend_closures.h>
 
 #include "mustache/mustache.hpp"
-#include "mustache_private.hpp"
 #include "mustache_zend_closure_lambda.hpp"
 
 ZendClosureLambda::~ZendClosureLambda()
@@ -23,11 +22,7 @@ void ZendClosureLambda::addGcValues(zend_get_gc_buffer * gc_buffer)
 
 int ZendClosureLambda::getUserFunctionParamCount()
 {
-#if PHP_VERSION_ID < 80000
-  const zend_function * func = zend_get_closure_method_def(&closure);
-#else
   const zend_function * func = zend_get_closure_method_def(Z_OBJ(closure));
-#endif
   return func->common.num_args;
 }
 

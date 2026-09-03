@@ -6,7 +6,6 @@
 #include "php_mustache.h"
 #include <Zend/zend_exceptions.h>
 #include "mustache/mustache.hpp"
-#include "mustache_private.hpp"
 #include "mustache_exceptions.hpp"
 
 /* {{{ ZE2 OO definitions */
@@ -32,9 +31,9 @@ PHP_MINIT_FUNCTION(mustache_exceptions)
     MustacheParserException_ce_ptr = zend_register_internal_class_ex(&mustache_parser_exception_ce, MustacheException_ce_ptr);
     MustacheParserException_ce_ptr->create_object = MustacheException_ce_ptr->create_object;
     zend_declare_property_long(MustacheParserException_ce_ptr,
-            "templateLineNo", sizeof("templateLineNo") - 1, -1, ZEND_ACC_PUBLIC);
+        ZEND_STRL("templateLineNo"), -1, ZEND_ACC_PUBLIC);
     zend_declare_property_long(MustacheParserException_ce_ptr,
-            "templateCharNo", sizeof("templateCharNo") - 1, -1, ZEND_ACC_PUBLIC);
+        ZEND_STRL("templateCharNo"), -1, ZEND_ACC_PUBLIC);
 
     return SUCCESS;
   } catch(...) {
@@ -61,13 +60,8 @@ void mustache_exception_handler()
     ZVAL_OBJ(&ex, obj);
     exception = &ex;
 
-#if PHP_VERSION_ID < 80000
-    zend_update_property_long(MustacheParserException_ce_ptr, exception, (char *) "templateLineNo", strlen("templateLineNo"), e.lineNo);
-    zend_update_property_long(MustacheParserException_ce_ptr, exception, (char *) "templateCharNo", strlen("templateCharNo"), e.charNo);
-#else
-    zend_update_property_long(MustacheParserException_ce_ptr, Z_OBJ_P(exception), (char *) "templateLineNo", strlen("templateLineNo"), e.lineNo);
-    zend_update_property_long(MustacheParserException_ce_ptr, Z_OBJ_P(exception), (char *) "templateCharNo", strlen("templateCharNo"), e.charNo);
-#endif
+    zend_update_property_long(MustacheParserException_ce_ptr, Z_OBJ_P(exception), ZEND_STRL("templateLineNo"), e.lineNo);
+    zend_update_property_long(MustacheParserException_ce_ptr, Z_OBJ_P(exception), ZEND_STRL("templateCharNo"), e.charNo);
   } catch( mustache::Exception& e ) {
     zend_throw_exception_ex(MustacheException_ce_ptr, 0,
             "%s", e.what());

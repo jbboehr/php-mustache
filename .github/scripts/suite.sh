@@ -11,17 +11,23 @@ export LD_LIBRARY_PATH="${INSTALL_PREFIX}/lib:${LD_LIBRARY_PATH}"
 
 export NO_INTERACTION=1
 export REPORT_EXIT_STATUS=1
-export TEST_PHP_EXECUTABLE=`which php`
+export TEST_PHP_EXECUTABLE="$(command -v php)"
 
 function install_libmustache() (
     set -o errexit -o pipefail -o xtrace
 
     rm -rf libmustache
-    git clone https://github.com/jbboehr/libmustache.git
+    git init libmustache
+    git -C libmustache remote add origin https://github.com/jbboehr/libmustache.git
+    git -C libmustache fetch --depth=1 origin "${LIBMUSTACHE_VERSION}"
+    git -C libmustache checkout --detach FETCH_HEAD
     cd libmustache
-    git checkout "${LIBMUSTACHE_VERSION}"
     autoreconf -fiv
-    ./configure --prefix=${INSTALL_PREFIX} --without-mustache-spec
+    ./configure \
+        --prefix="${INSTALL_PREFIX}" \
+        --without-json \
+        --without-mustache-spec \
+        --without-yaml
     make all install
 )
 

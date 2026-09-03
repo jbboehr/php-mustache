@@ -38,12 +38,9 @@ function install_system_packages() {
         gcc \
         git \
         jq \
-        libjson-c-dev \
         libtool \
-        libyaml-dev \
         m4 \
         make \
-        nlohmann-json3-dev \
         "php${PHP_VERSION}-cli" \
         "php${PHP_VERSION}-dev" \
         pkg-config
@@ -62,12 +59,18 @@ PHP_CONFIG=${PHP_CONFIG:-$(command -v "php-config${PHP_VERSION}")}
 export PKG_CONFIG_PATH="${INSTALL_PREFIX}/lib/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}"
 export LD_LIBRARY_PATH="${INSTALL_PREFIX}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
-git clone https://github.com/jbboehr/libmustache.git "${WORK_DIR}/libmustache"
-git -C "${WORK_DIR}/libmustache" checkout --detach "${LIBMUSTACHE_VERSION}"
+git init "${WORK_DIR}/libmustache"
+git -C "${WORK_DIR}/libmustache" remote add origin https://github.com/jbboehr/libmustache.git
+git -C "${WORK_DIR}/libmustache" fetch --depth=1 origin "${LIBMUSTACHE_VERSION}"
+git -C "${WORK_DIR}/libmustache" checkout --detach FETCH_HEAD
 (
     cd "${WORK_DIR}/libmustache"
     autoreconf -fiv
-    ./configure --prefix="${INSTALL_PREFIX}" --without-mustache-spec
+    ./configure \
+        --prefix="${INSTALL_PREFIX}" \
+        --without-json \
+        --without-mustache-spec \
+        --without-yaml
     make -j2
     make install
 )

@@ -4,7 +4,6 @@
 #endif
 
 #include "php_mustache.h"
-#include "mustache_private.hpp"
 #include "mustache_class_method_lambda.hpp"
 
 ClassMethodLambda::~ClassMethodLambda()

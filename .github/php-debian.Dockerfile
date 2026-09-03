@@ -16,23 +16,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         g++ \
         gcc \
         git \
-        libjson-c-dev \
         libtool \
-        libyaml-dev \
         m4 \
         make \
-        nlohmann-json3-dev \
         pkg-config
 
 # libmustache
-RUN git clone https://github.com/jbboehr/libmustache.git
 WORKDIR /build/libmustache
-RUN git checkout "${LIBMUSTACHE_VERSION}" && git submodule update --init
+RUN git init && \
+    git remote add origin https://github.com/jbboehr/libmustache.git && \
+    git fetch --depth=1 origin "${LIBMUSTACHE_VERSION}" && \
+    git checkout --detach FETCH_HEAD
 RUN autoreconf -fiv
 RUN ./configure \
         --prefix /usr/local/ \
         --enable-static \
         --disable-shared \
+        --without-json \
+        --without-mustache-spec \
+        --without-yaml \
         CXXFLAGS="-O3 -fPIC -DPIC -flto" \
         RANLIB=gcc-ranlib \
         AR=gcc-ar \
@@ -51,9 +53,6 @@ RUN make install
 
 # image1
 FROM ${BASE_IMAGE}
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        libjson-c-dev \
-        libyaml-dev
 COPY --from=0 /usr/local/lib/php/extensions /usr/local/lib/php/extensions
 RUN docker-php-ext-enable mustache
 ENTRYPOINT ["docker-php-entrypoint"]

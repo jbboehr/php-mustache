@@ -7,7 +7,6 @@
 #include <mustache/lambda.hpp>
 #include "php_mustache.h"
 #include "mustache_arginfo.h"
-#include "mustache_private.hpp"
 #if PHP_VERSION_ID < 80100
 #include <Zend/zend_exceptions.h>
 #include <Zend/zend_interfaces.h>
@@ -295,14 +294,17 @@ class DataConverter {
       zend_string * string_key = NULL;
       zval * value = NULL;
 
-      array_values.reserve(zend_hash_num_elements(values_hash));
-      object_values.reserve(zend_hash_num_elements(values_hash));
-
       ZEND_HASH_FOREACH_KEY_VAL_IND(values_hash, numeric_key, string_key, value) {
         (void) numeric_key;
         if( string_key == NULL ) {
+          if( !saw_numeric_key && !saw_string_key ) {
+            array_values.reserve(zend_hash_num_elements(values_hash));
+          }
           saw_numeric_key = true;
         } else {
+          if( !saw_numeric_key && !saw_string_key ) {
+            object_values.reserve(zend_hash_num_elements(values_hash));
+          }
           saw_string_key = true;
         }
         if( saw_numeric_key && saw_string_key ) {
@@ -335,11 +337,7 @@ class DataConverter {
       zval * value = NULL;
 
       if( Z_OBJ_HT_P(current)->get_properties != NULL ) {
-#if PHP_VERSION_ID >= 80000
         properties = Z_OBJ_HT_P(current)->get_properties(Z_OBJ_P(current));
-#else
-        properties = Z_OBJ_HT_P(current)->get_properties(current);
-#endif
       }
       if( properties == NULL ) {
         return;

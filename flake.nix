@@ -125,8 +125,14 @@
           };
         };
 
-        libmustachePackage = libmustache.packages.${system}.libmustache;
-        libmustacheCmakePackage = libmustache.packages.${system}.libmustache-cmake;
+        libmustachePackage = libmustache.packages.${system}.libmustache.override {
+          nlohmann_json = null;
+          libyaml = null;
+        };
+        libmustacheCmakePackage = libmustache.packages.${system}.libmustache-cmake.override {
+          nlohmann_json = null;
+          libyaml = null;
+        };
         # Keep the sanitizer job on the same Autotools package as the normal jobs.
         libmustacheSanitizedPackage = libmustachePackage.override {
           debugSupport = true;
@@ -276,10 +282,12 @@
           };
         };
 
+        matrixPhpVersions = ["php81" "php82" "php83" "php84" "php85"];
+
         # @see https://github.com/NixOS/nixpkgs/pull/110787
         buildConfs =
           (lib.cartesianProduct {
-            php = ["php81" "php82" "php83" "php84" "php85"];
+            php = matrixPhpVersions;
             stdenv = [
               "gcc"
               "clang"
@@ -290,7 +298,7 @@
             sanitizerSupport = [false];
           })
           ++ (lib.cartesianProduct {
-            php = ["php81" "php82" "php83" "php84" "php85"];
+            php = matrixPhpVersions;
             stdenv = ["gcc"];
             coverageSupport = [true];
             sanitizerSupport = [false];

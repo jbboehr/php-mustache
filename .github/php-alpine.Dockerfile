@@ -11,17 +11,22 @@ WORKDIR /build
 RUN test -n "${LIBMUSTACHE_VERSION}"
 
 RUN apk update && \
-    apk --no-cache add alpine-sdk automake autoconf libtool json-c-dev nlohmann-json yaml-dev
+    apk --no-cache add alpine-sdk automake autoconf libtool
 
 # libmustache
-RUN git clone https://github.com/jbboehr/libmustache.git
 WORKDIR /build/libmustache
-RUN git checkout "${LIBMUSTACHE_VERSION}" && git submodule update --init
+RUN git init && \
+    git remote add origin https://github.com/jbboehr/libmustache.git && \
+    git fetch --depth=1 origin "${LIBMUSTACHE_VERSION}" && \
+    git checkout --detach FETCH_HEAD
 RUN autoreconf -fiv
 RUN ./configure \
         --prefix /usr/local/ \
         --enable-static \
         --disable-shared \
+        --without-json \
+        --without-mustache-spec \
+        --without-yaml \
         CXXFLAGS="-O3 -fPIC -DPIC -flto" \
         RANLIB=gcc-ranlib \
         AR=gcc-ar \
@@ -40,7 +45,7 @@ RUN make install
 
 # image1
 FROM ${BASE_IMAGE}
-RUN apk --no-cache add json-c yaml libstdc++
+RUN apk --no-cache add libstdc++
 COPY --from=0 /usr/local/lib/php/extensions /usr/local/lib/php/extensions
 RUN docker-php-ext-enable mustache
 ENTRYPOINT ["docker-php-entrypoint"]

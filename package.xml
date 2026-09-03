@@ -47,7 +47,6 @@
    <file name="mustache_lambda_helper.hpp" role="src" />
    <file name="mustache_mustache.cpp" role="src" />
    <file name="mustache_mustache.hpp" role="src" />
-   <file name="mustache_private.hpp" role="src" />
    <file name="mustache_template.cpp" role="src" />
    <file name="mustache_template.hpp" role="src" />
    <file name="mustache_zend_closure_lambda.cpp" role="src" />
@@ -293,7 +292,6 @@
    <file name="tests/MustacheTemplate____construct.phpt" role="test" />
    <file name="tests/MustacheTemplate____sleep.phpt" role="test" />
    <file name="tests/MustacheTemplate____toString.phpt" role="test" />
-   <file name="tests/MustacheTemplate____wakeup-apc.phpt" role="test" />
    <file name="tests/MustacheTemplate____wakeup.phpt" role="test" />
    <file name="tests/MustacheTemplate__construct-explicit-null.phpt" role="test" />
    <file name="tests/Mustache__tokenize.phpt" role="test" />

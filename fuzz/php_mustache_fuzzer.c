@@ -241,8 +241,7 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
     }
     free(configuration);
 
-    mustache_ce = zend_hash_str_find_ptr(
-        CG(class_table), "mustache", sizeof("mustache") - 1);
+    mustache_ce = zend_hash_str_find_ptr(CG(class_table), ZEND_STRL("mustache"));
     if (mustache_ce == NULL) {
         fprintf(stderr, "Mustache class was not registered\n");
         abort();

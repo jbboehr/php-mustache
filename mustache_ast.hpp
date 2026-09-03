@@ -17,8 +17,6 @@ struct php_obj_MustacheAST {
 
 extern zend_class_entry * MustacheAST_ce_ptr;
 
-std::unique_ptr<mustache::Node> mustache_node_from_binary_string(const char * str, size_t len);
-std::string mustache_node_to_binary_string(const mustache::Node& node);
 void mustache_node_to_zval(const mustache::Node& node, zval * current);
 
 struct php_obj_MustacheAST * php_mustache_ast_object_fetch_object(zval * zv);
@@ -31,6 +29,5 @@ PHP_METHOD(MustacheAST, __serialize);
 PHP_METHOD(MustacheAST, __unserialize);
 PHP_METHOD(MustacheAST, toArray);
 PHP_METHOD(MustacheAST, toBinary);
-PHP_METHOD(MustacheAST, __toString);
 
 #endif /* PHP_MUSTACHE_AST_HPP */

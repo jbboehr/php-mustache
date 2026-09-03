@@ -5,7 +5,6 @@
 
 #include "php_mustache.h"
 #include "mustache_arginfo.h"
-#include "mustache_private.hpp"
 #if PHP_VERSION_ID < 80100
 #include <Zend/zend_exceptions.h>
 #include <Zend/zend_interfaces.h>
@@ -174,26 +173,18 @@ mustache::Mustache * mustache_new_Mustache() {
 /* }}} */
 
 /* {{{ mustache_parse_data_param */
-bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache, mustache::Data ** node)
+static void mustache_parse_data_param(zval * data, mustache::Data ** node)
 {
-  struct php_obj_MustacheData * mdPayload = NULL;
-
-  if( Z_TYPE_P(data) == IS_OBJECT ) {
-    if( Z_OBJCE_P(data) == MustacheData_ce_ptr ) {
-      mdPayload = php_mustache_data_object_fetch_object(data);
-      if( mdPayload->data == NULL ) {
-        throw InvalidParameterException("MustacheData was not initialized properly");
-      }
-      *node = mdPayload->data;
-      return true;
-    } else {
-      **node = mustache_data_from_zval(data);
-      return true;
+  if( Z_TYPE_P(data) == IS_OBJECT && Z_OBJCE_P(data) == MustacheData_ce_ptr ) {
+    struct php_obj_MustacheData * payload = php_mustache_data_object_fetch_object(data);
+    if( payload->data == NULL ) {
+      throw InvalidParameterException("MustacheData was not initialized properly");
     }
-  } else {
-    **node = mustache_data_from_zval(data);
-    return true;
+    *node = payload->data;
+    return;
   }
+
+  **node = mustache_data_from_zval(data);
 }
 /* }}} */
 
@@ -252,13 +243,8 @@ static const mustache::Node * mustache_ast_node(zval * value, uint32_t argument)
 static std::string mustache_template_object_source(zval * value, uint32_t argument)
 {
   zval rv;
-#if PHP_VERSION_ID < 80000
   zval * source_value = zend_read_property(
-      Z_OBJCE_P(value), value, "template", sizeof("template") - 1, 1, &rv);
-#else
-  zval * source_value = zend_read_property(
-      Z_OBJCE_P(value), Z_OBJ_P(value), "template", sizeof("template") - 1, 1, &rv);
-#endif
+      Z_OBJCE_P(value), Z_OBJ_P(value), ZEND_STRL("template"), 1, &rv);
   source_value = mustache_dereference_zval(source_value);
   if( source_value == NULL || Z_TYPE_P(source_value) != IS_STRING ) {
     mustache_argument_value_error(argument, "must contain a string MustacheTemplate source");
@@ -769,9 +755,7 @@ PHP_METHOD(Mustache, render)
           2, "array|object|string|int|float|bool|null", dataValue);
     }
     try {
-      if( !mustache_parse_data_param(data, payload->mustache, &templateDataPtr) ) {
-        mustache_argument_value_error(2, "could not be converted to Mustache data");
-      }
+      mustache_parse_data_param(data, &templateDataPtr);
     } catch( const InvalidParameterException& error ) {
       mustache_argument_value_error(2, error.what());
     }
@@ -830,12 +814,9 @@ PHP_METHOD(Mustache, tokenize)
     _this_zval = getThis();
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
 
-    // Assign template to string
-    std::string templateStr(template_str, template_len);
-
     // Tokenize template
     mustache::Node root;
-    payload->mustache->tokenize(std::string_view(templateStr), &root);
+    payload->mustache->tokenize(std::string_view(template_str, template_len), &root);
 
     // Convert to PHP array
     mustache_node_to_zval(root, return_value);
@@ -929,10 +910,7 @@ PHP_METHOD(Mustache, benchmarkRenderArchive)
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
     mustache::Data templateData;
     mustache::Data * templateDataPtr = &templateData;
-    if( !mustache_parse_data_param(data, payload->mustache, &templateDataPtr) ) {
-      RETURN_FALSE;
-      return;
-    }
+    mustache_parse_data_param(data, &templateDataPtr);
 
     const mustache::ArchivedTemplate archived = mustache::loadArchivedTemplate(
         std::string_view(archiveStr, archiveLen), mustache_archive_benchmark_limits());

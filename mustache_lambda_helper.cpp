@@ -5,7 +5,6 @@
 
 #include "php_mustache.h"
 #include "mustache_arginfo.h"
-#include "mustache_private.hpp"
 #include "mustache_exceptions.hpp"
 #include "mustache_lambda_helper.hpp"
 #include <memory>

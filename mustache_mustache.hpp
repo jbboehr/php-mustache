@@ -14,8 +14,6 @@ php_obj_Mustache * php_mustache_mustache_object_fetch_object(zval * zv);
 PHP_MINIT_FUNCTION(mustache_mustache);
 
 mustache::Mustache * mustache_new_Mustache();
-bool mustache_parse_data_param(zval * data, mustache::Mustache * mustache,
-    mustache::Data ** node);
 
 PHP_METHOD(Mustache, __construct);
 PHP_METHOD(Mustache, getEscapeByDefault);

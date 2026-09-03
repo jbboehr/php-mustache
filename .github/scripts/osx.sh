@@ -18,17 +18,23 @@ fi
 function install_brew_packages() (
     set -o errexit -o pipefail -o xtrace
 
-    brew install autoconf automake libtool pkg-config json-c libyaml nlohmann-json "${PHP_FORMULA}"
+    brew install autoconf automake libtool pkg-config "${PHP_FORMULA}"
 )
 
 function install_libmustache() (
     set -o errexit -o pipefail -o xtrace
 
-    git clone https://github.com/jbboehr/libmustache.git
+    git init libmustache
+    git -C libmustache remote add origin https://github.com/jbboehr/libmustache.git
+    git -C libmustache fetch --depth=1 origin "${LIBMUSTACHE_VERSION}"
+    git -C libmustache checkout --detach FETCH_HEAD
     cd libmustache
-    git checkout "${LIBMUSTACHE_VERSION}"
     autoreconf -i
-    ./configure --without-mustache-spec --prefix=$HOME/buildprefix
+    ./configure \
+        --prefix="$HOME/buildprefix" \
+        --without-json \
+        --without-mustache-spec \
+        --without-yaml
     make
     make install
 )

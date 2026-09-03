@@ -17,10 +17,7 @@ RUN dnf install \
     gcc \
     gcc-c++ \
     git \
-    json-c-devel \
-    json-devel \
     libtool \
-    libyaml-devel \
     m4 \
     make \
     php-devel \
@@ -29,14 +26,19 @@ RUN dnf install \
     -y
 
 # libmustache
-RUN git clone https://github.com/jbboehr/libmustache.git
 WORKDIR /build/libmustache
-RUN git checkout "${LIBMUSTACHE_VERSION}" && git submodule update --init
+RUN git init && \
+    git remote add origin https://github.com/jbboehr/libmustache.git && \
+    git fetch --depth=1 origin "${LIBMUSTACHE_VERSION}" && \
+    git checkout --detach FETCH_HEAD
 RUN autoreconf -fiv
 RUN ./configure \
         --prefix /usr/local/ \
         --enable-static \
         --disable-shared \
+        --without-json \
+        --without-mustache-spec \
+        --without-yaml \
         CXXFLAGS="-O3 -fPIC -DPIC -flto" \
         RANLIB=gcc-ranlib \
         AR=gcc-ar \

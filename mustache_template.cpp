@@ -5,7 +5,6 @@
 
 #include "php_mustache.h"
 #include "mustache_arginfo.h"
-#include "mustache_private.hpp"
 #include "mustache_exceptions.hpp"
 #include "mustache_template.hpp"
 
@@ -30,7 +29,7 @@ PHP_MINIT_FUNCTION(mustache_template)
     INIT_CLASS_ENTRY(ce, "MustacheTemplate", MustacheTemplate_methods);
     MustacheTemplate_ce_ptr = zend_register_internal_class(&ce);
 
-    zend_declare_property_null(MustacheTemplate_ce_ptr, "template", sizeof("template") - 1, ZEND_ACC_PROTECTED);
+    zend_declare_property_null(MustacheTemplate_ce_ptr, ZEND_STRL("template"), ZEND_ACC_PROTECTED);
 
     return SUCCESS;
   } catch(...) {
@@ -60,11 +59,7 @@ PHP_METHOD(MustacheTemplate, __construct)
 
     // Check if data was null
     if( template_len > 0 && template_str != NULL ) {
-#if PHP_VERSION_ID < 80000
-      zend_update_property_stringl(MustacheTemplate_ce_ptr, _this_zval, "template", sizeof("template") - 1, template_str, template_len);
-#else
-      zend_update_property_stringl(MustacheTemplate_ce_ptr, Z_OBJ_P(_this_zval), "template", sizeof("template") - 1, template_str, template_len);
-#endif
+      zend_update_property_stringl(MustacheTemplate_ce_ptr, Z_OBJ_P(_this_zval), ZEND_STRL("template"), template_str, template_len);
     }
 
   } catch(...) {
@@ -89,11 +84,7 @@ PHP_METHOD(MustacheTemplate, __toString)
 
     // Return
     zval rv;
-#if PHP_VERSION_ID < 80000
-    zval * value = zend_read_property(Z_OBJCE_P(_this_zval), _this_zval, "template", sizeof("template")-1, 1, &rv);
-#else
-    zval * value = zend_read_property(Z_OBJCE_P(_this_zval), Z_OBJ_P(_this_zval), "template", sizeof("template")-1, 1, &rv);
-#endif
+    zval * value = zend_read_property(Z_OBJCE_P(_this_zval), Z_OBJ_P(_this_zval), ZEND_STRL("template"), 1, &rv);
     convert_to_string(value);
     RETURN_ZVAL(value, 1, 0);
 
