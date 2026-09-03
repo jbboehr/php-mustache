@@ -1,5 +1,6 @@
 
-ARG BASE_IMAGE=fedora:latest
+# Fedora 44's GCC 16 currently breaks libmustache's Cista type-version witness.
+ARG BASE_IMAGE=fedora:43
 ARG LIBMUSTACHE_VERSION
 
 # image0
