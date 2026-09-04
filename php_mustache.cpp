@@ -31,14 +31,33 @@ PHP_INI_END()
 /* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(mustache)
 {
-  REGISTER_INI_ENTRIES();
+  if( REGISTER_INI_ENTRIES() == FAILURE ) {
+    return FAILURE;
+  }
 
-  PHP_MINIT(mustache_ast)(INIT_FUNC_ARGS_PASSTHRU);
-  PHP_MINIT(mustache_mustache)(INIT_FUNC_ARGS_PASSTHRU);
-  PHP_MINIT(mustache_data)(INIT_FUNC_ARGS_PASSTHRU);
-  PHP_MINIT(mustache_template)(INIT_FUNC_ARGS_PASSTHRU);
-  PHP_MINIT(mustache_exceptions)(INIT_FUNC_ARGS_PASSTHRU);
-  PHP_MINIT(mustache_lambda_helper)(INIT_FUNC_ARGS_PASSTHRU);
+  if( PHP_MINIT(mustache_ast)(INIT_FUNC_ARGS_PASSTHRU) == FAILURE ) {
+    return FAILURE;
+  }
+
+  if( PHP_MINIT(mustache_mustache)(INIT_FUNC_ARGS_PASSTHRU) == FAILURE ) {
+    return FAILURE;
+  }
+
+  if( PHP_MINIT(mustache_data)(INIT_FUNC_ARGS_PASSTHRU) == FAILURE ) {
+    return FAILURE;
+  }
+
+  if( PHP_MINIT(mustache_template)(INIT_FUNC_ARGS_PASSTHRU) == FAILURE ) {
+    return FAILURE;
+  }
+
+  if( PHP_MINIT(mustache_exceptions)(INIT_FUNC_ARGS_PASSTHRU) == FAILURE ) {
+    return FAILURE;
+  }
+
+  if( PHP_MINIT(mustache_lambda_helper)(INIT_FUNC_ARGS_PASSTHRU) == FAILURE ) {
+    return FAILURE;
+  }
 
   return SUCCESS;
 }
