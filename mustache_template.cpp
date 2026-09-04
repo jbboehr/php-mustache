@@ -84,9 +84,33 @@ PHP_METHOD(MustacheTemplate, __toString)
 
     // Return
     zval rv;
-    zval * value = zend_read_property(Z_OBJCE_P(_this_zval), Z_OBJ_P(_this_zval), ZEND_STRL("template"), 1, &rv);
-    convert_to_string(value);
-    RETURN_ZVAL(value, 1, 0);
+    ZVAL_UNDEF(&rv);
+    zval * value = zend_read_property(MustacheTemplate_ce_ptr, Z_OBJ_P(_this_zval), ZEND_STRL("template"), 1, &rv);
+    if( UNEXPECTED(EG(exception) != NULL) ) {
+      if( !Z_ISUNDEF(rv) ) {
+        zval_ptr_dtor(&rv);
+      }
+      RETURN_THROWS();
+    }
+    if( value == &EG(uninitialized_zval) || Z_TYPE_P(value) == IS_UNDEF ) {
+      if( !Z_ISUNDEF(rv) ) {
+        zval_ptr_dtor(&rv);
+      }
+      RETURN_EMPTY_STRING();
+    }
+
+    zend_string * string_value = zval_try_get_string(value);
+    if( !Z_ISUNDEF(rv) ) {
+      zval_ptr_dtor(&rv);
+    }
+    if( UNEXPECTED(string_value == NULL) ) {
+      RETURN_THROWS();
+    }
+    if( UNEXPECTED(EG(exception) != NULL) ) {
+      zend_string_release(string_value);
+      RETURN_THROWS();
+    }
+    RETURN_STR(string_value);
 
   } catch(...) {
     mustache_exception_handler();

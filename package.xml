@@ -292,6 +292,7 @@
    <file name="tests/mustache-spec-utf8-red-bean.phpt" role="test" />
    <file name="tests/MustacheTemplate____construct.phpt" role="test" />
    <file name="tests/MustacheTemplate____sleep.phpt" role="test" />
+   <file name="tests/MustacheTemplate____toString-preserves-uninitialized-sentinel.phpt" role="test" />
    <file name="tests/MustacheTemplate____toString.phpt" role="test" />
    <file name="tests/MustacheTemplate____wakeup.phpt" role="test" />
    <file name="tests/MustacheTemplate__construct-explicit-null.phpt" role="test" />
