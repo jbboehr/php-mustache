@@ -277,15 +277,22 @@ class DataConverter {
       consume(stringBytes, length, limits.maxStringBytes, "Data string byte limit exceeded");
     }
 
+    void addContainerEntries(size_t count)
+    {
+      consume(containerEntries, count, limits.maxContainerEntries, "Data container entry limit exceeded");
+    }
+
     void addContainerEntry()
     {
-      consume(containerEntries, 1, limits.maxContainerEntries, "Data container entry limit exceeded");
+      addContainerEntries(1);
     }
 
     mustache::Data convertArray(zval * current, size_t depth)
     {
       HashTable * values_hash = Z_ARRVAL_P(current);
       ActivePathGuard<HashTable> active_guard(activeArrays, values_hash);
+      const size_t entry_count = zend_hash_num_elements(values_hash);
+      addContainerEntries(entry_count);
       mustache::Data::Array array_values;
       mustache::Data::Map object_values;
       bool saw_numeric_key = false;
@@ -298,12 +305,12 @@ class DataConverter {
         (void) numeric_key;
         if( string_key == NULL ) {
           if( !saw_numeric_key && !saw_string_key ) {
-            array_values.reserve(zend_hash_num_elements(values_hash));
+            array_values.reserve(entry_count);
           }
           saw_numeric_key = true;
         } else {
           if( !saw_numeric_key && !saw_string_key ) {
-            object_values.reserve(zend_hash_num_elements(values_hash));
+            object_values.reserve(entry_count);
           }
           saw_string_key = true;
         }
@@ -311,7 +318,6 @@ class DataConverter {
           fail("Mixed numeric and associative arrays are not supported");
         }
 
-        addContainerEntry();
         if( string_key == NULL ) {
           array_values.push_back(convert(value, depth + 1));
         } else {
