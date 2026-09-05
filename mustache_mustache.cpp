@@ -110,6 +110,7 @@ static zend_object * Mustache_obj_create(zend_class_entry * ce)
   try {
     intern = (struct php_obj_Mustache *) ecalloc(1, sizeof(php_obj_Mustache) + zend_object_properties_size(ce));
     zend_object_std_init(&intern->std, ce);
+    object_properties_init(&intern->std, ce);
     intern->std.handlers = &Mustache_obj_handlers;
 
     intern->mustache = mustache_new_Mustache();

@@ -88,6 +88,8 @@
    <file name="tests/MustacheData__toValue.phpt" role="test" />
    <file name="tests/Mustache__accepts-template-wrapper-subclasses.phpt" role="test" />
    <file name="tests/Mustache__applies-ini-defaults.phpt" role="test" />
+   <file name="tests/Mustache__initializes-properties-before-construction.phpt" role="test" />
+   <file name="tests/Mustache__initializes-subclass-properties.phpt" role="test" />
    <file name="tests/Mustache__archive-benchmark-arginfo.phpt" role="test" />
    <file name="tests/Mustache__archive-benchmark-ast-partial.phpt" role="test" />
    <file name="tests/Mustache__archive-benchmark-boundaries.phpt" role="test" />
