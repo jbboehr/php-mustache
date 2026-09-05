@@ -346,6 +346,9 @@ class DataConverter {
       if( Z_OBJ_HT_P(current)->get_properties != NULL ) {
         properties = Z_OBJ_HT_P(current)->get_properties(Z_OBJ_P(current));
       }
+      if( UNEXPECTED(EG(exception) != NULL) ) {
+        throw PhpInvalidParameterException();
+      }
       if( properties == NULL ) {
         return;
       }

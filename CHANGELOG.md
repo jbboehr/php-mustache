@@ -30,6 +30,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Fixed
 
+- Stop data conversion when an object property handler throws, preserving lazy initializer exceptions instead of replacing them with later template errors.
 - Initialize declared property defaults on `Mustache` subclasses, including before a custom constructor runs or when construction is bypassed through reflection.
 - Accept explicit `null` for the optional partial map, matching the public signature and an omitted argument.
 - Accept `MustacheTemplate` and `MustacheAST` subclasses wherever their base classes are supported.

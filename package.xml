@@ -75,6 +75,7 @@
    <file name="tests/Mustache____construct.phpt" role="test" />
    <file name="tests/MustacheData____construct.phpt" role="test" />
    <file name="tests/MustacheData__conversion-errors-are-transactional.phpt" role="test" />
+   <file name="tests/MustacheData__converts-lazy-object-contexts.phpt" role="test" />
    <file name="tests/MustacheData__object-custom-property-handlers.phpt" role="test" />
    <file name="tests/MustacheData__object-magic-accessors.phpt" role="test" />
    <file name="tests/MustacheData__object-property-precedence.phpt" role="test" />
@@ -110,6 +111,7 @@
    <file name="tests/Mustache__parse-owns-compiled-inputs.phpt" role="test" />
    <file name="tests/Mustache__parse-preserves-referenced-AST-lifetime.phpt" role="test" />
    <file name="tests/Mustache__parse-validates-and-recovers.phpt" role="test" />
+   <file name="tests/Mustache__preserves-lazy-initializer-exceptions.phpt" role="test" />
    <file name="tests/Mustache__template-source-exceptions-release-values.phpt" role="test" />
    <file name="tests/Mustache__template-source-releases-temporaries.phpt" role="test" />
    <file name="tests/Mustache__render-accepts-class-instance.phpt" role="test" />
