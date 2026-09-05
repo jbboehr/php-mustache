@@ -235,6 +235,12 @@
             };
             shellcheck.enable = true;
             shellcheck.excludes = ["^.github/scripts/(docker|fold|linux|osx|suite).sh$"];
+            ci-php-tools = {
+              enable = true;
+              entry = "${pkgs.python3}/bin/python3 .github/tests/test_php_tools.py";
+              files = "^\\.github/(scripts/(linux|suite)\\.sh|tests/test_php_tools\\.py)$";
+              pass_filenames = false;
+            };
           };
         };
 

@@ -14,10 +14,14 @@ export SUDO=sudo
 function install_apt_packages() (
     ${SUDO} add-apt-repository ppa:ondrej/php
     ${SUDO} apt-get update
-    ${SUDO} apt-get install -y "php${PHP_VERSION}-dev" lcov
+    ${SUDO} apt-get install -y "php${PHP_VERSION}-cli" "php${PHP_VERSION}-dev" lcov
 )
 
 cifold "install apt packages" install_apt_packages
+
+export TEST_PHP_EXECUTABLE="${TEST_PHP_EXECUTABLE:-php${PHP_VERSION}}"
+export PHPIZE="${PHPIZE:-phpize${PHP_VERSION}}"
+export PHP_CONFIG="${PHP_CONFIG:-php-config${PHP_VERSION}}"
 
 # source and execute the shared build and test suite
 source .github/scripts/suite.sh
