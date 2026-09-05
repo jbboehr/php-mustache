@@ -66,8 +66,11 @@ foreach( $specData as $spec => $data ) {
     $output .= '?>' . MY_EOL;
     $output .= '--EXPECT--' . MY_EOL;
     $output .= '<render>' . $test['expected'] . '</render>';
-    
+
     $cleanName = strtolower(trim(preg_replace('/[^a-zA-Z0-9]+/', '-', $test['name']), '-'));
-    file_put_contents('./tests/mustache-spec-' . $spec . '-' . $cleanName . '.phpt', $output);
+    $outputPath = './tests/mustache-spec-' . $spec . '-' . $cleanName . '.phpt';
+    if( file_put_contents($outputPath, $output) !== strlen($output) ) {
+      throw new RuntimeException('Could not write generated test: ' . $outputPath);
+    }
   }
 }

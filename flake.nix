@@ -241,6 +241,12 @@
               files = "^\\.github/(scripts/(linux|suite)\\.sh|tests/test_php_tools\\.py)$";
               pass_filenames = false;
             };
+            generate-tests = {
+              enable = true;
+              entry = "${pkgs.python3}/bin/python3 .github/tests/test_generate_tests.py --php ${pkgs.php83}/bin/php";
+              files = "^(generate-tests\\.php|\\.github/tests/test_generate_tests\\.py)$";
+              pass_filenames = false;
+            };
           };
         };
 
