@@ -58,7 +58,7 @@ PHP_METHOD(MustacheTemplate, __construct)
     _this_zval = getThis();
 
     // Check if data was null
-    if( template_len > 0 && template_str != NULL ) {
+    if( template_str != NULL ) {
       zend_update_property_stringl(MustacheTemplate_ce_ptr, Z_OBJ_P(_this_zval), ZEND_STRL("template"), template_str, template_len);
     }
 

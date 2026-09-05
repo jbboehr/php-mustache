@@ -117,6 +117,8 @@
    <file name="tests/Mustache__render-does-not-mutate-true.phpt" role="test" />
    <file name="tests/Mustache__render-empty-string-empty-data.phpt" role="test" />
    <file name="tests/Mustache__render-empty-string-with-data.phpt" role="test" />
+   <file name="tests/Mustache__accepts-empty-template-wrappers.phpt" role="test" />
+   <file name="tests/Mustache__rejects-uninitialized-template-wrappers.phpt" role="test" />
    <file name="tests/Mustache__render-embedded-nul-template.phpt" role="test" />
    <file name="tests/Mustache__render-configured-delimiters.phpt" role="test" />
    <file name="tests/Mustache__render-lambda-closure-section.phpt" role="test" />

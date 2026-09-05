@@ -273,9 +273,6 @@ static void mustache_template_source(zval * value, std::string& source, uint32_t
   }
 
   source = mustache_template_object_source(value, argument);
-  if( source.empty() ) {
-    mustache_argument_value_error(argument, "must contain a non-empty MustacheTemplate");
-  }
 }
 
 static void mustache_partial_source(zval * value, std::string& source, uint32_t argument)
@@ -288,9 +285,6 @@ static void mustache_partial_source(zval * value, std::string& source, uint32_t 
   if( value != NULL && Z_TYPE_P(value) == IS_OBJECT ) {
     if( instanceof_function(Z_OBJCE_P(value), MustacheTemplate_ce_ptr) ) {
       source = mustache_template_object_source(value, argument);
-      if( source.empty() ) {
-        mustache_argument_value_error(argument, "must not contain an empty MustacheTemplate");
-      }
       return;
     }
     mustache_argument_value_error(argument,
