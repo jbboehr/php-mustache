@@ -10,36 +10,11 @@
 #include "mustache_exceptions.hpp"
 #include "mustache_lambda_helper.hpp"
 #include "mustache_lambda.hpp"
+#include "mustache_zval.hpp"
 
 #undef min
 
 namespace {
-
-class ZvalGuard {
-  private:
-    zval value;
-
-  public:
-    ZvalGuard()
-    {
-      ZVAL_UNDEF(&value);
-    }
-
-    ~ZvalGuard()
-    {
-      if( !Z_ISUNDEF(value) ) {
-        zval_ptr_dtor(&value);
-      }
-    }
-
-    ZvalGuard(const ZvalGuard&) = delete;
-    ZvalGuard& operator=(const ZvalGuard&) = delete;
-
-    zval * get()
-    {
-      return &value;
-    }
-};
 
 class ZvalArguments {
   private:

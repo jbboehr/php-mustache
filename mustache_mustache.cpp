@@ -14,6 +14,7 @@
 #include "mustache_exceptions.hpp"
 #include "mustache_template.hpp"
 #include "mustache_mustache.hpp"
+#include "mustache_zval.hpp"
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -242,14 +243,24 @@ static const mustache::Node * mustache_ast_node(zval * value, uint32_t argument)
 
 static std::string mustache_template_object_source(zval * value, uint32_t argument)
 {
-  zval rv;
-  zval * source_value = zend_read_property(
-      Z_OBJCE_P(value), Z_OBJ_P(value), ZEND_STRL("template"), 1, &rv);
-  source_value = mustache_dereference_zval(source_value);
-  if( source_value == NULL || Z_TYPE_P(source_value) != IS_STRING ) {
-    mustache_argument_value_error(argument, "must contain a string MustacheTemplate source");
+  std::string source;
+  {
+    ZvalGuard rv;
+    zval * source_value = zend_read_property(
+        Z_OBJCE_P(value), Z_OBJ_P(value), ZEND_STRL("template"), 1, rv.get());
+    if( EG(exception) != NULL ) {
+      throw PhpInvalidParameterException();
+    }
+    source_value = mustache_dereference_zval(source_value);
+    if( source_value == NULL || Z_TYPE_P(source_value) != IS_STRING ) {
+      mustache_argument_value_error(argument, "must contain a string MustacheTemplate source");
+    }
+    source.assign(Z_STRVAL_P(source_value), Z_STRLEN_P(source_value));
   }
-  return std::string(Z_STRVAL_P(source_value), Z_STRLEN_P(source_value));
+  if( EG(exception) != NULL ) {
+    throw PhpInvalidParameterException();
+  }
+  return source;
 }
 
 static void mustache_template_source(zval * value, std::string& source, uint32_t argument)

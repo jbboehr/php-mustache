@@ -49,6 +49,7 @@
    <file name="mustache_mustache.hpp" role="src" />
    <file name="mustache_template.cpp" role="src" />
    <file name="mustache_template.hpp" role="src" />
+   <file name="mustache_zval.hpp" role="src" />
    <file name="mustache_zend_closure_lambda.cpp" role="src" />
    <file name="mustache_zend_closure_lambda.hpp" role="src" />
    <file name="php_mustache.cpp" role="src" />
@@ -105,6 +106,8 @@
    <file name="tests/Mustache__parse-owns-compiled-inputs.phpt" role="test" />
    <file name="tests/Mustache__parse-preserves-referenced-AST-lifetime.phpt" role="test" />
    <file name="tests/Mustache__parse-validates-and-recovers.phpt" role="test" />
+   <file name="tests/Mustache__template-source-exceptions-release-values.phpt" role="test" />
+   <file name="tests/Mustache__template-source-releases-temporaries.phpt" role="test" />
    <file name="tests/Mustache__render-accepts-class-instance.phpt" role="test" />
    <file name="tests/Mustache__render-accepts-MustacheAST.phpt" role="test" />
    <file name="tests/Mustache__render-accepts-MustacheData.phpt" role="test" />
