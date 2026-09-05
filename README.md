@@ -115,6 +115,18 @@ Well, 6000 dollars, after taxes.
 
 See also: [template loader example](examples.md)
 
+`MustacheData` and `MustacheLambdaHelper` are final classes and cannot be
+subclassed. To add application behavior around converted data, store a
+`MustacheData` instance in your own class and pass the stored `MustacheData`
+instance to `Mustache::render()`. The extension supplies `MustacheLambdaHelper`
+to section lambdas; use the helper only during its callback.
+
+PHP also rejects `ReflectionClass::newInstanceWithoutConstructor()` for these
+two classes.
+
+`Mustache`, `MustacheTemplate`, and `MustacheAST` remain extensible. The
+[PHP stub](mustache.stub.php) describes their public methods and types.
+
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.

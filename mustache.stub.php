@@ -228,7 +228,7 @@ class MustacheTemplate
 /**
  * Owns data converted to libmustache's native representation.
  */
-class MustacheData
+final class MustacheData
 {
 #if PHP_VERSION_ID < 80100
     /** @internal PHP 8.0 serialization-denial hook. */
@@ -260,7 +260,7 @@ class MustacheData
  * Instances are created by the extension and are valid only for the duration
  * of the lambda callback.
  */
-class MustacheLambdaHelper
+final class MustacheLambdaHelper
 {
     private function __construct()
     {

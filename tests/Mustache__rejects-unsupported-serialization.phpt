@@ -5,25 +5,11 @@ Mustache and MustacheData reject unsupported serialization
 --FILE--
 <?php
 class ApplicationMustache extends Mustache {}
-class ApplicationMustacheData extends MustacheData {}
 
 if (PHP_VERSION_ID < 80100) {
     class SerializingMustache extends Mustache {}
-    class SerializingMustacheData extends MustacheData {}
 } else {
     class SerializingMustache extends Mustache
-    {
-        public function __serialize(): array
-        {
-            return array();
-        }
-
-        public function __unserialize(array $data): void
-        {
-        }
-    }
-
-    class SerializingMustacheData extends MustacheData
     {
         public function __serialize(): array
         {
@@ -76,8 +62,6 @@ $values = array(
     'ApplicationMustache' => new ApplicationMustache(),
     'SerializingMustache' => new SerializingMustache(),
     'MustacheData' => new MustacheData(array('name' => 'Ada')),
-    'ApplicationMustacheData' => new ApplicationMustacheData(array('name' => 'Ada')),
-    'SerializingMustacheData' => new SerializingMustacheData(array('name' => 'Ada')),
 );
 
 foreach ($values as $class => $value) {
@@ -99,11 +83,7 @@ serialize-Mustache:rejected
 serialize-ApplicationMustache:rejected
 serialize-SerializingMustache:rejected
 serialize-MustacheData:rejected
-serialize-ApplicationMustacheData:rejected
-serialize-SerializingMustacheData:rejected
 unserialize-Mustache:rejected
 unserialize-ApplicationMustache:rejected
 unserialize-SerializingMustache:rejected
 unserialize-MustacheData:rejected
-unserialize-ApplicationMustacheData:rejected
-unserialize-SerializingMustacheData:rejected

@@ -1,5 +1,5 @@
 --TEST--
-Native arginfo matches the public API contract
+Native reflection matches the public API contract
 --SKIPIF--
 <?php
 if (!extension_loaded('mustache')) die('skip ');
@@ -85,12 +85,14 @@ $methods = [
 ];
 
 foreach ($methods as $class => $classMethods) {
+    echo $class, ': ', (new ReflectionClass($class))->isFinal() ? 'final' : 'extensible', "\n";
     foreach ($classMethods as $method) {
         describeMethod($class, $method);
     }
 }
 ?>
 --EXPECT--
+Mustache: extensible
 public Mustache::__construct():-
 public Mustache::getEscapeByDefault():bool
 public Mustache::getStartSequence():string
@@ -102,6 +104,7 @@ public Mustache::parse(tmpl:MustacheAST|MustacheTemplate|string):MustacheAST
 public Mustache::render(str:MustacheAST|MustacheTemplate|string, vars:mixed, partials:array|null=NULL):string
 public Mustache::tokenize(tmpl:string):array
 public Mustache::debugDataStructure(vars:mixed):mixed
+MustacheAST: extensible
 public MustacheAST::__construct(vars:null|string=NULL):-
 public static MustacheAST::fromBinary(binary:string):static
 public MustacheAST::__serialize():array
@@ -109,9 +112,12 @@ public MustacheAST::__unserialize(data:array):void
 public MustacheAST::toArray():array
 public MustacheAST::toBinary():string
 public MustacheAST::__toString():string
+MustacheTemplate: extensible
 public MustacheTemplate::__construct(vars:null|string=NULL):-
 public MustacheTemplate::__toString():string
+MustacheData: final
 public MustacheData::__construct(tmpl:mixed):-
 public MustacheData::toValue():mixed
+MustacheLambdaHelper: final
 private MustacheLambdaHelper::__construct():-
 public MustacheLambdaHelper::render(tmpl:string):string

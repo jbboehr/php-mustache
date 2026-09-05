@@ -13,6 +13,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Changed
 
+- Make `MustacheData` and `MustacheLambdaHelper` final. Existing subclasses must use composition; helpers continue to be supplied by the extension to lambda callbacks. PHP also rejects creating these classes through `ReflectionClass::newInstanceWithoutConstructor()`.
 - Compare generated Mustache specification output with exact whitespace boundaries instead of ignoring whitespace differences.
 - Follow Mustache standalone-tag whitespace and partial-indentation rules provided by libmustache.
 - Keep Valgrind out of the default flake checks and expose it as an explicit PHP 8.3 build.

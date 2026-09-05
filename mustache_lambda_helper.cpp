@@ -80,6 +80,7 @@ PHP_MINIT_FUNCTION(mustache_lambda_helper)
   zend_class_entry ce;
 
   INIT_CLASS_ENTRY(ce, "MustacheLambdaHelper", MustacheLambdaHelper_methods);
+  ce.ce_flags |= ZEND_ACC_FINAL;
   ce.create_object = MustacheLambdaHelper_obj_create;
   MustacheLambdaHelper_ce_ptr = zend_register_internal_class(&ce);
   memcpy(&MustacheLambdaHelper_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));

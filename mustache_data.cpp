@@ -131,6 +131,7 @@ PHP_MINIT_FUNCTION(mustache_data)
   zend_class_entry ce;
 
   INIT_CLASS_ENTRY(ce, "MustacheData", MustacheData_methods);
+  ce.ce_flags |= ZEND_ACC_FINAL;
   ce.create_object = MustacheData_obj_create;
 #if PHP_VERSION_ID < 80100
   ce.serialize = zend_class_serialize_deny;

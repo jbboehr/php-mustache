@@ -22,10 +22,14 @@ try {
 }
 fclose($resource);
 
-$emptyData = (new ReflectionClass(MustacheData::class))->newInstanceWithoutConstructor();
-var_dump($emptyData->toValue());
 try {
-  (new Mustache())->render('unused', $emptyData);
+  (new ReflectionClass(MustacheData::class))->newInstanceWithoutConstructor();
+  echo "constructor bypass accepted\n";
+} catch (ReflectionException $error) {
+  echo get_class($error), "\n";
+}
+try {
+  (new Mustache())->render('unused', $resourceData);
 } catch (Throwable $error) {
   echo get_class($error), "\n";
 }
@@ -54,8 +58,7 @@ MustacheData::__construct(): Invalid data type
 MustacheData::toValue(): MustacheData was not initialized properly
 bool(false)
 TypeError
-MustacheData::toValue(): MustacheData was not initialized properly
-bool(false)
+ReflectionException
 ValueError
 Lambda data cannot be converted to a PHP value
 Lambda data cannot be converted to a PHP value

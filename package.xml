@@ -81,6 +81,7 @@
    <file name="tests/MustacheData__object-property-shapes.phpt" role="test" />
    <file name="tests/MustacheData__owns-lambda-values.phpt" role="test" />
    <file name="tests/MustacheData__rejects-container-limit-before-conversion.phpt" role="test" />
+   <file name="tests/MustacheData__rejects-inheritance.phpt" role="test" />
    <file name="tests/MustacheData__rejects-reinitialization-during-render.phpt" role="test" />
    <file name="tests/MustacheData__rejects-unsupported-values.phpt" role="test" />
    <file name="tests/MustacheData__scalar-types.phpt" role="test" />
@@ -101,6 +102,7 @@
    <file name="tests/MustacheLambdaHelper__render-object.phpt" role="test" />
    <file name="tests/MustacheLambdaHelper__nested-exception-contexts.phpt" role="test" />
    <file name="tests/MustacheLambdaHelper__nested-contexts.phpt" role="test" />
+   <file name="tests/MustacheLambdaHelper__rejects-inheritance.phpt" role="test" />
    <file name="tests/MustacheLambdaHelper__rejects-use-after-callback.phpt" role="test" />
    <file name="tests/Mustache__parse.phpt" role="test" />
    <file name="tests/Mustache__parse-owns-compiled-inputs.phpt" role="test" />

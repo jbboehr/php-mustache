@@ -6,13 +6,11 @@ MustacheLambdaHelper rejects use after its lambda callback returns
 <?php
 $mustache = new Mustache();
 $retained = null;
-$inactive = (new ReflectionClass(MustacheLambdaHelper::class))
-  ->newInstanceWithoutConstructor();
 try {
-  $inactive->render('{{value}}');
-  echo "inactive helper rendered\n";
-} catch (MustacheException $e) {
-  var_dump($e->getMessage());
+  (new ReflectionClass(MustacheLambdaHelper::class))->newInstanceWithoutConstructor();
+  echo "constructor bypass accepted\n";
+} catch (ReflectionException $e) {
+  echo "constructor bypass rejected\n";
 }
 
 $data = array(
@@ -60,7 +58,7 @@ try {
 }
 ?>
 --EXPECT--
-string(41) "Lambda render context is no longer active"
+constructor bypass rejected
 string(4) "safe"
 string(41) "Lambda render context is no longer active"
 string(4) "safe"
