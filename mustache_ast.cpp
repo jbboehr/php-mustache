@@ -368,7 +368,7 @@ PHP_METHOD(MustacheAST, toArray)
 
     // Check payload
     if( payload->state == NULL || payload->state->node == NULL ) {
-      throw InvalidParameterException("MustacheAST was not initialized properly");
+      mustache_ast_value_error("MustacheAST is not initialized");
     }
 
     // Convert to PHP array
@@ -394,7 +394,7 @@ PHP_METHOD(MustacheAST, toBinary)
     struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(_this_zval);
 
     if( payload->state == NULL || payload->state->node == NULL ) {
-      throw InvalidParameterException("MustacheAST was not initialized properly");
+      mustache_ast_value_error("MustacheAST is not initialized");
     }
 
     RETVAL_STR(mustache_node_to_zend_string(*payload->state->node));

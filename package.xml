@@ -55,6 +55,7 @@
    <file name="php_mustache.h" role="src" />
    <file name="tests/arginfo-reflection.phpt" role="test" />
    <file name="tests/MustacheAST____construct.phpt" role="test" />
+   <file name="tests/MustacheAST__accessors-reject-uninitialized-and-recover.phpt" role="test" />
    <file name="tests/MustacheAST__binary-api.phpt" role="test" />
    <file name="tests/MustacheAST__fromBinary-boundaries-and-recovery.phpt" role="test" />
    <file name="tests/MustacheAST__fromBinary-initializes-subclass-properties.phpt" role="test" />
