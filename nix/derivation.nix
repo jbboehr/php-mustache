@@ -94,7 +94,7 @@
 
   meta = with lib; {
     homepage = "https://github.com/jbboehr/php-mustache";
-    license = licenses.bsd3;
+    license = licenses.mit;
     platforms = platforms.linux;
     outputsToInstall = outputs;
   };
