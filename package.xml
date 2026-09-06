@@ -120,6 +120,7 @@
    <file name="tests/Mustache__render-accepts-MustacheTemplate.phpt" role="test" />
    <file name="tests/Mustache__render-accepts-object.phpt" role="test" />
    <file name="tests/Mustache__render-accepts-object-with-properties.phpt" role="test" />
+   <file name="tests/Mustache__render-AST-fiber-overlap-and-recovery.phpt" role="test" />
    <file name="tests/Mustache__render-does-not-mutate-double.phpt" role="test" />
    <file name="tests/Mustache__render-does-not-mutate-false.phpt" role="test" />
    <file name="tests/Mustache__render-does-not-mutate-int.phpt" role="test" />
@@ -149,6 +150,7 @@
    <file name="tests/Mustache__render-references.phpt" role="test" />
    <file name="tests/Mustache__render-rejects-invalid-inputs-atomically.phpt" role="test" />
    <file name="tests/Mustache__render-source-and-AST-partials-equally.phpt" role="test" />
+   <file name="tests/Mustache__render-source-fiber-contexts.phpt" role="test" />
    <file name="tests/Mustache__render-tag.phpt" role="test" />
    <file name="tests/Mustache__rejects-excessive-template-nesting.phpt" role="test" />
    <file name="tests/Mustache__rejects-empty-ini-delimiters.phpt" role="test" />
