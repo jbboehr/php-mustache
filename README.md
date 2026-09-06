@@ -1,6 +1,6 @@
 # php-mustache
 
-[![GitHub Build Status](https://github.com/jbboehr/php-mustache/workflows/ci/badge.svg)](https://github.com/jbboehr/php-mustache/actions?query=workflow%3Aci)
+[![GitHub Build Status](https://github.com/jbboehr/php-mustache/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jbboehr/php-mustache/actions/workflows/ci.yml)
 [![Coverage Status](https://coveralls.io/repos/jbboehr/php-mustache/badge.svg?branch=master&service=github)](https://coveralls.io/github/jbboehr/php-mustache?branch=master)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md)
 [![AI burn](https://img.shields.io/endpoint?url=https%3A%2F%2Fgist.githubusercontent.com%2Fjbboehr%2F01576ea7c08e2401b6121904462024a3%2Fraw%2Fagent-badge.json&cacheSeconds=300)](https://github.com/arlegotin/agent-badge)
