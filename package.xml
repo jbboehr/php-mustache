@@ -79,6 +79,7 @@
    <file name="tests/MustacheData__converts-lazy-object-contexts.phpt" role="test" />
    <file name="tests/MustacheData__object-custom-property-handlers.phpt" role="test" />
    <file name="tests/MustacheData__object-magic-accessors.phpt" role="test" />
+   <file name="tests/MustacheData__object-property-hooks.phpt" role="test" />
    <file name="tests/MustacheData__object-property-precedence.phpt" role="test" />
    <file name="tests/MustacheData__object-property-shapes.phpt" role="test" />
    <file name="tests/MustacheData__owns-lambda-values.phpt" role="test" />

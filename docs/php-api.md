@@ -67,6 +67,14 @@ lambdas under their declared names, including capitalization. Constructors,
 destructors, and static methods are omitted. A public property takes
 precedence over a method with the same name.
 
+For initialized objects with
+[PHP 8.4+ property hooks](https://www.php.net/manual/en/language.oop5.property-hooks.php),
+property collection reads stored backing values without invoking `get` hooks.
+Virtual properties and uninitialized backing values are omitted. For example,
+a getter that uppercases a stored `Ada` still renders `Ada` when the object is
+passed directly. To supply computed values, read the properties explicitly
+into an array, such as `['name' => $person->name]`, and pass that array as data.
+
 Missing properties are not discovered through `__get()`, `__isset()`, or
 `__debugInfo()`. `ArrayObject` offsets are not treated as properties, even
 with `ARRAY_AS_PROPS`. Pass `getArrayCopy()` to expose those offsets as data.
