@@ -3,6 +3,12 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
+    agent-badge = {
+      url = "github:jbboehr/agent-badge.ts/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.gitignore.follows = "gitignore";
+    };
     systems.url = "github:nix-systems/default-linux";
     flake-utils = {
       url = "github:numtide/flake-utils";
@@ -38,6 +44,7 @@
   outputs = {
     self,
     nixpkgs,
+    agent-badge,
     flake-utils,
     gitignore,
     git-hooks,
@@ -262,6 +269,7 @@
           }) {
             inputsFrom = [package];
             buildInputs = with pkgs; [
+              agent-badge.packages.${system}.default
               actionlint
               autoconf-archive
               lcov

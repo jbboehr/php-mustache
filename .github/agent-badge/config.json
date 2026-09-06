@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "providers": {
+    "codex": {
+      "enabled": true
+    },
+    "claude": {
+      "enabled": true
+    },
+    "grok": {
+      "enabled": true
+    }
+  },
+  "repo": {
+    "aliases": {
+      "remotes": [],
+      "slugs": []
+    }
+  },
+  "badge": {
+    "label": "AI burn",
+    "mode": "tokens",
+    "style": "flat",
+    "color": "#E8A515",
+    "colorZero": "lightgrey",
+    "cacheSeconds": 300
+  },
+  "publish": {
+    "provider": "github-gist",
+    "gistId": "01576ea7c08e2401b6121904462024a3",
+    "badgeUrl": "https://img.shields.io/endpoint?url=https%3A%2F%2Fgist.githubusercontent.com%2Fjbboehr%2F01576ea7c08e2401b6121904462024a3%2Fraw%2Fagent-badge.json&cacheSeconds=300"
+  },
+  "refresh": {
+    "prePush": {
+      "enabled": false,
+      "mode": "fail-soft"
+    }
+  },
+  "privacy": {
+    "aggregateOnly": true,
+    "output": "standard"
+  }
+}

@@ -1,5 +1,32 @@
 {
   "nodes": {
+    "agent-badge": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "gitignore": [
+          "gitignore"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788683347,
+        "narHash": "sha256-fcFq4zYo8VKZHoYVc53s85vWyZpZGMgQUmqlbtPcV4w=",
+        "owner": "jbboehr",
+        "repo": "agent-badge.ts",
+        "rev": "c00276270b0546a9c3c22ac54d7e258ae2dbf4e6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jbboehr",
+        "ref": "master",
+        "repo": "agent-badge.ts",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -330,6 +357,7 @@
     },
     "root": {
       "inputs": {
+        "agent-badge": "agent-badge",
         "flake-utils": "flake-utils",
         "git-hooks": "git-hooks",
         "gitignore": "gitignore",
