@@ -5,7 +5,8 @@ initialization with an explicit ownership contract. The implementation slice
 based on `b506a28` now adds owned container captures. The original concern about
 invalid native access has not been experimentally demonstrated. The constructor
 review below recommends retaining the existing publication rules. Zend bailout
-cleanup remains a separate follow-up.
+cleanup has a [separate ownership review](zend-bailout-ownership.md) and remains
+open.
 
 ## Current behavior and evidence
 
