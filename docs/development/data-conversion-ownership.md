@@ -228,9 +228,86 @@ source review. Zend bailout cleanup and other platforms remain unverified here.
 
 ## Separate finding from the cleanup fixture
 
-A public `__destruct()` currently becomes a retained method lambda, contrary
-to the API guide. A benign check with the previous PHP 8.4.24 extension found
-the `__destruct` key in `MustacheData::toValue()`. The cleanup test therefore
-uses property-only objects to avoid conflating intentional lambda retention
-with temporary capture ownership. Correcting destructor exposure is newly
-identified follow-up work, outside this F1 slice.
+A public `__destruct()` became a retained method lambda, contrary to the
+[API guide](../php-api.md#objects). A benign check with the previous
+PHP 8.4.24 extension found the `__destruct` key in `MustacheData::toValue()`.
+The F1 cleanup tests therefore use property-only objects to avoid conflating
+method-lambda retention with temporary capture ownership.
+
+The follow-up fix based on `d2f087f` excludes `__destruct` by a case-insensitive
+method-name check. The previous `#ifdef ZEND_ACC_DTOR` filter disappeared when
+compiled with PHP 8.3.33 because its headers do not define that flag. PHP's
+[magic-method registration](https://raw.githubusercontent.com/php/php-src/php-8.3.33/Zend/zend_API.c)
+recognizes destructors by the lowercased name and records a destructor pointer.
+Pointer identity alone is insufficient for this filter: PHP's
+[inheritance implementation](https://raw.githubusercontent.com/php/php-src/php-8.3.33/Zend/zend_inheritance.c)
+can duplicate an inherited internal function into a child's method table while
+retaining the parent's destructor pointer. Comparing names handles these
+copies as well as inherited, trait-provided, and mixed-case declarations.
+
+Constructor, visibility, and static-method filtering retain their existing
+rules. Ordinary public methods and other public magic methods still become
+lambdas. A public property named `__destruct` remains template data. Objects
+whose only method was their destructor no longer stay alive solely because a
+`MustacheData` instance exists. Their copied property values remain usable.
+Objects with ordinary method lambdas remain retained for those callbacks.
+
+### Destructor-filter verification
+
+On Linux x86-64 with PHP 8.3.33, the new
+[omission regression](../../tests/MustacheData__omits-destructor-methods.phpt)
+failed against the unchanged extension before the fix. Direct, inherited, and
+mixed-case destructors appeared as keys, each `toValue()` call emitted a lambda
+conversion warning, and the original object remained alive until the native
+data was released. After rebuilding with the fix, the same test passed: only
+the `name` property remained, conversion emitted no warnings, and ordinary
+source release ran the destructor exactly once while copied data still rendered.
+
+The [method-lifecycle test](../../tests/Mustache__render-object-method-lifecycle.phpt)
+initially passed both before and after the fix. It checks ordinary method lambdas,
+`__toString()`, property-over-method precedence for a string property named
+`__destruct`, and normal object release through source and AST rendering with
+direct objects and cached native data. This is compatibility coverage.
+
+The independent code review identified the inherited-internal-function case.
+A targeted independent test pass confirmed it twice against the initial
+pointer-based patch. The new
+[internal-inheritance regression](../../tests/MustacheData__omits-inherited-internal-destructor.phpt)
+creates a temporary data-only tar archive using a `PharData` subclass and checks
+that conversion retains a public property and ordinary method while omitting
+the inherited destructor. It skips when `PharData` is unavailable. The test
+review also added trait-destructor and static-method coverage to the omission
+test, and callable-object dispatch and retention coverage to the lifecycle test.
+
+These checks observe method eligibility and ordinary reference release. They do
+not manually invoke destructor methods. The template's `__destruct` token in
+the compatibility test resolves the string property.
+
+After correcting the inherited-internal case, the focused three-test run and
+fresh full suites passed on Linux x86-64:
+
+| PHP | Passed | Skipped | Failed |
+| --- | ---: | ---: | ---: |
+| 8.0.30 | 255 | 12 | 0 |
+| 8.3.33 | 257 | 10 | 0 |
+| 8.3.33, ASan/UBSan | 257 | 10 | 0 |
+| 8.4.24 | 263 | 4 | 0 |
+| 8.5.9 | 263 | 4 | 0 |
+
+All three new PHPTs ran without skips on every listed runtime. The build targets
+and lint command in the earlier verification section were rerun. Nix builds
+used a source snapshot containing all 267 PHPTs, including the new untracked
+files. The full suites then ran from the checkout with each matching PHP/module
+pair and `run-tests.php -n -d extension=MODULE -j4 tests`, with
+`REPORT_EXIT_STATUS=1` and `NO_INTERACTION=1`. The sanitizer run used the
+allocator and ASan/UBSan settings from `nix/derivation.nix`, including leak
+detection. All configured pre-commit checks, 19 local document links, and the
+package manifest passed.
+
+Reliability verdict: **PASS_WITH_RESIDUAL_RISK**. Both demonstrated omission
+failures are covered by passing regressions. The independent test review's
+trait, static-method, and invokable-object checks also pass. A further metadata
+check preserved a differently named trait alias while omitting its mixed-case
+destructor, without invoking either method. PHP 8.1, PHP 8.2, other platforms,
+and throwing destructors were not exercised in this slice. The separate F7
+Zend bailout cleanup concern remains deferred.

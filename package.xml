@@ -83,6 +83,8 @@
    <file name="tests/MustacheData__object-property-hooks.phpt" role="test" />
    <file name="tests/MustacheData__object-property-precedence.phpt" role="test" />
    <file name="tests/MustacheData__object-property-shapes.phpt" role="test" />
+   <file name="tests/MustacheData__omits-destructor-methods.phpt" role="test" />
+   <file name="tests/MustacheData__omits-inherited-internal-destructor.phpt" role="test" />
    <file name="tests/MustacheData__owns-lambda-values.phpt" role="test" />
    <file name="tests/MustacheData__rejects-container-limit-before-conversion.phpt" role="test" />
    <file name="tests/MustacheData__rejects-inheritance.phpt" role="test" />
@@ -149,6 +151,7 @@
    <file name="tests/Mustache__render-lambda-object-method.phpt" role="test" />
    <file name="tests/Mustache__render-lambda-parameter-arities.phpt" role="test" />
    <file name="tests/Mustache__render-lambda-return-values.phpt" role="test" />
+   <file name="tests/Mustache__render-object-method-lifecycle.phpt" role="test" />
    <file name="tests/Mustache__render-partial-accepts-MustacheAST.phpt" role="test" />
    <file name="tests/Mustache__render-partial-accepts-MustacheTemplate.phpt" role="test" />
    <file name="tests/Mustache__render-recursive-array.phpt" role="test" />

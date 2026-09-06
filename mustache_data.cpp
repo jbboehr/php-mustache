@@ -266,12 +266,13 @@ static zend_always_inline bool is_invokable_object(const zend_class_entry * ce)
 
 static zend_always_inline bool is_valid_function(const zend_function * function)
 {
-  return (function->common.fn_flags & ZEND_ACC_STATIC) == 0 &&
+  const zend_string * function_name = function->common.function_name;
+  // Inherited internal methods can be copies distinct from the class destructor.
+  return function_name != NULL &&
+          !zend_string_equals_literal_ci(function_name, "__destruct") &&
+          (function->common.fn_flags & ZEND_ACC_STATIC) == 0 &&
 #ifdef ZEND_ACC_CTOR
           (function->common.fn_flags & ZEND_ACC_CTOR) == 0 &&
-#endif
-#ifdef ZEND_ACC_DTOR
-          (function->common.fn_flags & ZEND_ACC_DTOR) == 0 &&
 #endif
           (function->common.fn_flags & ZEND_ACC_PROTECTED) == 0 &&
           (function->common.fn_flags & ZEND_ACC_PRIVATE) == 0;
@@ -453,7 +454,7 @@ class DataConverter {
       ZEND_HASH_FOREACH_VAL_IND(&class_entry->function_table, function_value) {
         zend_function * function = (zend_function *) Z_PTR_P(function_value);
         zend_string * function_name = function->common.function_name;
-        if( !is_valid_function(function) || function_name == NULL ) {
+        if( !is_valid_function(function) ) {
           continue;
         }
 
