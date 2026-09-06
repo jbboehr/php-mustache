@@ -1,15 +1,16 @@
 # Data conversion ownership review
 
-This is the F1 follow-up at revision `0e5503a`, reviewed on September 5, 2026.
-The recommendation is to keep lazy-object initialization and give recursive
-conversion an explicit ownership contract. The capture strategy below is a
-proposal, not implemented behavior. F1's lifetime concern remains unconfirmed.
+The F1 design review at revision `0e5503a` proposed retaining lazy-object
+initialization with an explicit ownership contract. The implementation slice
+based on `b506a28` now adds owned container captures. The original concern about
+invalid native access has not been experimentally demonstrated. Constructor
+publication and Zend bailout cleanup remain separate follow-ups.
 
 ## Current behavior and evidence
 
-[DataConverter](../../mustache_data.cpp) traverses borrowed array entries and
-object properties. Recursive conversion can call an object's `get_properties`
-handler while an outer traversal is still active. In PHP 8.4.24, the
+[DataConverter](../../mustache_data.cpp) now traverses owned entries. Before
+this change, recursive conversion could call an object's `get_properties`
+handler while iterating a borrowed outer container. In PHP 8.4.24, the
 [standard handler](https://raw.githubusercontent.com/php/php-src/php-8.4.24/Zend/zend_object_handlers.h)
 can enter lazy initialization. Its
 [property-table builder](https://raw.githubusercontent.com/php/php-src/php-8.4.24/Zend/zend_object_handlers.c)
@@ -20,59 +21,51 @@ The converter now checks for a pending PHP exception immediately after
 and subsequent renderer reuse have regression coverage. The original report's
 missing-exception-check observation is therefore resolved.
 
-The remaining static concern is ownership during recursive traversal.
-`ActivePathGuard` tracks array, object, and reference identities for cycle
-detection but does not acquire a Zend reference. Retaining an object alone
-would keep it alive without making its property values or table immutable.
-Likewise, retaining an outer array does not independently capture values held
-through PHP references. Adding one `ZvalGuard` at the root would not establish
-a stable traversal contract for the whole conversion.
+`ActivePathGuard` still tracks original array, object, and reference identities
+for cycle detection. `CapturedValue` owns the resolved value and retains its
+original reference wrapper when present. This keeps the identity alive while
+conversion reads the captured referent. Entry storage owns keys and values
+independently of the original buckets and indirect property slots.
 
-These observations justify reviewing ownership. They do not establish that a
-particular application can invalidate an active traversal or cause an invalid
-native access.
+## Capture contract
 
-## Proposed capture contract
-
-Capture each container's immediate entries before recursively converting its
-children. Each captured entry must own its key and resolved value. Objects
-remain the same PHP objects, and their properties are collected when conversion
-reaches them. This is a per-container capture, not an atomic copy of the entire
-object graph. A nested object's later initialization can still affect objects
+The converter captures each container's immediate entries before recursively
+converting its children. Each captured entry owns its key and resolved value.
+Objects remain the same PHP objects, and their properties are collected when
+conversion reaches them. This is a per-container capture, not an atomic copy of
+the entire object graph. A nested object's later initialization can still affect objects
 whose properties have not yet been collected.
 
-Implement this in the shared converter so `MustacheData`, rendering, and
-`debugDataStructure()` follow the same rules:
+The shared converter gives `MustacheData`, rendering, and `debugDataStructure()`
+the same rules:
 
-1. Retain the resolved input owner before calling a property handler. Keep the
-   object alive through both property collection and method-lambda creation.
-2. Check for a pending exception immediately after the handler returns. Capture
-   only the entries the current visibility and key rules would accept, before
-   any recursive child conversion can run PHP code.
-3. Copy indirect entries' resolved values into owned storage. Define reference
-   capture explicitly so a copied reference wrapper is not mistaken for an
-   independent value. Retain the original owners and identities needed by cycle
-   detection, even if the traversal uses separate entry storage.
-4. Charge entry and key-byte budgets before allocating their capture storage.
-   Preserve node and depth limits during recursion. Review peak memory usage
-   because captures coexist with the native result and ancestor captures.
-5. Convert the owned entries, then release temporary ownership before reporting
-   success. Releasing a final PHP reference can run a destructor. Preserve any
-   pending PHP exception, and do not publish a successful result if cleanup
-   raises one. C++ exception paths must release the same temporary ownership.
+1. The resolved input owner survives property-handler calls, property collection,
+   and method-lambda creation.
+2. A pending exception is checked immediately after the handler returns. Visible
+   property entries are captured before recursive child conversion runs PHP.
+3. Indirect entries and reference referents are copied into owned storage.
+   Reference wrappers are retained separately for cycle detection. Sibling
+   aliases remain valid because active identities are tracked only along the
+   current recursion path.
+4. Entry and key-byte budgets are charged before allocating their capture
+   storage. Node and depth limits remain enforced during recursive conversion.
+5. Temporary ownership is released before reporting success. A pending PHP
+   exception raised during cleanup stops conversion and takes precedence over
+   translating a native validation error. C++ exception paths release the same
+   temporary ownership. The root owner is released before a caller publishes
+   the result.
 
-Keep the current array ordering, mixed-key rejection, property visibility,
+The implementation keeps array ordering, mixed-key rejection, property visibility,
 backing-value behavior for property hooks, property-over-method precedence,
-and lambda retention. Capturing values must not invoke userland clone hooks or
-turn object properties into calls to getters. A different Zend property API
-would need its own compatibility review.
+and lambda retention. Capturing values invokes neither userland clone hooks nor
+property getters. The Zend property API used for collection is unchanged.
 
-The main compatibility decision is when values become fixed during conversion.
-The proposed contract fixes immediate values when their container is captured.
-It deliberately leaves later object-property collection observable. Review
-that behavior and the extra allocation cost before implementing the capture.
-Capturing all keys before recursion can also move key or limit errors ahead
-of a child's exception. Tests must establish the intended error ordering.
+Immediate values now become fixed when their container is captured. Later
+object-property collection remains observable. Key validation and capture-budget
+errors occur before child conversion. Captures coexist with ancestor captures
+and the native result, adding temporary storage bounded by the entry and
+key-byte budgets. These budgets do not bound total process memory. Throughput
+and peak resident-memory costs have not been benchmarked in this slice.
 
 ## Constructor publication
 
@@ -94,17 +87,58 @@ before it is added.
 
 ## Verification
 
-Fresh full PHPT runs on Linux x86-64 used the existing matching extension builds
-with unchanged native source:
+The capture and key-validation tests first failed against the previous PHP
+8.4.24 extension for the intended behavioral differences. The original 20
+capture cases read `after` instead of `before`. The two later nested-array
+cases also failed against that extension. All six key-validation cases ran
+the child initializer and received its RuntimeException instead of ValueError.
+The fixtures retain their containers and change existing scalar values only.
+
+Fresh Linux x86-64 builds and full PHPT suites passed:
 
 | PHP | Passed | Skipped | Failed |
 | --- | ---: | ---: | ---: |
-| 8.3.33 | 253 | 7 | 0 |
-| 8.4.24 | 256 | 4 | 0 |
-| 8.5.9 | 256 | 4 | 0 |
+| 8.0.30 | 252 | 12 | 0 |
+| 8.3.33 | 254 | 10 | 0 |
+| 8.3.33, ASan/UBSan | 254 | 10 | 0 |
+| 8.4.24 | 260 | 4 | 0 |
+| 8.5.9 | 260 | 4 | 0 |
+
+PHP 8.3 used the rebuilt workspace module. The other rows used fresh Nix check
+outputs, followed by direct PHPT runs with the matching absolute PHP and module
+paths. Build and lint commands were:
+
+```sh
+nix develop --command make -j4
+nix build --no-link \
+  .#checks.x86_64-linux.php80-gcc \
+  .#checks.x86_64-linux.php83-gcc-sanitized \
+  .#checks.x86_64-linux.php84-gcc \
+  .#checks.x86_64-linux.php85-gcc
+nix develop --command pre-commit run --all-files
+```
+
+PHPT runs used `REPORT_EXIT_STATUS=1`, `NO_INTERACTION=1`, and
+`run-tests.php -n -d extension=MODULE tests`. The sanitizer run additionally
+used the allocator and ASan/UBSan settings from `nix/derivation.nix`, with leak
+detection enabled. All package-manifest and changed-document link checks passed.
 
 Relevant passing coverage includes:
 
+- [Captured values](../../tests/MustacheData__captures-container-values.phpt):
+  maps, lists, and declared properties capture reference referents, while later
+  objects expose their updated properties. Both lazy-object kinds and all four
+  conversion entry points are covered.
+- [Key validation](../../tests/MustacheData__validates-keys-before-child-conversion.phpt):
+  mixed keys are rejected without running child initializers, including when
+  template source is invalid.
+- [Capture cleanup](../../tests/MustacheData__releases-captured-values.phpt):
+  ordinary property objects and sibling aliases are released after successful
+  and failed conversion. This is characterization coverage that also passes
+  with the old extension.
+- [PHP-exception cleanup](../../tests/MustacheData__releases-captures-after-php-exception.phpt):
+  an initializer's original exception survives while sibling captures are
+  released and later rendering succeeds. This also passes with the old extension.
 - [Lazy contexts](../../tests/MustacheData__converts-lazy-object-contexts.phpt):
   ghosts and proxies initialize once through direct and nested conversion.
 - [Initializer exceptions](../../tests/Mustache__preserves-lazy-initializer-exceptions.phpt):
@@ -118,16 +152,23 @@ Relevant passing coverage includes:
 - [Property hooks](../../tests/MustacheData__object-property-hooks.phpt):
   initialized objects expose backing values without invoking getters.
 
-The lazy-object and property-hook tests skip PHP 8.3. These tests validate
-existing behavior, not the proposed capture contract. Traversal invalidation
-and constructor reentry were not experimentally demonstrated. No fresh native
-build, sanitizer run, or other-platform verification was performed for this
-documentation slice.
+The lazy-object and property-hook tests skip PHP versions before 8.4. The
+sanitizer run therefore does not exercise lazy initialization. Traversal
+invalidation and constructor reentry were not experimentally demonstrated.
+Exceptions raised by a destructor during temporary-owner release were reviewed
+statically, without a runtime experiment for that branch. Other platforms were
+not tested. F7's Zend bailout cleanup concern remains separate: ordinary C++
+scope cleanup does not establish bailout safety.
 
-All configured pre-commit checks, explicit Markdown lint of this new file,
-and checks of its eight local links and Markdown anchors passed.
+The independent code review found no in-scope defect. The independent test
+review added the nested array/object capture check and PHP-exception cleanup
+coverage above. Neither review demonstrated a production defect in this slice.
 
-The next implementation slice should establish owned per-container capture
-with tests for its chosen semantics, reference identity, budgets, and cleanup.
-F1 remains open until that work is verified. F7's Zend bailout cleanup concern
-is separate: ordinary C++ scope cleanup does not establish bailout safety.
+## Separate finding from the cleanup fixture
+
+A public `__destruct()` currently becomes a retained method lambda, contrary
+to the API guide. A benign check with the previous PHP 8.4.24 extension found
+the `__destruct` key in `MustacheData::toValue()`. The cleanup test therefore
+uses property-only objects to avoid conflating intentional lambda retention
+with temporary capture ownership. Correcting destructor exposure is newly
+identified follow-up work, outside this F1 slice.

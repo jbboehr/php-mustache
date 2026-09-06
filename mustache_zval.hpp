@@ -23,6 +23,12 @@ class ZvalGuard {
     ZvalGuard(const ZvalGuard&) = delete;
     ZvalGuard& operator=(const ZvalGuard&) = delete;
 
+    ZvalGuard(ZvalGuard&& other) noexcept
+    {
+      ZVAL_COPY_VALUE(&value, &other.value);
+      ZVAL_UNDEF(&other.value);
+    }
+
     zval * get()
     {
       return &value;

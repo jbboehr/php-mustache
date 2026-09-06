@@ -75,6 +75,7 @@
    <file name="tests/MustacheAST__construct-explicit-null.phpt" role="test" />
    <file name="tests/Mustache____construct.phpt" role="test" />
    <file name="tests/MustacheData____construct.phpt" role="test" />
+   <file name="tests/MustacheData__captures-container-values.phpt" role="test" />
    <file name="tests/MustacheData__conversion-errors-are-transactional.phpt" role="test" />
    <file name="tests/MustacheData__converts-lazy-object-contexts.phpt" role="test" />
    <file name="tests/MustacheData__object-custom-property-handlers.phpt" role="test" />
@@ -87,8 +88,11 @@
    <file name="tests/MustacheData__rejects-inheritance.phpt" role="test" />
    <file name="tests/MustacheData__rejects-reinitialization-during-render.phpt" role="test" />
    <file name="tests/MustacheData__rejects-unsupported-values.phpt" role="test" />
+   <file name="tests/MustacheData__releases-captured-values.phpt" role="test" />
+   <file name="tests/MustacheData__releases-captures-after-php-exception.phpt" role="test" />
    <file name="tests/MustacheData__scalar-types.phpt" role="test" />
    <file name="tests/MustacheData__toValue.phpt" role="test" />
+   <file name="tests/MustacheData__validates-keys-before-child-conversion.phpt" role="test" />
    <file name="tests/Mustache__accepts-template-wrapper-subclasses.phpt" role="test" />
    <file name="tests/Mustache__applies-ini-defaults.phpt" role="test" />
    <file name="tests/Mustache__initializes-properties-before-construction.phpt" role="test" />

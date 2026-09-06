@@ -18,11 +18,13 @@
 #include "mustache_lambda.hpp"
 #include "mustache_zend_closure_lambda.hpp"
 #include "mustache_data.hpp"
+#include "mustache_zval.hpp"
 #include <cmath>
 #include <cstdint>
 #include <memory>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 
 /* {{{ ZE2 OO definitions */
 zend_class_entry * MustacheData_ce_ptr;
@@ -214,6 +216,48 @@ class ActivePathGuard {
     ActivePathGuard& operator=(const ActivePathGuard&) = delete;
 };
 
+class CapturedValue {
+  private:
+    ZvalGuard reference;
+    ZvalGuard value;
+
+  public:
+    explicit CapturedValue(zval * current)
+    {
+      if( current == NULL ) {
+        throw InvalidParameterException("Missing data value");
+      }
+      while( Z_TYPE_P(current) == IS_INDIRECT ) {
+        current = Z_INDIRECT_P(current);
+      }
+      if( Z_TYPE_P(current) == IS_REFERENCE ) {
+        // Keep the original identity alive without reading its mutable referent later.
+        ZVAL_COPY(reference.get(), current);
+      }
+      ZVAL_COPY_DEREF(value.get(), current);
+    }
+
+    zend_reference * originalReference()
+    {
+      return Z_ISUNDEF_P(reference.get()) ? NULL : Z_REF_P(reference.get());
+    }
+
+    zval * get()
+    {
+      return value.get();
+    }
+};
+
+struct CapturedEntry {
+    std::string key;
+    CapturedValue value;
+
+    CapturedEntry(const char * name, size_t length, zval * current) :
+        key(name, length), value(current)
+    {
+    }
+};
+
 static zend_always_inline bool is_invokable_object(const zend_class_entry * ce)
 {
   const HashTable * function_table = ce != NULL ? &ce->function_table : NULL;
@@ -294,8 +338,8 @@ class DataConverter {
       ActivePathGuard<HashTable> active_guard(activeArrays, values_hash);
       const size_t entry_count = zend_hash_num_elements(values_hash);
       addContainerEntries(entry_count);
-      mustache::Data::Array array_values;
-      mustache::Data::Map object_values;
+      std::vector<CapturedEntry> entries;
+      entries.reserve(entry_count);
       bool saw_numeric_key = false;
       bool saw_string_key = false;
       zend_ulong numeric_key = 0;
@@ -305,14 +349,8 @@ class DataConverter {
       ZEND_HASH_FOREACH_KEY_VAL_IND(values_hash, numeric_key, string_key, value) {
         (void) numeric_key;
         if( string_key == NULL ) {
-          if( !saw_numeric_key && !saw_string_key ) {
-            array_values.reserve(entry_count);
-          }
           saw_numeric_key = true;
         } else {
-          if( !saw_numeric_key && !saw_string_key ) {
-            object_values.reserve(entry_count);
-          }
           saw_string_key = true;
         }
         if( saw_numeric_key && saw_string_key ) {
@@ -320,17 +358,25 @@ class DataConverter {
         }
 
         if( string_key == NULL ) {
-          array_values.push_back(convert(value, depth + 1));
+          entries.emplace_back("", 0, value);
         } else {
           addString(ZSTR_LEN(string_key));
-          object_values.emplace(
-              std::string(ZSTR_VAL(string_key), ZSTR_LEN(string_key)),
-              convert(value, depth + 1));
+          entries.emplace_back(ZSTR_VAL(string_key), ZSTR_LEN(string_key), value);
         }
       } ZEND_HASH_FOREACH_END();
 
       if( saw_string_key ) {
+        mustache::Data::Map object_values;
+        object_values.reserve(entries.size());
+        for( CapturedEntry& entry : entries ) {
+          object_values.emplace(std::move(entry.key), convertCaptured(entry.value, depth + 1));
+        }
         return mustache::Data::object(std::move(object_values));
+      }
+      mustache::Data::Array array_values;
+      array_values.reserve(entries.size());
+      for( CapturedEntry& entry : entries ) {
+        array_values.push_back(convertCaptured(entry.value, depth + 1));
       }
       return mustache::Data::array(std::move(array_values));
     }
@@ -353,6 +399,7 @@ class DataConverter {
         return;
       }
 
+      std::vector<CapturedEntry> entries;
       ZEND_HASH_FOREACH_KEY_VAL_IND(properties, numeric_key, key, value) {
         (void) numeric_key;
         if( key == NULL || ZSTR_LEN(key) == 0 || ZSTR_VAL(key)[0] == '\0' ) {
@@ -387,10 +434,12 @@ class DataConverter {
 
         addContainerEntry();
         addString(property_name_length);
-        values.emplace(
-            std::string(property_name, property_name_length),
-            convert(value, depth + 1));
+        entries.emplace_back(property_name, property_name_length, value);
       } ZEND_HASH_FOREACH_END();
+
+      for( CapturedEntry& entry : entries ) {
+        values.emplace(std::move(entry.key), convertCaptured(entry.value, depth + 1));
+      }
     }
 
     void addObjectFunctions(mustache::Data::Map& values, zval * current, size_t depth)
@@ -440,25 +489,32 @@ class DataConverter {
       ActivePathGuard<zend_object> active_guard(activeObjects, Z_OBJ_P(current));
       mustache::Data::Map values;
       addObjectProperties(values, current, depth);
+      if( UNEXPECTED(EG(exception) != NULL) ) {
+        throw PhpInvalidParameterException();
+      }
       addObjectFunctions(values, current, depth);
       return mustache::Data::object(std::move(values));
     }
 
-  public:
-    mustache::Data convert(zval * current, size_t depth = 1)
+    mustache::Data convertCaptured(CapturedValue& captured, size_t depth)
     {
-      if( current == NULL ) {
-        fail("Missing data value");
-      }
-      if( Z_TYPE_P(current) == IS_INDIRECT ) {
-        return convert(Z_INDIRECT_P(current), depth);
-      }
-      if( Z_TYPE_P(current) == IS_REFERENCE ) {
-        zend_reference * reference = Z_REF_P(current);
+      mustache::Data result;
+      zend_reference * reference = captured.originalReference();
+      if( reference != NULL ) {
         ActivePathGuard<zend_reference> active_guard(activeReferences, reference);
-        return convert(Z_REFVAL_P(current), depth);
+        result = convertValue(captured.get(), depth);
+      } else {
+        result = convertValue(captured.get(), depth);
       }
+      // Container captures have been released and their destructors may have run PHP.
+      if( UNEXPECTED(EG(exception) != NULL) ) {
+        throw PhpInvalidParameterException();
+      }
+      return result;
+    }
 
+    mustache::Data convertValue(zval * current, size_t depth)
+    {
       addNode(depth);
       switch( Z_TYPE_P(current) ) {
         case IS_NULL:
@@ -486,6 +542,13 @@ class DataConverter {
           fail("Invalid data type");
       }
     }
+
+  public:
+    mustache::Data convert(zval * current)
+    {
+      CapturedValue captured(current);
+      return convertCaptured(captured, 1);
+    }
 };
 
 } // namespace
@@ -493,8 +556,21 @@ class DataConverter {
 /* {{{ mustache_data_from_zval */
 mustache::Data mustache_data_from_zval(zval * current)
 {
-  DataConverter converter;
-  return converter.convert(current);
+  try {
+    DataConverter converter;
+    mustache::Data result = converter.convert(current);
+    // The root owner is released before any caller can publish the result.
+    if( UNEXPECTED(EG(exception) != NULL) ) {
+      throw PhpInvalidParameterException();
+    }
+    return result;
+  } catch(...) {
+    // Cleanup exceptions also take precedence over native validation errors.
+    if( EG(exception) != NULL ) {
+      throw PhpInvalidParameterException();
+    }
+    throw;
+  }
 }
 /* }}} mustache_data_from_zval */
 

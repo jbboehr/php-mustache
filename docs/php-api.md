@@ -44,6 +44,13 @@ PHP arrays become one of two Mustache data shapes:
 An empty array becomes an empty sequence. PHP can convert numeric string keys
 to integers before the extension receives them.
 
+Conversion captures each container's immediate values before converting its
+children. A lazy initializer changing a referenced scalar therefore does not
+change that scalar's already captured value. Nested objects keep their identity,
+and their properties are collected when conversion reaches them, so those later
+property values can reflect changes made by earlier initializers. Conversion
+does not make an atomic copy of the entire object graph.
+
 ```php
 <?php
 $mustache = new Mustache();
@@ -172,6 +179,10 @@ and `templateCharNo` properties are one-based, or `-1` when unavailable.
 Exceptions thrown by PHP callbacks or error handlers propagate unchanged.
 If an exception escapes a rendering callback, later template callbacks are
 not invoked.
+
+Invalid array key combinations and limits reached while collecting a container
+are reported before its children are converted. These errors can therefore
+precede an exception that a child's lazy initializer would have thrown.
 
 ```php
 <?php
