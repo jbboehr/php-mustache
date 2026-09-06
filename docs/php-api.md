@@ -169,7 +169,9 @@ the kind of failure:
 
 `MustacheParserException` extends `MustacheException`. Its `templateLineNo`
 and `templateCharNo` properties are one-based, or `-1` when unavailable.
-Exceptions thrown by PHP callbacks retain their original type.
+Exceptions thrown by PHP callbacks or error handlers propagate unchanged.
+If an exception escapes a rendering callback, later template callbacks are
+not invoked.
 
 ```php
 <?php
