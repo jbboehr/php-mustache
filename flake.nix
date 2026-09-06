@@ -247,6 +247,12 @@
               files = "^(generate-tests\\.php|\\.github/tests/test_generate_tests\\.py)$";
               pass_filenames = false;
             };
+            arginfo-stub-hash = {
+              enable = true;
+              entry = "${pkgs.python3}/bin/python3 .github/tests/test_arginfo.py";
+              files = "^(mustache\\.stub\\.php|mustache_arginfo\\.h|\\.github/tests/test_arginfo\\.py)$";
+              pass_filenames = false;
+            };
           };
         };
 

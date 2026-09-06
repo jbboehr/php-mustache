@@ -572,7 +572,7 @@ PHP_METHOD(Mustache, getStopSequence)
 }
 /* }}} Mustache::getStopSequence */
 
-/* {{{ proto boolean Mustache::setStartSequence(bool flag) */
+/* {{{ proto boolean Mustache::setEscapeByDefault(bool|int escapeByDefault) */
 PHP_METHOD(Mustache, setEscapeByDefault)
 {
   try {
@@ -670,7 +670,7 @@ PHP_METHOD(Mustache, setStopSequence)
     mustache_exception_handler();
   }
 }
-/* }}} Mustache::setStartSequence */
+/* }}} Mustache::setStopSequence */
 
 /* {{{ proto MustacheAST Mustache::parse(string|MustacheTemplate|MustacheAST template) */
 PHP_METHOD(Mustache, parse)
