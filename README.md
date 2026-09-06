@@ -113,7 +113,10 @@ You have just won 10000 dollars!
 Well, 6000 dollars, after taxes.
 ```
 
-See also: [template loader example](examples.md)
+See the [official Mustache manual](https://mustache.github.io/mustache.5.html)
+for template syntax, the [PHP API guide](docs/php-api.md) for data conversion,
+lambdas, errors, and limits, and the [template loader example](examples.md)
+for loading templates from files.
 
 `MustacheData` and `MustacheLambdaHelper` are final classes and cannot be
 subclassed. To add application behavior around converted data, store a
