@@ -134,14 +134,99 @@ the outer render objects would not cover local library objects or undo skipped
 scope guards. Allocator substitution alone has the same state-restoration gap.
 Neither is an adequate standalone fix for the reviewed implementation.
 
-The next bounded task is a boundary and cleanup prototype covering callback
-invocation, result conversion, and nested helper unwinding. Start with controlled
-internal abort-status injection and ordinary exceptions to check cleanup and
-propagation. Such checks would validate the prototype's C++ mechanics; they
-would not establish actual Zend bailout safety. Production integration still
-requires evidence for the remaining boundaries and supported runtimes.
+The [boundary prototype](#boundary-prototype) below checks the C++ part of this
+direction. The next implementation decision is the real Zend adapter's jump
+boundary and PHP-reference cleanup contract, including cleanup after Zend has
+reset executor state. The prototype does not settle either question. Production
+integration also needs coverage of the other boundaries above and supported
+runtimes.
+
+## Boundary prototype
+
+The standalone prototype added after `fcbed0f` links to the pinned libmustache
+renderer. It uses injected status values and ordinary C++ exceptions. It does
+not include Zend, create PHP values, or install a non-local jump boundary.
+
+Run it from the repository root:
+
+```sh
+nix develop --command bash docs/development/prototypes/bailout-boundary/run.sh
+```
+
+The [runner](prototypes/bailout-boundary/run.sh) compiles with C++17 and warnings
+as errors, runs the checks, and removes its temporary executable. Inside the
+development shell, invoking it with `bash` directly also works. It requires
+the shell's C++ compiler, `pkg-config`, and libmustache. This is a manual
+maintainer experiment; it is not part of the extension build, PHPT suite, or
+release package.
+
+The [boundary model](prototypes/bailout-boundary/boundary.hpp) has three rules:
+
+1. An abort status is sticky for the modeled request. Participating boundaries
+   check it before doing work. Catching the internal C++ marker cannot reset it.
+   Ordinary exceptions remain distinct and allow another render in that request.
+2. Cleanup records an abort without throwing. A checkpoint after cleanup starts
+   C++ unwinding if no exception is already in flight. When cleanup reports an
+   abort during another exception, that original exception remains available for
+   inspection and the request's outcome becomes aborted.
+3. The outer runner publishes output only after a successful render and final
+   checkpoint. Failed and aborted outcomes contain no output, including when
+   cleanup reports an abort while the render function returns its result.
+
+The simulated cleanup function is required to be `noexcept` and to return a
+status. It continues to run during native unwinding. That is a proposed adapter
+contract, not evidence that releasing real PHP references at that point is safe.
+Likewise, the saved exception is an internal diagnostic; this prototype does not
+define a PHP exception or translate an abort back into Zend termination.
+
+The [tests](prototypes/bailout-boundary/test.cpp) exercise the real AST and
+compiled render paths with benign templates. Each backend covers success,
+callback and conversion aborts, cleanup aborts on return and during unwinding,
+ordinary exceptions (including nonstandard C++ exception objects), and nested
+helper rendering. Checks cover callback progress, output suppression after a
+literal prefix has already rendered, destruction of an acquired native owner
+exactly once, preservation of the original exception, and inactive retained
+helper contexts.
+Each render case also checks a subsequent successful render using the same
+`mustache::Mustache` object. Aborted cases use a fresh modeled request;
+ordinary failures reuse their request. This does not reuse the compiled
+backend's internal per-render engine across top-level calls.
+
+Fresh Linux x86-64 runs with GCC 15.2.0 and libmustache 0.6.0 passed all 22
+rendering cases plus the terminal-state checks. The terminal checks cover a
+caught abort marker, skipped adapter entry, cleanup before output publication,
+and cleanup status remaining sticky. Before implementation, the executable
+failed because an aborted request resumed work. A later adapter-entry check
+also failed before adding the entry checkpoint, then passed after that change.
+
+Reliability review result: `PASS_WITH_RESIDUAL_RISK`. Independent correctness
+and test reviews found no actionable defect in the prototype. Temporary-copy
+mutations confirmed that the tests reject publishing aborted output, clearing an
+earlier cleanup abort, and removing the outer runner's entry checkpoint. Two
+additional mutations initially passed: catching only `std::exception` after
+changing the internal marker to derive from it, and retaining partial AST output
+in the test adapter after failure. The added nonstandard-exception case and
+literal prefixes made those mutations fail; the unchanged implementation passed
+the strengthened tests. No dependency or extension source was mutated.
+
+The full PHP 8.3.33 suite also passed for this slice using the unchanged workspace
+module: 254 passed, 10 skipped, no failures or warnings. It used
+`REPORT_EXIT_STATUS=1 NO_INTERACTION=1`, the matching `TEST_PHP_EXECUTABLE`, and
+`run-tests.php -n -d extension=modules/mustache.so -j4 tests`. All configured
+pre-commit checks, explicit runner shell checks, 21 local documentation links,
+and the package manifest check passed. The manifest still lists all 264 PHPTs
+and excludes the standalone prototype.
+
+These results establish ordinary C++ propagation and observable renderer cleanup
+for this status model. The native owner's counters do not measure PHP reference
+counts or prove all allocations were released. No actual Zend adapter, PHP
+allocation failure, non-local jump, request shutdown, cross-request effect,
+sanitizer run, or other platform was tested by the prototype. F7 remains open.
 
 ## Verification and limits
+
+The following verification belongs to the preceding design-review slice. The
+prototype's separate evidence and limits are recorded above.
 
 Source review covered the extension at `bd30d9e`, the pinned libmustache files
 linked above, PHP 8.3.33 bailout and shutdown implementation, and the normal exit
