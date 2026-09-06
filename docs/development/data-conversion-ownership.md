@@ -3,8 +3,9 @@
 The F1 design review at revision `0e5503a` proposed retaining lazy-object
 initialization with an explicit ownership contract. The implementation slice
 based on `b506a28` now adds owned container captures. The original concern about
-invalid native access has not been experimentally demonstrated. Constructor
-publication and Zend bailout cleanup remain separate follow-ups.
+invalid native access has not been experimentally demonstrated. The constructor
+review below recommends retaining the existing publication rules. Zend bailout
+cleanup remains a separate follow-up.
 
 ## Current behavior and evidence
 
@@ -69,23 +70,50 @@ and peak resident-memory costs have not been benchmarked in this slice.
 
 ## Constructor publication
 
-`MustacheData::__construct()` rejects an existing native payload, converts into
-a `unique_ptr`, and publishes only after conversion returns. The existing
-reinitialization test covers an already initialized instance.
+The follow-up review at `afaba55` recommends keeping the existing constructor
+state model. No affected caller was found in the repository's documented usage
+or tests that warrants adding an initialization-in-progress flag. This is an
+applicability decision, not a claim that overlapping constructor calls are safe.
 
-`MustacheData` is now final. Reflection-based constructor bypass is rejected,
-and ordinary construction does not return the instance until the constructor
-finishes. Those restrictions narrow the original publication concern.
-However, a conversion failure under a nonthrowing warning handler can leave
-an exposed, uninitialized instance, as documented in the
-[PHP API guide](../php-api.md#errors). Finality alone does not settle that case.
+[`MustacheData::__construct()`](../../mustache_data.cpp) rejects an existing
+native payload, converts into a `unique_ptr`, and publishes only after conversion
+and temporary-owner cleanup return successfully. The F1 capture change did not
+introduce the constructor's check-before-conversion pattern.
 
-This review has not established a supported caller that reenters conversion on
-such an instance. Keep the publication question separate from traversal
-ownership. An initialization-in-progress flag needs an applicability review
-before it is added.
+| Entry path | Current behavior |
+| --- | --- |
+| Ordinary `new MustacheData($input)` | The constructor does not pass its instance to the input's callbacks. The `new` expression returns it only after construction finishes. |
+| Repeated call on initialized data | The existing payload check rejects replacement before converting the new input. |
+| Failed conversion with a nonthrowing warning handler | The `new` expression can return an uninitialized instance. It cannot be rendered or read as valid data. |
+| Sequential retry on an uninitialized instance | A later direct constructor call can initialize it. Failed retries leave it uninitialized. |
+| Subclass, reflection bypass, cloning, or PHP serialization | Finality and the wrapper's allocation, clone, and serialization restrictions reject these paths. |
+| Lazy `MustacheData` wrapper on PHP 8.4 | PHP rejects both lazy ghosts and proxies for this internal class. Lazy objects supplied as input remain supported. |
+
+The warning contract matters here. Native validation errors reach
+[`mustache_exception_handler()`](../../mustache_exceptions.cpp) only after
+conversion has unwound out of the constructor's `try` block. A warning handler
+therefore runs after that failed conversion; the failed call does not later
+resume conversion and publish a result. PHP exceptions from input callbacks
+also stop publication. The [PHP API guide](../php-api.md#errors) documents the
+uninitialized state left by a nonthrowing warning.
+
+Finality and delayed publication narrow the concern but do not provide an
+isolation boundary against arbitrary PHP callback code. There is still no guard
+for overlapping direct constructor calls on the same uninitialized instance.
+The documented construction and rendering flows do not require that behavior,
+and scalar or container data alone does not invoke the constructor again. The
+remaining concern depends on application PHP code manipulating the wrapper's
+lifecycle during conversion; it has not been experimentally demonstrated.
+
+Accept that limitation for this slice. Adding a flag now would introduce another
+state and failure-reset rule without an established affected application flow.
+Revisit the decision if a supported factory starts exposing instances before
+initialization completes, or an application requires overlapping initialization.
+Sequential retry is recorded as existing behavior, not proposed as a new API.
 
 ## Verification
+
+### Capture implementation
 
 The capture and key-validation tests first failed against the previous PHP
 8.4.24 extension for the intended behavioral differences. The original 20
@@ -163,6 +191,39 @@ scope cleanup does not establish bailout safety.
 The independent code review found no in-scope defect. The independent test
 review added the nested array/object capture check and PHP-exception cleanup
 coverage above. Neither review demonstrated a production defect in this slice.
+
+### Constructor review
+
+The constructor review used the unchanged native implementation at `afaba55`.
+Standalone checks passed on Linux x86-64 with PHP 8.3.33 and 8.4.24:
+
+- Non-finite input emitted `E_WARNING`, left `toValue()` returning `false`, and
+  caused `render()` to reject the uninitialized wrapper with `ValueError`.
+- A completed retry with mixed array keys left the same instance uninitialized.
+  A further retry whose warning handler threw preserved the exact exception
+  object and still left no readable payload.
+- A subsequent sequential retry with `['name' => 'Ada']` produced that exact
+  value from `toValue()` and rendered `Ada`. A later replacement attempt warned
+  and preserved the existing value.
+- When a warning handler threw during ordinary `new`, the assignment target kept
+  its previous value.
+- Reflection reported the class as final; constructor bypass and cloning were
+  rejected. On PHP 8.4, both lazy-wrapper factories were rejected before their
+  initializers ran.
+
+The six existing constructor, transactional-error, inheritance, reinitialization,
+unsupported-value, and serialization PHPTs also passed on both versions. Fresh
+full-suite runs passed 254 tests with 10 skips on PHP 8.3, and 260 tests with four
+skips on PHP 8.4. All configured pre-commit checks, 14 local document links, and
+the package-manifest check passed. These runs reused the matching native builds;
+compilation, sanitizer checks, and other PHP versions were not repeated for this
+documentation-only slice.
+
+These are characterization checks, with no runtime implementation change or
+red/green bug reproduction. Every constructor retry completed before the next
+began. Neither overlapping initialization nor lifecycle manipulation inside an
+input callback was exercised. The warning-handler timing conclusion comes from
+source review. Zend bailout cleanup and other platforms remain unverified here.
 
 ## Separate finding from the cleanup fixture
 
