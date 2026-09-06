@@ -232,14 +232,19 @@ static bool mustache_is_ast(zval * value)
       instanceof_function(Z_OBJCE_P(value), MustacheAST_ce_ptr);
 }
 
-static const mustache::Node * mustache_ast_node(zval * value, uint32_t argument)
+static const php_mustache_ast_state& mustache_ast_state(zval * value, uint32_t argument)
 {
   value = mustache_dereference_zval(value);
   struct php_obj_MustacheAST * payload = php_mustache_ast_object_fetch_object(value);
   if( payload->state == NULL || payload->state->node == NULL ) {
     mustache_argument_value_error(argument, "must contain an initialized MustacheAST");
   }
-  return payload->state->node.get();
+  return *payload->state;
+}
+
+static const mustache::Node * mustache_ast_node(zval * value, uint32_t argument)
+{
+  return mustache_ast_state(value, argument).node.get();
 }
 
 static std::string mustache_template_object_source(zval * value, uint32_t argument)
@@ -306,7 +311,7 @@ static void mustache_partial_source(zval * value, std::string& source, uint32_t 
       "must contain only string keys and string, MustacheTemplate, or MustacheAST values");
 }
 
-static std::unique_ptr<mustache::Node> mustache_clone_node(
+static void mustache_validate_partial_node(
     const mustache::Node& source, size_t depth, NodeCloneState& state)
 {
   if( depth == 0 || depth > 64 ) {
@@ -322,6 +327,25 @@ static std::unique_ptr<mustache::Node> mustache_clone_node(
   }
   state.dataParts += source.dataParts.size();
 
+  for( const std::unique_ptr<mustache::Node>& child : source.children ) {
+    if( child == NULL ) {
+      throw InvalidParameterException("MustacheAST contains an empty child node");
+    }
+    mustache_validate_partial_node(*child, depth + 1, state);
+  }
+  if( source.child != NULL ) {
+    mustache_validate_partial_node(*source.child, depth + 1, state);
+  }
+  for( const auto& partial : source.partials ) {
+    if( partial.second == NULL ) {
+      throw InvalidParameterException("MustacheAST contains an empty partial node");
+    }
+    mustache_validate_partial_node(*partial.second, depth + 1, state);
+  }
+}
+
+static std::unique_ptr<mustache::Node> mustache_clone_node(const mustache::Node& source)
+{
   std::unique_ptr<mustache::Node> clone = std::make_unique<mustache::Node>();
   clone->type = source.type;
   clone->flags = source.flags;
@@ -332,28 +356,32 @@ static std::unique_ptr<mustache::Node> mustache_clone_node(
 
   clone->children.reserve(source.children.size());
   for( const std::unique_ptr<mustache::Node>& child : source.children ) {
-    if( child == NULL ) {
-      throw InvalidParameterException("MustacheAST contains an empty child node");
-    }
-    clone->children.push_back(mustache_clone_node(*child, depth + 1, state));
+    clone->children.push_back(mustache_clone_node(*child));
   }
   if( source.child != NULL ) {
-    clone->child = mustache_clone_node(*source.child, depth + 1, state);
+    clone->child = mustache_clone_node(*source.child);
   }
   for( const auto& partial : source.partials ) {
-    if( partial.second == NULL ) {
-      throw InvalidParameterException("MustacheAST contains an empty partial node");
-    }
     clone->partials.emplace(
-        partial.first, mustache_clone_node(*partial.second, depth + 1, state));
+        partial.first, mustache_clone_node(*partial.second));
   }
   return clone;
 }
 
-static std::unique_ptr<mustache::Node> mustache_clone_node(const mustache::Node& source)
+static std::unique_ptr<mustache::Node> mustache_copy_ast_partial(const php_mustache_ast_state& ast)
 {
   NodeCloneState state;
-  return mustache_clone_node(source, 1, state);
+  mustache_validate_partial_node(*ast.node, 1, state);
+  if( ast.source.has_value() ) {
+    // Node is move-only, and its original section text is private. Reparse
+    // with an independent snapshot so the active renderer keeps its settings.
+    std::unique_ptr<mustache::Node> partial = std::make_unique<mustache::Node>();
+    mustache::Tokenizer tokenizer = ast.source->tokenizer;
+    tokenizer.tokenize(std::string_view(ast.source->text), partial.get());
+    return partial;
+  }
+  // Binary-decoded ASTs have no original source metadata to retain.
+  return mustache_clone_node(*ast.node);
 }
 
 static bool mustache_partials_include_ast(zval * partials)
@@ -440,11 +468,10 @@ static void mustache_parse_partials(zval * partials_value, mustache::Mustache * 
 
     std::unique_ptr<mustache::Node> partial;
     if( mustache_is_ast(value) ) {
-      const mustache::Node * ast_node = mustache_ast_node(value, argument);
-      // Node::Partials owns its values. Clone deliberately rather than
-      // adopting the node still owned by the PHP MustacheAST object.
+      const php_mustache_ast_state& ast = mustache_ast_state(value, argument);
+      // Node::Partials owns its values independently of the PHP AST object.
       try {
-        partial = mustache_clone_node(*ast_node);
+        partial = mustache_copy_ast_partial(ast);
       } catch( const InvalidParameterException& error ) {
         mustache_argument_value_error(argument, error.what());
       }
@@ -690,18 +717,22 @@ PHP_METHOD(Mustache, parse)
     _this_zval = getThis();
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
 
-    // Check template parameter
-    mustache::Node templateNode;
-    const mustache::Node * templateNodePtr = NULL;
-    mustache_parse_template_param(tmpl, payload->mustache, templateNode, &templateNodePtr, 1);
-
     // Existing ASTs are already parsed. Preserve their identity so parse()
     // remains safe to use in generic template-normalization paths.
     zval * templateValue = mustache_dereference_zval(tmpl);
     if( mustache_is_ast(templateValue) ) {
+      mustache_ast_node(templateValue, 1);
       ZVAL_COPY(return_value, templateValue);
       return;
     }
+
+    php_mustache_ast_source source;
+    mustache_template_source(templateValue, source.text, 1);
+    // Reading a template property can call PHP and change parser settings.
+    // Capture them only after reading the source, and never read it twice.
+    source.tokenizer = payload->mustache->tokenizer;
+    std::unique_ptr<mustache::Node> templateNode = std::make_unique<mustache::Node>();
+    source.tokenizer.tokenize(std::string_view(source.text), templateNode.get());
 
     // Strings and MustacheTemplate values compile into a new owned AST.
     if( object_init_ex(return_value, MustacheAST_ce_ptr) != SUCCESS ) {
@@ -723,8 +754,8 @@ PHP_METHOD(Mustache, parse)
       zend_throw_error(NULL, "MustacheAST is already initialized");
       RETURN_THROWS();
     }
-    intern->state->node =
-        std::make_unique<mustache::Node>(std::move(templateNode));
+    intern->state->source = std::move(source);
+    intern->state->node = std::move(templateNode);
 
   } catch(...) {
     mustache_exception_handler();
@@ -769,7 +800,7 @@ PHP_METHOD(Mustache, render)
     std::string output;
     if( mustache_is_ast(tmpl) || mustache_partials_include_ast(partials) ) {
       // AST-backed inputs remain on the compatibility renderer. Its partial
-      // map owns explicit deep clones of public MustacheAST values.
+      // map owns independent copies of public MustacheAST values.
       mustache::Node templateNode;
       const mustache::Node * templateNodePtr = NULL;
       mustache_parse_template_param(tmpl, payload->mustache, templateNode, &templateNodePtr, 1);

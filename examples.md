@@ -96,7 +96,8 @@ You have just won 10000 dollars!
 ## Persisting parsed templates
 
 Parsed templates can be cached as binary strings and restored without parsing
-the source again:
+the source again when the binary format can preserve their section delimiters
+and original section body text:
 
 ```php
 $mustache = new Mustache();
@@ -110,3 +111,12 @@ echo $mustache->render($cached, ['name' => 'John']);
 
 The binary format is provided by libmustache. Cache entries should therefore be
 invalidated when libmustache is upgraded.
+
+Both `toBinary()` and PHP's `serialize($ast)` throw `MustacheException` if a `#`
+section uses delimiters other than `{{` and `}}`, or its original body text
+differs from the format's reconstructed text. Tag spacing, comments, triple-brace
+spelling, and standalone formatting can cause this difference. These ASTs still
+render normally and remain usable after the exception. Cache their source and
+parse it when needed to preserve exact section callback text. Changing delimiters
+for interpolation alone does not prevent binary persistence. The
+[PHP API guide](docs/php-api.md#templates-and-partials) lists the exception messages.

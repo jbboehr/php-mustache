@@ -18,6 +18,27 @@ to `parse()` returns that same object. `new MustacheAST($binary)` and
 See the [parsed-template cache example](../examples.md#persisting-parsed-templates)
 for storing binary templates and invalidating them after libmustache upgrades.
 
+Binary persistence cannot preserve all section metadata. Both `toBinary()` and
+PHP's `serialize($ast)` throw `MustacheException` for ASTs containing a `#` section
+with either of these properties:
+
+- Delimiters other than `{{` and `}}`: the message is
+  `Legacy serialization cannot preserve custom section delimiters`.
+- Original body text that differs from the binary format's reconstructed text:
+  the message is `Legacy serialization cannot preserve original section text`.
+  Tag spacing, comments, triple-brace spelling, and standalone formatting can
+  cause this difference, even with default delimiters.
+
+These ASTs still render normally and remain usable after the exception. Cache
+their source and parse it when needed to preserve exact section callback text.
+Changing delimiters for interpolation alone does not prevent binary persistence.
+
+AST partials preserve the delimiters and escaping setting used when they were
+parsed, including when rendered by another `Mustache` instance. ASTs parsed from
+source retain that source and parse it again when copied into a partial map to
+preserve exact section callback text. This adds source storage and parsing work
+for each render that uses them as partials.
+
 An empty string or `new MustacheTemplate('')` is a valid empty template.
 `new MustacheTemplate()` and `new MustacheTemplate(null)` leave their wrappers
 uninitialized. Passing these to `parse()` or `render()` throws `ValueError`.
@@ -130,6 +151,9 @@ arguments according to the callback's declared parameters: the unrendered
 section text and a `MustacheLambdaHelper`. A callback that declares no
 parameters receives none. Any further required parameter causes PHP's usual
 `ArgumentCountError`. Return a string to use as the lambda result.
+
+For templates parsed from source, the section body preserves the original tag
+spelling, comments, and whitespace.
 
 The helper renders text with the section's current context:
 

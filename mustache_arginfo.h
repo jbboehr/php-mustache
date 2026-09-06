@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 821f3e8b2fbd9c5982f8511aa1ed2838883be388 */
+ * Stub hash: 3cbcc7e6a85dfcf6c76cfff7a7c448cb4be37868 */
 
 #if PHP_VERSION_ID < 80100
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Mustache___serialize, 0, 0, IS_ARRAY, 0)

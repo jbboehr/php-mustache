@@ -162,7 +162,12 @@ class MustacheAST
     /**
      * Returns the data used by PHP serialization.
      *
+     * Rejects # sections with non-default delimiters or original body text that
+     * differs from legacy reconstruction. Cache source to preserve exact section
+     * callback text.
+     *
      * @return array{binary: string}
+     * @throws MustacheException If section delimiters or original body text cannot be preserved.
      */
     public function __serialize(): array
     {
@@ -181,7 +186,8 @@ class MustacheAST
      * Returns libmustache's internal parse tree for diagnostics.
      *
      * The array shape is not part of the compatibility contract and may change
-     * between releases. Use toBinary() for persistent parsed-template caches.
+     * between releases. Use toBinary() for persistent parsed-template caches
+     * where supported, or cache source to preserve exact section callback text.
      *
      * @internal
      * @return array<string, mixed>
@@ -192,6 +198,12 @@ class MustacheAST
 
     /**
      * Returns libmustache's binary AST representation.
+     *
+     * Rejects # sections with non-default delimiters or original body text that
+     * differs from legacy reconstruction. Cache source to preserve exact section
+     * callback text.
+     *
+     * @throws MustacheException If section delimiters or original body text cannot be preserved.
      */
     public function toBinary(): string
     {
@@ -201,6 +213,7 @@ class MustacheAST
      * Returns libmustache's binary AST representation.
      *
      * @deprecated Use toBinary() instead.
+     * @throws MustacheException If section delimiters or original body text cannot be preserved.
      */
     public function __toString(): string
     {

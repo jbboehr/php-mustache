@@ -29,6 +29,7 @@
     nix-phps.url = "github:fossar/nix-phps";
     libmustache = {
       url = "github:jbboehr/libmustache/develop";
+      inputs.agent-badge.follows = "agent-badge";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.systems.follows = "systems";
       inputs.flake-utils.follows = "flake-utils";

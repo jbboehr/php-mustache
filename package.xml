@@ -65,9 +65,11 @@
    <file name="tests/MustacheAST__modern-serialization.phpt" role="test" />
    <file name="tests/MustacheAST__toArray.phpt" role="test" />
    <file name="tests/MustacheAST__rejects-invalid-serialization.phpt" role="test" />
+   <file name="tests/MustacheAST__rejects-lossy-custom-delimiter-serialization.phpt" role="test" />
    <file name="tests/MustacheAST__rejects-reinitialization-during-render.phpt" role="test" />
    <file name="tests/MustacheAST__rejects-resource-limit-inputs.phpt" role="test" />
    <file name="tests/MustacheAST__roundtrips-complex-templates.phpt" role="test" />
+   <file name="tests/MustacheAST__section-body-serialization.phpt" role="test" />
    <file name="tests/MustacheAST__serialization-subclass-alias-recovery.phpt" role="test" />
    <file name="tests/MustacheAST__serialize-output-limit.phpt" role="test" />
    <file name="tests/MustacheAST__unserialize-validates-and-recovers.phpt" role="test" />
@@ -129,13 +131,16 @@
    <file name="tests/Mustache__render-accepts-object.phpt" role="test" />
    <file name="tests/Mustache__render-accepts-object-with-properties.phpt" role="test" />
    <file name="tests/Mustache__render-AST-fiber-overlap-and-recovery.phpt" role="test" />
+   <file name="tests/Mustache__render-AST-partial-preserves-parser-settings.phpt" role="test" />
    <file name="tests/Mustache__render-does-not-mutate-double.phpt" role="test" />
    <file name="tests/Mustache__render-does-not-mutate-false.phpt" role="test" />
    <file name="tests/Mustache__render-does-not-mutate-int.phpt" role="test" />
    <file name="tests/Mustache__render-does-not-mutate-null.phpt" role="test" />
    <file name="tests/Mustache__render-does-not-mutate-true.phpt" role="test" />
+   <file name="tests/Mustache__render-dotted-name-context-stack.phpt" role="test" />
    <file name="tests/Mustache__render-empty-string-empty-data.phpt" role="test" />
    <file name="tests/Mustache__render-empty-string-with-data.phpt" role="test" />
+   <file name="tests/Mustache__render-escapes-complete-lambda-interpolation.phpt" role="test" />
    <file name="tests/Mustache__accepts-empty-template-wrappers.phpt" role="test" />
    <file name="tests/Mustache__rejects-uninitialized-template-wrappers.phpt" role="test" />
    <file name="tests/Mustache__render-embedded-nul-template.phpt" role="test" />
@@ -154,6 +159,7 @@
    <file name="tests/Mustache__render-object-method-lifecycle.phpt" role="test" />
    <file name="tests/Mustache__render-partial-accepts-MustacheAST.phpt" role="test" />
    <file name="tests/Mustache__render-partial-accepts-MustacheTemplate.phpt" role="test" />
+   <file name="tests/Mustache__render-preserves-original-section-body.phpt" role="test" />
    <file name="tests/Mustache__render-recursive-array.phpt" role="test" />
    <file name="tests/Mustache__render-recursive-object.phpt" role="test" />
    <file name="tests/Mustache__render-references.phpt" role="test" />

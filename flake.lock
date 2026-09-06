@@ -153,6 +153,9 @@
     },
     "libmustache": {
       "inputs": {
+        "agent-badge": [
+          "agent-badge"
+        ],
         "flake-utils": [
           "flake-utils"
         ],
@@ -170,11 +173,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788277872,
-        "narHash": "sha256-Qhcm9ptFUOZlBu+ivif8KnkP3LcgCvgPyKuoz0Qsl/E=",
+        "lastModified": 1788719527,
+        "narHash": "sha256-a0lQ0KcGWcLxkiWUL7yVd68g+rJoK3PYrDCsXWOhevo=",
         "owner": "jbboehr",
         "repo": "libmustache",
-        "rev": "fea4160d02238c7503d72e4f2705fda7b65edef5",
+        "rev": "e6b2de00d7a3ad801eb655165eed1fd9a4352b97",
         "type": "github"
       },
       "original": {
