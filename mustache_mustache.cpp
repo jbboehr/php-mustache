@@ -61,6 +61,7 @@ static zend_function_entry Mustache_methods[] = {
   PHP_ME(Mustache, setEscapeByDefault, arginfo_class_Mustache_setEscapeByDefault, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, setStartSequence, arginfo_class_Mustache_setStartSequence, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, setStopSequence, arginfo_class_Mustache_setStopSequence, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, setPartialLimits, arginfo_class_Mustache_setPartialLimits, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, parse, arginfo_class_Mustache_parse, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, render, arginfo_class_Mustache_render, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, tokenize, arginfo_class_Mustache_tokenize, ZEND_ACC_PUBLIC)
@@ -109,6 +110,8 @@ static zend_object * Mustache_obj_create(zend_class_entry * ce)
 
   try {
     intern = (struct php_obj_Mustache *) ecalloc(1, sizeof(php_obj_Mustache) + zend_object_properties_size(ce));
+    intern->max_partial_entries = -1;
+    intern->max_partial_text_bytes = -1;
     zend_object_std_init(&intern->std, ce);
     object_properties_init(&intern->std, ce);
     intern->std.handlers = &Mustache_obj_handlers;
@@ -225,6 +228,42 @@ static zval * mustache_dereference_zval(zval * value)
   throw PhpInvalidParameterException();
 }
 
+class PartialBudget {
+  private:
+    zend_long entries_left;
+    zend_long text_bytes_left;
+    uint32_t argument;
+
+  public:
+    PartialBudget(const php_obj_Mustache& owner, uint32_t argument) :
+        entries_left(owner.max_partial_entries),
+        text_bytes_left(owner.max_partial_text_bytes), argument(argument) {}
+
+    bool limits_text() const { return text_bytes_left >= 0; }
+
+    void consume_text(size_t bytes)
+    {
+      if( !limits_text() ) {
+        return;
+      }
+      if( bytes > static_cast<size_t>(text_bytes_left) ) {
+        mustache_argument_value_error(argument, "exceeds the partial maxTextBytes limit");
+      }
+      text_bytes_left -= static_cast<zend_long>(bytes);
+    }
+
+    void consume_entry(size_t name_bytes)
+    {
+      if( entries_left == 0 ) {
+        mustache_argument_value_error(argument, "exceeds the partial maxEntries limit");
+      }
+      if( entries_left > 0 ) {
+        --entries_left;
+      }
+      consume_text(name_bytes);
+    }
+};
+
 static bool mustache_is_ast(zval * value)
 {
   value = mustache_dereference_zval(value);
@@ -247,7 +286,8 @@ static const mustache::Node * mustache_ast_node(zval * value, uint32_t argument)
   return mustache_ast_state(value, argument).node.get();
 }
 
-static std::string mustache_template_object_source(zval * value, uint32_t argument)
+static std::string mustache_template_object_source(
+    zval * value, uint32_t argument, PartialBudget * budget = nullptr)
 {
   std::string source;
   {
@@ -260,6 +300,9 @@ static std::string mustache_template_object_source(zval * value, uint32_t argume
     source_value = mustache_dereference_zval(source_value);
     if( source_value == NULL || Z_TYPE_P(source_value) != IS_STRING ) {
       mustache_argument_value_error(argument, "must contain a string MustacheTemplate source");
+    }
+    if( budget != nullptr ) {
+      budget->consume_text(Z_STRLEN_P(source_value));
     }
     source.assign(Z_STRVAL_P(source_value), Z_STRLEN_P(source_value));
   }
@@ -292,16 +335,18 @@ static void mustache_template_source(zval * value, std::string& source, uint32_t
   source = mustache_template_object_source(value, argument);
 }
 
-static void mustache_partial_source(zval * value, std::string& source, uint32_t argument)
+static void mustache_partial_source(
+    zval * value, std::string& source, uint32_t argument, PartialBudget& budget)
 {
   value = mustache_dereference_zval(value);
   if( value != NULL && Z_TYPE_P(value) == IS_STRING ) {
+    budget.consume_text(Z_STRLEN_P(value));
     source.assign(Z_STRVAL_P(value), Z_STRLEN_P(value));
     return;
   }
   if( value != NULL && Z_TYPE_P(value) == IS_OBJECT ) {
     if( instanceof_function(Z_OBJCE_P(value), MustacheTemplate_ce_ptr) ) {
-      source = mustache_template_object_source(value, argument);
+      source = mustache_template_object_source(value, argument, &budget);
       return;
     }
     mustache_argument_value_error(argument,
@@ -312,7 +357,7 @@ static void mustache_partial_source(zval * value, std::string& source, uint32_t 
 }
 
 static void mustache_validate_partial_node(
-    const mustache::Node& source, size_t depth, NodeCloneState& state)
+    const mustache::Node& source, size_t depth, NodeCloneState& state, PartialBudget * budget)
 {
   if( depth == 0 || depth > 64 ) {
     throw InvalidParameterException("MustacheAST nesting limit exceeded while cloning a partial");
@@ -327,20 +372,38 @@ static void mustache_validate_partial_node(
   }
   state.dataParts += source.dataParts.size();
 
+  if( budget != nullptr ) {
+    if( source.data.has_value() ) {
+      budget->consume_text(source.data->size());
+    }
+    for( const std::string& part : source.dataParts ) {
+      budget->consume_text(part.size());
+    }
+    if( source.startSequence.has_value() ) {
+      budget->consume_text(source.startSequence->size());
+    }
+    if( source.stopSequence.has_value() ) {
+      budget->consume_text(source.stopSequence->size());
+    }
+  }
+
   for( const std::unique_ptr<mustache::Node>& child : source.children ) {
     if( child == NULL ) {
       throw InvalidParameterException("MustacheAST contains an empty child node");
     }
-    mustache_validate_partial_node(*child, depth + 1, state);
+    mustache_validate_partial_node(*child, depth + 1, state, budget);
   }
   if( source.child != NULL ) {
-    mustache_validate_partial_node(*source.child, depth + 1, state);
+    mustache_validate_partial_node(*source.child, depth + 1, state, budget);
   }
   for( const auto& partial : source.partials ) {
     if( partial.second == NULL ) {
       throw InvalidParameterException("MustacheAST contains an empty partial node");
     }
-    mustache_validate_partial_node(*partial.second, depth + 1, state);
+    if( budget != nullptr ) {
+      budget->consume_text(partial.first.size());
+    }
+    mustache_validate_partial_node(*partial.second, depth + 1, state, budget);
   }
 }
 
@@ -368,11 +431,14 @@ static std::unique_ptr<mustache::Node> mustache_clone_node(const mustache::Node&
   return clone;
 }
 
-static std::unique_ptr<mustache::Node> mustache_copy_ast_partial(const php_mustache_ast_state& ast)
+static std::unique_ptr<mustache::Node> mustache_copy_ast_partial(
+    const php_mustache_ast_state& ast, PartialBudget& budget)
 {
   NodeCloneState state;
-  mustache_validate_partial_node(*ast.node, 1, state);
+  mustache_validate_partial_node(*ast.node, 1, state,
+      !ast.source.has_value() && budget.limits_text() ? &budget : nullptr);
   if( ast.source.has_value() ) {
+    budget.consume_text(ast.source->text.size());
     // Node is move-only, and its original section text is private. Reparse
     // with an independent snapshot so the active renderer keeps its settings.
     std::unique_ptr<mustache::Node> partial = std::make_unique<mustache::Node>();
@@ -423,7 +489,7 @@ static void mustache_compile_template_param(zval * value, mustache::Mustache * m
 }
 
 static void mustache_compile_partials(zval * partials_value, mustache::Mustache * mustache,
-    mustache::PartialMap& partials, uint32_t argument)
+    mustache::PartialMap& partials, uint32_t argument, PartialBudget& budget)
 {
   partials_value = mustache_dereference_zval(partials_value);
   if( partials_value == NULL || Z_TYPE_P(partials_value) != IS_ARRAY ) {
@@ -440,8 +506,9 @@ static void mustache_compile_partials(zval * partials_value, mustache::Mustache 
           "must contain only string keys and string, MustacheTemplate, or MustacheAST values");
     }
 
+    budget.consume_entry(ZSTR_LEN(key));
     std::string source;
-    mustache_partial_source(value, source, argument);
+    mustache_partial_source(value, source, argument, budget);
     partials.emplace(
         std::string(ZSTR_VAL(key), ZSTR_LEN(key)),
         mustache->compile(std::string_view(source)));
@@ -449,7 +516,7 @@ static void mustache_compile_partials(zval * partials_value, mustache::Mustache 
 }
 
 static void mustache_parse_partials(zval * partials_value, mustache::Mustache * mustache,
-    mustache::Node::Partials& partials, uint32_t argument)
+    mustache::Node::Partials& partials, uint32_t argument, PartialBudget& budget)
 {
   partials_value = mustache_dereference_zval(partials_value);
   if( partials_value == NULL || Z_TYPE_P(partials_value) != IS_ARRAY ) {
@@ -466,18 +533,19 @@ static void mustache_parse_partials(zval * partials_value, mustache::Mustache * 
           "must contain only string keys and string, MustacheTemplate, or MustacheAST values");
     }
 
+    budget.consume_entry(ZSTR_LEN(key));
     std::unique_ptr<mustache::Node> partial;
     if( mustache_is_ast(value) ) {
       const php_mustache_ast_state& ast = mustache_ast_state(value, argument);
       // Node::Partials owns its values independently of the PHP AST object.
       try {
-        partial = mustache_copy_ast_partial(ast);
+        partial = mustache_copy_ast_partial(ast, budget);
       } catch( const InvalidParameterException& error ) {
         mustache_argument_value_error(argument, error.what());
       }
     } else {
       std::string source;
-      mustache_partial_source(value, source, argument);
+      mustache_partial_source(value, source, argument, budget);
       partial = std::make_unique<mustache::Node>();
       mustache->tokenize(std::string_view(source), partial.get());
     }
@@ -520,6 +588,35 @@ PHP_METHOD(Mustache, __construct)
   }
 }
 /* }}} Mustache::__construct */
+
+/* {{{ proto void Mustache::setPartialLimits(?int maxEntries = null, ?int maxTextBytes = null) */
+PHP_METHOD(Mustache, setPartialLimits)
+{
+  try {
+    zend_long max_entries = 0;
+    zend_long max_text_bytes = 0;
+    zend_bool entries_is_null = 1;
+    zend_bool text_bytes_is_null = 1;
+    zval * _this_zval = NULL;
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "O|l!l!",
+            &_this_zval, Mustache_ce_ptr, &max_entries, &entries_is_null,
+            &max_text_bytes, &text_bytes_is_null) == FAILURE ) {
+      throw PhpInvalidParameterException();
+    }
+    if( !entries_is_null && max_entries < 0 ) {
+      mustache_argument_value_error(1, "must be greater than or equal to 0, or null");
+    }
+    if( !text_bytes_is_null && max_text_bytes < 0 ) {
+      mustache_argument_value_error(2, "must be greater than or equal to 0, or null");
+    }
+    php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
+    payload->max_partial_entries = entries_is_null ? -1 : max_entries;
+    payload->max_partial_text_bytes = text_bytes_is_null ? -1 : max_text_bytes;
+  } catch(...) {
+    mustache_exception_handler();
+  }
+}
+/* }}} Mustache::setPartialLimits */
 
 /* {{{ proto boolean Mustache::getEscapeByDefault() */
 PHP_METHOD(Mustache, getEscapeByDefault)
@@ -784,6 +881,7 @@ PHP_METHOD(Mustache, render)
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
 
     // Prepare template data
+    PartialBudget partial_budget(*payload, 3);
     mustache::Data templateData;
     mustache::Data * templateDataPtr = &templateData;
     zval * dataValue = mustache_dereference_zval(data);
@@ -805,7 +903,7 @@ PHP_METHOD(Mustache, render)
       const mustache::Node * templateNodePtr = NULL;
       mustache_parse_template_param(tmpl, payload->mustache, templateNode, &templateNodePtr, 1);
       mustache::Node::Partials templatePartials;
-      mustache_parse_partials(partials, payload->mustache, templatePartials, 3);
+      mustache_parse_partials(partials, payload->mustache, templatePartials, 3, partial_budget);
       zval * templateValue = mustache_dereference_zval(tmpl);
       if( templateValue != NULL && Z_TYPE_P(templateValue) == IS_STRING ) {
         output.reserve(Z_STRLEN_P(templateValue));
@@ -818,7 +916,7 @@ PHP_METHOD(Mustache, render)
       mustache::CompiledTemplate compiledTemplate;
       mustache_compile_template_param(tmpl, payload->mustache, compiledTemplate, 1);
       mustache::PartialMap compiledPartials;
-      mustache_compile_partials(partials, payload->mustache, compiledPartials, 3);
+      mustache_compile_partials(partials, payload->mustache, compiledPartials, 3, partial_budget);
       output = payload->mustache->render(
           compiledTemplate, *templateDataPtr, compiledPartials);
     }
@@ -908,19 +1006,20 @@ PHP_METHOD(Mustache, benchmarkSerializeArchive)
     }
 
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
+    PartialBudget partial_budget(*payload, 2);
     std::vector<std::uint8_t> archive;
     if( mustache_partials_include_ast(partials) ) {
       mustache::Node root;
       payload->mustache->tokenize(std::string_view(templateStr, templateLen), &root);
       mustache::Node::Partials templatePartials;
-      mustache_parse_partials(partials, payload->mustache, templatePartials, 2);
+      mustache_parse_partials(partials, payload->mustache, templatePartials, 2, partial_budget);
       archive = mustache::serializeArchivedTemplate(
           root, templatePartials, mustache_archive_benchmark_limits());
     } else {
       const mustache::CompiledTemplate compiled = payload->mustache->compile(
           std::string_view(templateStr, templateLen));
       mustache::PartialMap compiledPartials;
-      mustache_compile_partials(partials, payload->mustache, compiledPartials, 2);
+      mustache_compile_partials(partials, payload->mustache, compiledPartials, 2, partial_budget);
       archive = mustache::serializeArchivedTemplate(
           compiled, compiledPartials, mustache_archive_benchmark_limits());
     }

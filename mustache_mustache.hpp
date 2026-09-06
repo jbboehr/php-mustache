@@ -6,6 +6,9 @@
 
 struct php_obj_Mustache {
     mustache::Mustache * mustache;
+    // Negative values mean no aggregate limit. Initialized in create_object.
+    zend_long max_partial_entries;
+    zend_long max_partial_text_bytes;
     zend_object std;
 };
 
@@ -22,6 +25,7 @@ PHP_METHOD(Mustache, getStopSequence);
 PHP_METHOD(Mustache, setEscapeByDefault);
 PHP_METHOD(Mustache, setStartSequence);
 PHP_METHOD(Mustache, setStopSequence);
+PHP_METHOD(Mustache, setPartialLimits);
 PHP_METHOD(Mustache, parse);
 PHP_METHOD(Mustache, render);
 PHP_METHOD(Mustache, tokenize);

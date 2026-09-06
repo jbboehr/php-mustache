@@ -166,6 +166,11 @@
    <file name="tests/Mustache__render-references.phpt" role="test" />
    <file name="tests/Mustache__render-rejects-invalid-inputs-atomically.phpt" role="test" />
    <file name="tests/Mustache__render-source-and-AST-partials-equally.phpt" role="test" />
+   <file name="tests/Mustache__partial-limits.phpt" role="test" />
+   <file name="tests/Mustache__partial-limits-archive.phpt" role="test" />
+   <file name="tests/Mustache__partial-limits-callbacks.phpt" role="test" />
+   <file name="tests/Mustache__partial-limits-fibers.phpt" role="test" />
+   <file name="tests/Mustache__partial-limits-representations.phpt" role="test" />
    <file name="tests/Mustache__render-source-fiber-contexts.phpt" role="test" />
    <file name="tests/Mustache__render-tag.phpt" role="test" />
    <file name="tests/Mustache__render-warning-handler-exceptions.phpt" role="test" />

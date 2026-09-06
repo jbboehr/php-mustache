@@ -64,6 +64,18 @@ class Mustache
     }
 
     /**
+     * Replaces the per-render partial-map limits. Null disables a limit.
+     *
+     * Counts supplied entries, names, and source or cloned AST text in bytes.
+     * Each render snapshots both limits before invoking PHP callbacks.
+     *
+     * @throws ValueError If a limit is negative.
+     */
+    public function setPartialLimits(?int $maxEntries = null, ?int $maxTextBytes = null): void
+    {
+    }
+
+    /**
      * Parses a template into an AST.
      *
      * Passing an existing MustacheAST returns the same object. A

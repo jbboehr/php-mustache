@@ -571,11 +571,11 @@ would add unnecessary review and regression risk.
 
 ### I6. Consider a budget for the complete partial map
 
-**Follow-up decision:** [Retain the current limits and defer a built-in aggregate
-budget](partial-map-budget.md). The repository fixtures and ordinary controls
-do not establish appropriate defaults for applications with many partials.
-The follow-up records the accounting requirements and evidence needed to revisit
-this optional improvement; no resource-exhaustion defect was demonstrated.
+**Follow-up:** [Opt-in entry and text limits](partial-map-budget.md#opt-in-implementation)
+now cover partial-map preparation. Default aggregate thresholds and a complete
+memory/node budget remain deferred. The repository fixtures and ordinary
+controls do not establish appropriate defaults for applications with many
+partials. No resource-exhaustion defect was demonstrated.
 
 [Source partial compilation](../../mustache_mustache.cpp#L391) and
 [AST partial preparation](../../mustache_mustache.cpp#L417) apply individual

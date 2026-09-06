@@ -305,8 +305,8 @@ Changing these with `ini_set()` affects subsequently created instances.
 Use `setEscapeByDefault()`, `setStartSequence()`, and `setStopSequence()` to
 configure an existing instance. Delimiters must be nonempty strings.
 
-The PHP API does not expose resource-limit setters. The extension fixes the
-following limits, with MiB meaning 1,048,576 bytes:
+The extension fixes the following data-conversion and binary-AST limits,
+with MiB meaning 1,048,576 bytes:
 
 | Operation | Limits |
 | --- | --- |
@@ -322,4 +322,61 @@ For libmustache 0.6.0, these are:
 | Rendering | 64 MiB output, nesting depth 256, 1,000,000 node visits, and 64 MiB of lambda-generated template text in total |
 
 These limits apply to individual conversions, templates, or render operations.
-There is no aggregate budget for the complete partial map.
+Aggregate partial-map limits are disabled by default and can be enabled on
+individual `Mustache` instances.
+
+### Partial-map limits
+
+`setPartialLimits(?int $maxEntries = null, ?int $maxTextBytes = null): void`
+replaces both limits for subsequent renders. For example:
+
+```php
+<?php
+$mustache = new Mustache();
+$mustache->setPartialLimits(maxEntries: 2, maxTextBytes: 32);
+echo $mustache->render(
+    '{{>greeting}}',
+    ['name' => 'Ada'],
+    ['greeting' => 'Hello {{name}}']
+), "\n";
+```
+
+This prints `Hello Ada`. The limits in this example are application choices.
+Choose limits appropriate to your template catalog.
+
+`null` disables the corresponding aggregate limit. Zero is a real zero
+allowance. A negative value throws `ValueError` and leaves both previous limits
+unchanged. Omitted arguments default to `null`, so `setPartialLimits()` disables
+both limits and `setPartialLimits(maxTextBytes: 32)` also disables the entry
+limit. The existing per-template limits still apply.
+
+`maxEntries` counts every supplied map entry, including unused entries. The
+same object supplied under two names counts twice. `maxTextBytes` counts each
+map name plus the following text for its value:
+
+| Partial value | Text charged to the budget |
+| --- | --- |
+| String | Source bytes |
+| `MustacheTemplate` | Source bytes returned by its `template` property |
+| AST created by `parse()` | Retained original source bytes used for reparsing |
+| AST loaded from binary | Copied node data, dotted-name parts, delimiter strings, and nested partial names |
+
+Lengths are byte counts, including embedded NULs. Binary AST fields are counted
+separately even when their contents repeat. Different representations can
+therefore consume different allowances. Each named occurrence is charged again.
+The root template and render data have their own limits and are not charged to
+this partial-map budget.
+
+Preparation checks each entry before copying its name or source, reparsing its
+AST, or cloning it. Wrapper properties are read once, in the existing preparation
+order. Earlier entries may already have been prepared when a later entry exceeds
+a limit. The call then throws `ValueError`, releases prepared entries, and returns
+no output. The same instance can render again with a fresh allowance.
+
+Each render captures both settings before data conversion or template-property
+callbacks. Changing them during a callback affects later or nested renders,
+while an already active or suspended render keeps its captured settings.
+
+These limits bound entry count and text, not total memory or aggregate node
+count. They do not include node/container overhead or prevent PHP callbacks from
+allocating the values they return.

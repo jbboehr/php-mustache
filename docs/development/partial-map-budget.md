@@ -1,10 +1,93 @@
 # Partial-map budget decision
 
-This is the I6 follow-up at `c194d91`, using libmustache revision
+The current implementation adds [opt-in entry and text limits](../php-api.md#partial-map-limits).
+There is still no aggregate limit enabled by default. The original decision
+below explains why no universal threshold or complete memory budget was chosen.
+
+## Opt-in implementation
+
+`Mustache::setPartialLimits()` replaces two per-instance settings. Both default
+to `null`, with zero enforcing a zero allowance. Each render captures the
+settings before calling PHP, then consumes its own remaining allowance during
+partial preparation. Subtraction follows a size check, so accumulation does not
+overflow. No counters are shared between nested or suspended renders.
+
+Both partial preparation paths charge each supplied entry and its name. Source
+strings and wrapper results are checked before their native source copy. ASTs
+with retained source charge that source before reparsing with their saved
+tokenizer settings. Binary-loaded ASTs charge the string fields and nested
+partial names copied by the existing clone path, during its validation pass.
+They retain the existing per-AST structural limits. The optional archive
+serializer uses the same preparation helpers and captures its own limits.
+
+The public contract measures input/prepared text, not allocator usage. Source
+compilation can introduce string copies and nodes that are not included in this
+text count. A complete aggregate node budget still needs a libmustache contract
+for its opaque compiled handles. Applications choose their own entry/text limits,
+so this change does not establish recommended default thresholds.
+
+Focused tests cover inclusive boundaries, disabled and zero limits, rejected
+configuration, repeated calls, representation-specific accounting, getter order,
+nested calls, configuration changes, and Fiber suspension. These use small
+inputs and caller-selected limits, not resource-exhaustion experiments.
+
+### Implementation verification
+
+The implementation follows base `1d7ee70` with libmustache pinned to
+`e6b2de00d7a3ad801eb655165eed1fd9a4352b97`. All five new PHPTs were observed
+failing with `missing setPartialLimits` against a pre-feature build, then passing
+with the feature enabled. The archive test uses the optional benchmark bridge
+and skips when that bridge is disabled. The Fiber test skips PHP 8.0.
+
+An independent correctness review found no actionable defects. A separate test
+review added the archive PHPT, covering entry/text boundaries, repeated calls,
+unused entries, source and binary AST accounting, and callback snapshots. It
+demonstrated no production failure. The final checks below include that test.
+
+| Fresh Linux x86-64 build and full suite | Passed | Skipped |
+| --- | ---: | ---: |
+| PHP 8.0.30, GCC | 265 | 14 |
+| PHP 8.3.33, workspace rebuild | 268 | 11 |
+| PHP 8.4.24, GCC | 274 | 5 |
+| PHP 8.3.33, ASan/UBSan with leak detection | 268 | 11 |
+| PHP 8.3.33, archive benchmark enabled | 272 | 7 |
+
+Every suite selected 279 tests and reported zero failures or warnings. The
+sanitizer check reported no sanitizer errors. Additional archive controls
+covered wrappers and repeated recovery after both kinds of limit rejection.
+Native reflection matched the stub's public, non-static, nullable integer
+parameters and `void` return type. The guide example printed `Hello Ada`.
+
+Nix verification used a temporary source snapshot containing tracked working-tree
+files and the five new PHPTs, without staging them:
+
+```sh
+nix build --no-link --keep-going --no-write-lock-file --max-jobs 2 --cores 4 -L \
+  path:/tmp/php-mustache-partial-limits-final-w4eqb0u0#checks.x86_64-linux.php80-gcc \
+  path:/tmp/php-mustache-partial-limits-final-w4eqb0u0#checks.x86_64-linux.php84-gcc \
+  path:/tmp/php-mustache-partial-limits-final-w4eqb0u0#checks.x86_64-linux.php83-gcc-sanitized \
+  path:/tmp/php-mustache-partial-limits-final-w4eqb0u0#php83-archive-benchmark
+```
+
+The workspace build used `nix develop --no-write-lock-file --command make -j4`.
+Focused and full tests used the matching PHP 8.3 executable with
+`run-tests.php -n -d extension=modules/mustache.so`, `REPORT_EXIT_STATUS=1`,
+`NO_INTERACTION=1`, and matching `TEST_PHP_EXECUTABLE`. The full invocation added
+`-j4 tests`.
+
+Other PHP versions and platforms were not rerun. Binary AST delimiter and nested
+partial-name charging was reviewed statically, without manufacturing binary
+fixtures unavailable through ordinary public PHP construction. No aggregate
+memory measurements or recommended default thresholds were established. The
+separate Zend bailout ownership concern remains outside this implementation.
+
+## Original default-limit decision
+
+This was the I6 follow-up at `c194d91`, using libmustache revision
 `fea4160d02238c7503d72e4f2705fda7b65edef5` from `flake.lock`.
 It follows the [original recommendation](project-review-2026-09-04.md#i6-consider-a-budget-for-the-complete-partial-map).
 
-**Decision: retain the current limits and defer a built-in aggregate budget.**
+**Decision at that revision: retain the current limits and defer a built-in aggregate budget.**
 The repository fixtures do not establish appropriate defaults for applications
 with many partials. No production workload distribution or process-memory target
 was available for this slice. Reusing an existing per-template limit as a new
@@ -13,14 +96,14 @@ Adding configuration would also require a supported default and AST policy.
 
 I6 remains optional hardening, not a demonstrated resource-exhaustion defect.
 This decision does not establish that individual limits bound total map memory.
-The [PHP API guide](../php-api.md#defaults-and-limits) already states that no
-aggregate partial-map budget exists. No runtime behavior or public API changes
-are proposed here.
+At that revision the PHP API exposed no aggregate partial-map budget. That
+decision slice proposed no runtime behavior or public API changes.
 
 ## Existing enforcement and candidate accounting
 
-Both preparation paths in [mustache_mustache.cpp](../../mustache_mustache.cpp)
-visit supplied entries in order, including unused ones. The source path compiles
+At the reviewed revision, both preparation paths in
+[mustache_mustache.cpp](../../mustache_mustache.cpp) visited supplied entries in
+order, including unused ones. The source path compiles
 each partial independently. The AST path tokenizes source entries and deep-clones
 AST entries, starting a fresh `NodeCloneState` for each supplied AST. Source
 parsing uses the dependency's defaults; cloning checks depth, node count, and
@@ -139,9 +222,10 @@ Both paths read unused wrappers when preparing a valid map. An earlier invalid
 source stops preparation before the later getter. The control only counts reads
 and returns ordinary values; it does not mutate the map or test resource limits.
 
-## Reopening criteria
+## Criteria for default limits or a complete budget
 
-Revisit I6 when there is a supported workload or deployment requirement to
+Revisit default thresholds and complete aggregate accounting when there is a
+supported workload or deployment requirement to
 choose limits against: partial counts, total names and source bytes, AST usage,
 and an acceptable process-memory budget. Include a catalog-shaped workload
 with many small entries as well as the existing few-entry fixtures.
