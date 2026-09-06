@@ -5,7 +5,9 @@ revision `fea4160d02238c7503d72e4f2705fda7b65edef5` from `flake.lock`. It follow
 the [original finding](project-review-2026-09-04.md#f7-zend-fatal-error-bailouts-bypass-native-callback-cleanup)
 and the [data ownership review](data-conversion-ownership.md).
 
-F7 remains open. The source supports an ownership and state-restoration concern
+F7 remains unresolved, with production integration
+[deferred after the feasibility review](zend-bailout-adapter-contract.md#integration-gate-and-next-work).
+The source supports an ownership and state-restoration concern
 when a Zend bailout crosses native frames, but this review has not demonstrated
 an extension leak or persistent-worker failure. The recommendation is to design
 the boundary between Zend and C++ before adding runtime handling. A catch around
@@ -139,8 +141,11 @@ direction. The subsequent [adapter contract](zend-bailout-adapter-contract.md)
 defines terminal outcomes, nested propagation, and PHP-release ownership states.
 It rules out retrying interrupted releases or assuming shutdown will replay
 unfinished handlers. A supported disposition for those PHP references remains
-the integration gate; the prototype does not establish it. Production integration
-also needs coverage of the other boundaries above and supported runtimes.
+the integration gate; the prototype does not establish it. The subsequent
+feasibility decision defers production integration until an ownership proposal
+meets the contract.
+Production integration also needs coverage of the other boundaries above and
+supported runtimes.
 
 ## Boundary prototype
 

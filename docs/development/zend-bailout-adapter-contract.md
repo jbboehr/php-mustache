@@ -4,7 +4,8 @@ This F7 slice follows the [ownership review](zend-bailout-ownership.md) and
 its [standalone prototype](zend-bailout-ownership.md#boundary-prototype).
 It reviews php-mustache at `540814c` against the PHP 8.3.33 sources linked below.
 It defines requirements for a real adapter; no adapter is installed by this
-change, and F7 remains open.
+change. The [feasibility decision](#integration-gate-and-next-work) at `587ee37`
+now defers production integration. F7 remains unresolved.
 
 The decision is to retain narrow Zend boundaries as a candidate, but **not to
 integrate the prototype's cleanup callback with `zval_ptr_dtor()` yet**. The
@@ -142,21 +143,151 @@ would add a compatibility decision the prototype has not tested.
 
 ## Integration gate and next work
 
-The next F7 decision is whether a request-owned PHP-reference store can provide
-a justified disposition for every state in the release table, with native
-destruction separated from PHP release. Any proposal must identify when each
-reference is acquired, who sees it for GC, when ownership transfers, and what
-happens if release is interrupted. It must also define storage lifetime through
-Fiber suspension and shutdown. Registering outer native allocations alone is
-already ruled out by the [ownership review](zend-bailout-ownership.md).
+**Decision at `587ee37`: defer F7's runtime implementation.** A request-owned
+reference store has not established the missing interrupted-release contract.
+The options below either change ordinary object lifetimes or require a broader
+ownership redesign before they can satisfy this adapter contract. Retain the
+existing implementation and its ordinary exception tests. This finishes the
+current feasibility slice; further F7 work depends on the reopening conditions
+below.
 
-Do not add the adapter to the extension until that ownership decision is
-supported. The existing prototype may remain useful for native propagation,
-but repeating its status tests cannot establish the missing Zend contract.
-If no suitable ownership mechanism is established, record F7 as deferred with
-these limits rather than treating intercepted bailouts as recovered requests.
+The scope is cleanup of php-mustache and libmustache owners, including PHP
+references they retain. F7 does not require repairing every other extension's
+cleanup. Nor does this decision establish that all real bailout adapters are
+impossible: it rejects integrating the candidates reviewed here without the
+missing ownership evidence. The extension's bailout effects remain unmeasured.
+
+### Reference-store options
+
+| Option | What it provides | Why it is not being implemented now |
+| --- | --- | --- |
+| Keep strong references in a request store until shutdown | Values outlive native stack unwinding. | Keeping those references after their normal owners die changes object lifetimes and delays collection of cycles. Shutdown release can still enter interrupted cleanup. |
+| Release store entries when their normal owner dies | Can preserve ordinary release timing instead of retaining everything until shutdown. | It reaches the same effectful PHP destruction boundary. Moving that call into a store does not establish the disposition of an interrupted release. |
+| Make a PHP owner hold the values, with native code borrowing them | Could separate native destruction from PHP release while preserving the object graph. | This is a possible redesign, not a drop-in registry. It needs ownership transfer, GC reporting, partial-construction handling, and coverage of temporary and published native owners. |
+
+The third option is the most useful direction if F7 is reopened. Currently,
+[`MustacheData_obj_get_gc()`](../../mustache_data.cpp) describes references held
+by native lambdas. PHP's
+[`zend_get_gc_buffer_add_zval()`](https://raw.githubusercontent.com/php/php-src/php-8.3.33/Zend/zend_gc.h)
+copies value descriptors without acquiring references, and the
+[collector](https://raw.githubusercontent.com/php/php-src/php-8.3.33/Zend/zend_gc.c)
+uses the reported edges during cycle collection. Reporting a reference to GC
+does not transfer its ownership or arrange abort cleanup. Moving ownership to
+a PHP store would require the reported graph to match the new owners, without
+omitting or double-counting their references.
+
+Native deletion is not yet independent of that graph.
+[`MustacheData_obj_free()`](../../mustache_data.cpp) deletes the native data,
+whose lambda destructors release PHP values. A store would have to separate
+those actions throughout the owned data, rather than only move the outer
+`delete`. PHP's
+[object-store teardown](https://raw.githubusercontent.com/php/php-src/php-8.3.33/Zend/zend_objects_API.c)
+still provides no replay of a free handler already marked as called. Request
+heap reclamation alone therefore does not establish completion of the extension's
+native cleanup. This conclusion comes from source review, not an interrupted
+handler experiment.
+
+### Ordinary retention control
+
+This PHP example compares the existing collectable native-lambda cycle with
+the same cycle kept reachable by an extra strong reference. It models only the
+first option's decision to retain references after their ordinary owners become
+unreachable; it is not an implementation of a native store or a bailout test.
+
+```php
+<?php
+function closureCycle(): array
+{
+    $holder = new stdClass();
+    $closure = static function () use ($holder) { return 'ok'; };
+    $data = new MustacheData(['value' => $closure]);
+    $holder->data = $data;
+    return [$closure, WeakReference::create($data)];
+}
+
+foreach ([false, true] as $retain) {
+    [$closure, $weak] = closureCycle();
+    $requestReferences = $retain ? [$closure] : [];
+    unset($closure);
+    gc_collect_cycles();
+    echo $retain ? "retained\n" : "unrooted\n";
+    var_dump($weak->get() === null);
+    $requestReferences = [];
+    gc_collect_cycles();
+    var_dump($weak->get() === null);
+}
+```
+
+PHP 8.3.33 with the unchanged workspace extension produced:
+
+```text
+unrooted
+bool(true)
+bool(true)
+retained
+bool(false)
+bool(true)
+```
+
+The extra root keeps the cycle alive; clearing it allows collection. The
+unrooted case also guards against attributing an existing collection failure
+to the proposed store. This demonstrates the cost of deferred strong-reference
+release, not a leak in the current extension or a defect in every possible
+reference store. Weak references could observe such owners but would not keep
+the PHP values alive for native borrowers.
+
+### Conditions for reopening F7
+
+Reopen runtime work when a concrete ownership proposal can account for all of
+the following, with supporting source or runtime evidence:
+
+- Native teardown can finish without releasing PHP values from destructors
+  still needed for unwinding. Ownership metadata survives partial acquisition
+  and the interrupted operation without depending on skipped native frames.
+- Each retained PHP reference has an identified owner and GC edge throughout
+  transfer, normal release, and interrupted release. The design preserves
+  ordinary collection behavior or explicitly justifies a compatibility change.
+- Temporary and published owners, nested calls, suspended Fibers, and shutdown
+  callbacks have defined lifetimes. The design covers the complete
+  [boundary inventory](zend-bailout-ownership.md#owners-and-zend-boundaries).
+
+Then choose a bounded implementation and validation slice for that proposal.
+The existing prototype and ordinary exception tests remain useful controls;
+neither substitutes for evidence about the actual Zend boundary. Until then,
+leave F7 deferred and move to the other planned work.
+
+### Feasibility verification
+
+Source review at `587ee37` covered the extension's native lambda owners,
+`MustacheData` GC and free handlers, and the linked PHP 8.3.33 GC and object-store
+implementations. The feasibility decision is an engineering judgment based on
+those ownership requirements and the limited experiment above.
+
+Fresh Linux x86-64 PHP 8.3.33 checks used the unchanged workspace module:
+
+- The PHP block above was extracted from this document and executed. Its output
+  matched the displayed result exactly, with exit status zero and no stderr.
+- Five existing PHPTs passed: [lambda ownership](../../tests/MustacheData__owns-lambda-values.phpt),
+  [capture release](../../tests/MustacheData__releases-captured-values.phpt),
+  [lambda exception cleanup](../../tests/Mustache__render-lambda-exceptions-release-values.phpt),
+  [source Fiber interleaving](../../tests/Mustache__render-source-fiber-contexts.phpt),
+  and [AST Fiber overlap and recovery](../../tests/Mustache__render-AST-fiber-overlap-and-recovery.phpt).
+- The full suite passed: 254 passed, 10 skipped, no failures or warnings, using
+  the PHP runner settings recorded below.
+- All configured pre-commit checks, Markdown lint, 84 local links across the
+  three changed documents, and the manifest check passed. All 264 PHPTs remain
+  listed and the maintainer documents remain excluded from the package.
+
+No production implementation, new PHPT, or reference-store prototype was added.
+The extension and C++ boundary prototype were not rebuilt. Interrupted release,
+actual Zend bailout handling, cross-request effects, sanitizers, other PHP
+versions, and other platforms were not tested. The Fiber checks establish
+existing ordinary behavior, not the proposed store's lifecycle.
 
 ## Verification and limits
+
+The following results belong to the preceding adapter-contract slice, before
+the feasibility decision above.
 
 Source review covered the linked PHP 8.3.33 bailout macros, executor calls,
 reference release, object store, Fiber state, and request shutdown, together

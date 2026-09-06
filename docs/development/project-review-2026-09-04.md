@@ -27,7 +27,7 @@ illustrate individual changes, not complete patches.
 | F4 | Rendering ignores a MustacheData subclass's native data | Observed on PHP 8.3/8.4/8.5 | Use inheritance-aware recognition |
 | F5 | Empty template wrappers reject valid empty source | Observed on PHP 8.3/8.4/8.5 | Preserve empty strings consistently |
 | F6 | AST accessors return null despite non-null return types | Observed on PHP 8.3/8.4/8.5 | Throw a consistent exception |
-| F7 | Zend bailouts bypass C++ callback cleanup | Static cleanup concern | Handle bailout separately |
+| F7 | Zend bailouts bypass C++ callback cleanup | Static cleanup concern | [Deferred pending ownership evidence](zend-bailout-adapter-contract.md#integration-gate-and-next-work) |
 
 ## F1. Potential lifetime invalidation during lazy-object initialization
 
@@ -388,8 +388,10 @@ Leak volume, repeated worker exhaustion, and memory corruption remain unverified
 
 The subsequent [ownership review and prototype](zend-bailout-ownership.md) and
 [real adapter contract](zend-bailout-adapter-contract.md) narrow the implementation
-requirements. F7 remains open: PHP-reference disposition after an interrupted
-release is still an integration gate.
+requirements. The [feasibility decision](zend-bailout-adapter-contract.md#integration-gate-and-next-work)
+defers F7's runtime implementation: PHP-reference disposition after an
+interrupted release is still an integration gate. F7 is unresolved, with no
+claim of an experimentally demonstrated extension leak or a completed fix.
 
 Design a Zend bailout boundary that allows native ownership to be reclaimed
 before bailout propagation resumes. Check all callback-capable operations,
