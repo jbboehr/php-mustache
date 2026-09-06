@@ -386,6 +386,11 @@ evidence of an extension leak: jumping across non-trivial destructors is outside
 the defined C++ unwinding contract, and that control did not execute Zend.
 Leak volume, repeated worker exhaustion, and memory corruption remain unverified.
 
+The subsequent [ownership review and prototype](zend-bailout-ownership.md) and
+[real adapter contract](zend-bailout-adapter-contract.md) narrow the implementation
+requirements. F7 remains open: PHP-reference disposition after an interrupted
+release is still an integration gate.
+
 Design a Zend bailout boundary that allows native ownership to be reclaimed
 before bailout propagation resumes. Check all callback-capable operations,
 including property reads and value-to-string conversion, when deciding where

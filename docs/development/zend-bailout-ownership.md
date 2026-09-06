@@ -135,11 +135,12 @@ scope guards. Allocator substitution alone has the same state-restoration gap.
 Neither is an adequate standalone fix for the reviewed implementation.
 
 The [boundary prototype](#boundary-prototype) below checks the C++ part of this
-direction. The next implementation decision is the real Zend adapter's jump
-boundary and PHP-reference cleanup contract, including cleanup after Zend has
-reset executor state. The prototype does not settle either question. Production
-integration also needs coverage of the other boundaries above and supported
-runtimes.
+direction. The subsequent [adapter contract](zend-bailout-adapter-contract.md)
+defines terminal outcomes, nested propagation, and PHP-release ownership states.
+It rules out retrying interrupted releases or assuming shutdown will replay
+unfinished handlers. A supported disposition for those PHP references remains
+the integration gate; the prototype does not establish it. Production integration
+also needs coverage of the other boundaries above and supported runtimes.
 
 ## Boundary prototype
 
