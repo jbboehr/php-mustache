@@ -10,6 +10,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 - Add PIE package metadata while retaining the existing PECL package metadata.
 - Add explicit `MustacheAST::toBinary()` and `MustacheAST::fromBinary()` APIs for persistent parsed-template caches.
+- Add `MustacheAST::NODE_*` constants for identifying node types in diagnostic parse trees, including `NODE_COMMENT` for comment extraction (GH-45).
 
 ### Changed
 

@@ -3,7 +3,7 @@
 Use the [official Mustache manual](https://mustache.github.io/mustache.5.html)
 for template syntax, sections, escaping, and partials. This guide covers how
 the PHP extension accepts data and calls PHP code. The
-[PHP stub](../mustache.stub.php) lists public methods and their types.
+[PHP stub](../mustache.stub.php) lists public methods, types, and constants.
 
 ## Templates and partials
 
@@ -46,6 +46,64 @@ uninitialized. Passing these to `parse()` or `render()` throws `ValueError`.
 because empty input is not a valid binary AST. Use `parse('')` for an empty AST.
 An AST whose constructor was bypassed is uninitialized and throws `ValueError`
 from `parse()`, `render()`, `toArray()`, and `toBinary()`.
+
+### Inspecting node types and comments
+
+`Mustache::tokenize($source)` and `MustacheAST::toArray()` expose libmustache's
+diagnostic tree. Compare a node's `type` with these public integer constants:
+
+| Constant | Node kind |
+| --- | --- |
+| `MustacheAST::NODE_NONE` | Unset node |
+| `MustacheAST::NODE_ROOT` | Template root |
+| `MustacheAST::NODE_OUTPUT` | Literal output |
+| `MustacheAST::NODE_TAG` | Generic tag |
+| `MustacheAST::NODE_CONTAINER` | Generic container |
+| `MustacheAST::NODE_VARIABLE` | Escaped or unescaped interpolation |
+| `MustacheAST::NODE_NEGATE` | Inverted section |
+| `MustacheAST::NODE_SECTION` | Section |
+| `MustacheAST::NODE_STOP` | Closing section tag |
+| `MustacheAST::NODE_COMMENT` | Comment |
+| `MustacheAST::NODE_PARTIAL` | Partial inclusion |
+| `MustacheAST::NODE_INLINE_PARTIAL` | Inline partial node |
+
+These constants mirror the individual libmustache node-type enum values.
+Some kinds are used internally or by legacy trees and may not occur when
+parsing source. The constants do not enable additional template syntax or
+expose the library's combined type masks or node flags.
+
+For example, walk the tree to extract comment contents before rendering:
+
+```php
+<?php
+function templateComments(array $node): iterable
+{
+    if ($node['type'] === MustacheAST::NODE_COMMENT) {
+        yield $node['data'] ?? '';
+    }
+    foreach ($node['children'] ?? [] as $child) {
+        yield from templateComments($child);
+    }
+}
+
+$ast = (new Mustache())->parse('{{! asset: main.css }}Hello');
+foreach (templateComments($ast->toArray()) as $comment) {
+    echo $comment, "\n";
+}
+```
+
+Output:
+
+```text
+asset: main.css
+```
+
+Comment contents have surrounding whitespace trimmed. Empty comments may
+omit `data`, which is why the example uses `?? ''`. Comments produce no rendered
+output. The constants provide names for node kinds, but the diagnostic array
+shape and other fields remain outside the compatibility contract. Use source
+or the supported binary APIs for caches. For application metadata that needs
+an independent format, preprocess front matter or store metadata separately.
 
 ## PHP data
 

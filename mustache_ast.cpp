@@ -191,6 +191,19 @@ PHP_MINIT_FUNCTION(mustache_ast)
     MustacheAST_ce_ptr = zend_register_internal_class(&ce);
     MustacheAST_ce_ptr->create_object = MustacheAST_obj_create;
 
+    zend_declare_class_constant_long(MustacheAST_ce_ptr, ZEND_STRL("NODE_NONE"), mustache::Node::TypeNone);
+    zend_declare_class_constant_long(MustacheAST_ce_ptr, ZEND_STRL("NODE_ROOT"), mustache::Node::TypeRoot);
+    zend_declare_class_constant_long(MustacheAST_ce_ptr, ZEND_STRL("NODE_OUTPUT"), mustache::Node::TypeOutput);
+    zend_declare_class_constant_long(MustacheAST_ce_ptr, ZEND_STRL("NODE_TAG"), mustache::Node::TypeTag);
+    zend_declare_class_constant_long(MustacheAST_ce_ptr, ZEND_STRL("NODE_CONTAINER"), mustache::Node::TypeContainer);
+    zend_declare_class_constant_long(MustacheAST_ce_ptr, ZEND_STRL("NODE_VARIABLE"), mustache::Node::TypeVariable);
+    zend_declare_class_constant_long(MustacheAST_ce_ptr, ZEND_STRL("NODE_NEGATE"), mustache::Node::TypeNegate);
+    zend_declare_class_constant_long(MustacheAST_ce_ptr, ZEND_STRL("NODE_SECTION"), mustache::Node::TypeSection);
+    zend_declare_class_constant_long(MustacheAST_ce_ptr, ZEND_STRL("NODE_STOP"), mustache::Node::TypeStop);
+    zend_declare_class_constant_long(MustacheAST_ce_ptr, ZEND_STRL("NODE_COMMENT"), mustache::Node::TypeComment);
+    zend_declare_class_constant_long(MustacheAST_ce_ptr, ZEND_STRL("NODE_PARTIAL"), mustache::Node::TypePartial);
+    zend_declare_class_constant_long(MustacheAST_ce_ptr, ZEND_STRL("NODE_INLINE_PARTIAL"), mustache::Node::TypeInlinePartial);
+
     return SUCCESS;
   } catch(...) {
     mustache_exception_handler();

@@ -63,6 +63,7 @@
    <file name="tests/MustacheAST__fromBinary-initializes-subclass-properties.phpt" role="test" />
    <file name="tests/MustacheAST__fromBinary-rejects-abstract-subclass.phpt" role="test" />
    <file name="tests/MustacheAST__modern-serialization.phpt" role="test" />
+   <file name="tests/MustacheAST__node-type-constants.phpt" role="test" />
    <file name="tests/MustacheAST__toArray.phpt" role="test" />
    <file name="tests/MustacheAST__rejects-invalid-serialization.phpt" role="test" />
    <file name="tests/MustacheAST__rejects-lossy-custom-delimiter-serialization.phpt" role="test" />

@@ -142,9 +142,37 @@ class Mustache
 
 /**
  * Owns a parsed Mustache template tree.
+ *
+ * NODE_* constants identify libmustache node types in tokenize() and toArray().
+ * Their names do not make the diagnostic array structure a stable API.
  */
 class MustacheAST
 {
+    /** @var int */
+    public const NODE_NONE = 0;
+    /** @var int */
+    public const NODE_ROOT = 1;
+    /** @var int */
+    public const NODE_OUTPUT = 2;
+    /** @var int */
+    public const NODE_TAG = 4;
+    /** @var int */
+    public const NODE_CONTAINER = 8;
+    /** @var int */
+    public const NODE_VARIABLE = 16;
+    /** @var int */
+    public const NODE_NEGATE = 32;
+    /** @var int */
+    public const NODE_SECTION = 64;
+    /** @var int */
+    public const NODE_STOP = 128;
+    /** @var int */
+    public const NODE_COMMENT = 256;
+    /** @var int */
+    public const NODE_PARTIAL = 512;
+    /** @var int */
+    public const NODE_INLINE_PARTIAL = 1024;
+
     /**
      * Constructs an AST from libmustache's binary representation.
      */

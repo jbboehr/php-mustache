@@ -1,12 +1,10 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3cbcc7e6a85dfcf6c76cfff7a7c448cb4be37868 */
+ * Stub hash: 0b25ccc514d419c31a641574d431140f40116c1f */
 
 #if PHP_VERSION_ID < 80100
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Mustache___serialize, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if PHP_VERSION_ID < 80100
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Mustache___unserialize, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -58,9 +56,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Mustache_benchmarkSerializ
 	ZEND_ARG_TYPE_INFO(0, tmpl, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, partials, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(PHP_MUSTACHE_ARCHIVE_BENCHMARK)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Mustache_benchmarkRenderArchive, 0, 2, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, archive, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, vars, IS_MIXED, 0)
@@ -94,9 +90,7 @@ ZEND_END_ARG_INFO()
 
 #if PHP_VERSION_ID < 80100
 #define arginfo_class_MustacheData___serialize arginfo_class_Mustache___serialize
-#endif
 
-#if PHP_VERSION_ID < 80100
 #define arginfo_class_MustacheData___unserialize arginfo_class_Mustache___unserialize
 #endif
 
