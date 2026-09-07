@@ -46,6 +46,8 @@
    <file name="mustache_lambda.hpp" role="src" />
    <file name="mustache_lambda_helper.cpp" role="src" />
    <file name="mustache_lambda_helper.hpp" role="src" />
+   <file name="mustache_lambda_result.cpp" role="src" />
+   <file name="mustache_lambda_result.hpp" role="src" />
    <file name="mustache_mustache.cpp" role="src" />
    <file name="mustache_mustache.hpp" role="src" />
    <file name="mustache_template.cpp" role="src" />
@@ -113,6 +115,14 @@
    <file name="tests/Mustache__getEscapeByDefault.phpt" role="test" />
    <file name="tests/Mustache__getStartSequence.phpt" role="test" />
    <file name="tests/Mustache__getStopSequence.phpt" role="test" />
+   <file name="tests/MustacheLambdaResult__class-alias.phpt" role="test" />
+   <file name="tests/MustacheLambdaResult__rejects-data.phpt" role="test" />
+   <file name="tests/MustacheLambdaResult__values.phpt" role="test" />
+   <file name="tests/Mustache__lambda-results-archive.phpt" role="test" />
+   <file name="tests/Mustache__lambda-results-callbacks.phpt" role="test" />
+   <file name="tests/Mustache__lambda-results-helpers.phpt" role="test" />
+   <file name="tests/Mustache__lambda-results-lifetime.phpt" role="test" />
+   <file name="tests/Mustache__lambda-results-representations.phpt" role="test" />
    <file name="tests/Mustache__lambda-string-mode.phpt" role="test" />
    <file name="tests/Mustache__lambda-string-mode-archive.phpt" role="test" />
    <file name="tests/Mustache__lambda-string-mode-callbacks.phpt" role="test" />

@@ -16,6 +16,7 @@
 #include "mustache_class_method_lambda.hpp"
 #include "mustache_exceptions.hpp"
 #include "mustache_lambda.hpp"
+#include "mustache_lambda_result.hpp"
 #include "mustache_zend_closure_lambda.hpp"
 #include "mustache_data.hpp"
 #include "mustache_zval.hpp"
@@ -478,6 +479,10 @@ class DataConverter {
       zend_class_entry * class_entry = Z_OBJCE_P(current);
       if( class_entry == MustacheData_ce_ptr ) {
         fail("Nested MustacheData values are not supported");
+      }
+      if( php_mustache_is_lambda_result(class_entry) ) {
+        zend_value_error("MustacheLiteralResult and MustacheTemplateResult belong in a callback return, not ordinary data");
+        throw PhpInvalidParameterException();
       }
       if( class_entry == zend_ce_closure ) {
         return mustache::Data::lambda(std::make_unique<ZendClosureLambda>(current));

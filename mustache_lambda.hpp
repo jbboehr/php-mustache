@@ -9,11 +9,11 @@ class Lambda : public mustache::Lambda {
   protected:
     virtual int getUserFunctionParamCount() = 0;
     virtual int invokeUserFunction(zval *retval_ptr, int param_count, zval params[]) = 0;
-    std::string invokeUserFunctionAsString(int param_count, zval params[]);
+    mustache::LambdaResult invokeUserFunctionAsResult(int param_count, zval params[]);
   public:
     virtual void addGcValues(zend_get_gc_buffer * gc_buffer) = 0;
-    std::string invoke() override;
-    std::string invoke(
+    mustache::LambdaResult invokeResult() override;
+    mustache::LambdaResult invokeResult(
         std::string_view text, mustache::LambdaRenderContext context) override;
 };
 

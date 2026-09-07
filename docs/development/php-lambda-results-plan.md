@@ -1,7 +1,8 @@
 # PHP lambda results: implementation proposal
 
-Status: slice 1 implements the mode API and has passed review. The two dedicated
-final result classes are selected for slice 2 and are not yet implemented.
+Status: slices 1 and 2 implement the mode API and two dedicated final result
+classes and have passed review. Slice 3's compatibility and release verification
+remains.
 The base is dependency-update commit `73587cf`. The dependency is
 libmustache `c43ad034850bab310d754bc3bba760cc31b08ef4`; its
 [update report](libmustache-update-2026-09-07.md) records verification and
@@ -18,7 +19,7 @@ and explicitly for an individual callback result.
 
 ## Recommended public API
 
-Proposed stub excerpts; method bodies are omitted here:
+Public API excerpts; method bodies are omitted here:
 
 ```php
 class Mustache
@@ -69,7 +70,7 @@ shared public base class, or interface is needed. A callback that returns any
 of the supported forms can declare
 `string|MustacheLiteralResult|MustacheTemplateResult` as its return type.
 Ordinary PHP strings express upstream's `Inherit` result. No `__toString()` is
-proposed on either result class: implicit conversion would discard its explicit
+provided on either result class: implicit conversion would discard its explicit
 interpretation.
 
 ### Why these are dedicated classes
@@ -114,7 +115,8 @@ Do not silently rewrite their expectations to accept a different default.
 ## Proposed consumer examples
 
 The ordinary-string example is implemented in slice 1. Examples using result
-classes describe slice 2. None of the new APIs exist in base commit `73587cf`.
+classes are implemented in slice 2. None of these APIs exist in base commit
+`73587cf`.
 
 ### Ordinary callbacks returning text
 
@@ -217,8 +219,8 @@ continues to consume its existing lambda text allowance.
 
 ## Binding design
 
-The current [PHP callback bridge](../../mustache_lambda.cpp) always calls
-`convert_to_string()` and implements the legacy string callbacks. Upstream's
+Before slice 2, the [PHP callback bridge](../../mustache_lambda.cpp) always called
+`convert_to_string()` and implemented the legacy string callbacks. Upstream's
 `invokeResult()` adapter wraps those strings as `Inherit`, which explains why
 the dependency update needed no PHP source changes.
 
@@ -301,8 +303,8 @@ object handlers, and callback result conversion. Register both classes in
 `php_mustache.cpp` and include their declarations in the stub. Put their shared
 implementation in `mustache_lambda_result.cpp`/`.hpp`; update
 `mustache_lambda.cpp`/`.hpp` and the
-new-type rejection in `mustache_data.cpp`. Add the sources to `config.m4` and
-the package manifest. Extend the feature probe for the native result API when
+new-type rejection in `mustache_data.cpp`. Add the sources to `config.m4`,
+`config.w32`, and the package manifest. Extend the feature probe for the native result API when
 it becomes a build requirement.
 
 Tests cover both classes overriding both modes; closures, invokable objects,
@@ -353,10 +355,11 @@ as a callback return. Constructor reinitialization replaced a wrapper's source,
 and reflection confirmed that the class is not final. These results support
 keeping the new result classes separate from the existing source wrapper.
 
-The explicit result ownership design remains a proposal based on source
-inspection. Examples using those classes and the combined stub excerpt have
-only been syntax-checked. Slice 1's mode example was executed with the rebuilt
-extension. PHPStan/IDE behavior is inferred from native types and PHPDoc; this
+During planning, the explicit result ownership design was based on source
+inspection, and examples using those classes were only syntax-checked.
+Slice 2 implements that design; its runtime evidence is recorded separately
+below. Slice 1's mode example was executed with the rebuilt extension.
+PHPStan/IDE behavior is inferred from native types and PHPDoc; this
 repository has no configured PHPStan verification. Constant-union annotations
 use `@phpstan-param` and `@phpstan-return` so PHP's stub generator retains the
 native integer signatures.
@@ -440,7 +443,98 @@ returned `Hello {{name}}` as documented. Final diff checks passed.
 
 Runtime verification was on x86_64 Linux. Other operating systems and CPU
 architectures were not tested. Valgrind remains part of slice 3's combined
-verification; it was not repeated here. The explicit result classes still
+verification; it was not repeated for slice 1. The explicit result classes
 belong to slice 2, and the deferred Zend bailout work remains outside this
 change. Slice 1 has passed review; the remaining implementation slices still
 pause for review before committing.
+
+## Slice 2 verification
+
+Slice 2 is based on mode-API commit `e87614a`. All seven initial PHPTs failed
+against a loaded pre-feature PHP 8.3 archive module with
+`missing explicit lambda results`. That includes the optional archive test;
+the feature's absence was checked in the test body rather than its skip logic.
+
+The first implementation passed the value, rendering, helper, callback, and
+lifetime tests. The data-rejection test exposed an exception mismatch:
+`InvalidParameterException` became `ValueError` in `render()`, but only a warning
+in `MustacheData` construction and the diagnostic API. The new result-type guard
+now raises `ValueError` directly and unwinds through the existing PHP-exception
+path. The test then passed without changing its expected behavior. Existing
+validation for other data types remains unchanged.
+
+The PHP 8.0 build exposed a separate fixture issue: the value test used
+`class_alias()` on an internal class, which PHP only supports
+[from PHP 8.3 onward](https://www.php.net/manual/en/function.class-alias.php).
+That runtime-specific check is separated from portable value semantics.
+
+The four PHP-lambda examples in the public guide were executed with the rebuilt
+PHP 8.3 extension. Their outputs were `Hello {{name}}`,
+`Hello {{name}} | Hello Ada`, `ADA`, and `{{other}}`, respectively.
+
+The independent correctness reviewer returned `PASS`, with no actionable
+production defects. The independent test reviewer returned
+`HARDENED_NO_FAILURE`. Retained test improvements verify the absence of a public
+base or interface, rejection of result objects as root templates and partials,
+and alias comparison and callback interpretation on PHP 8.3+. The new alias test
+failed against the pre-feature module and passed with the new classes; it
+correctly skips PHP versions that cannot alias internal classes. There were no
+accepted production fixes from either review.
+
+After both reviews, `nix flake check --keep-going` passed all 18 configured
+checks: 17 runtime configurations and the pre-commit check. The three optional
+PHP 8.3 archive configurations also passed their full suites. Results for each
+configuration in a row were identical:
+
+| PHP | Configurations | Passed | Skipped |
+| --- | --- | ---: | ---: |
+| 8.0.30 | GCC | 274 | 21 |
+| 8.1.34 | GCC, Clang, GCC coverage | 278 | 17 |
+| 8.2.33 | GCC, Clang, GCC coverage | 278 | 17 |
+| 8.3.33 | GCC, Clang, GCC coverage, GCC ASan/UBSan | 279 | 16 |
+| 8.4.24 | GCC, Clang, GCC coverage | 286 | 9 |
+| 8.5.9 | GCC, Clang, GCC coverage | 286 | 9 |
+| 8.3.33 archive bridge | GCC, Clang, GCC ASan/UBSan | 287 | 8 |
+
+Each runtime configuration selected 295 PHPTs, with zero failures and zero test
+warnings. The skips reflect runtime-specific features and whether the optional
+archive bridge is enabled. The final workspace PHP 8.3 focused run passed seven
+new tests and skipped the archive test; that test passed in all three archive
+builds. Additional PHP 8.4 checks confirmed that `newLazyGhost()` and
+`newLazyProxy()` reject both result classes with `Error`, so they cannot bypass
+construction.
+
+The extended configure probe passed with the pinned headers. A separate
+configure run with the preceding development headers passed the old ABI 6
+check, then failed the result API check with the intended rebuild instruction.
+The log is `/tmp/php-mustache-results-old-headers.log`.
+
+Final builds used a source snapshot containing all eight new PHPTs:
+
+```sh
+nix flake check path:/tmp/php-mustache-results-final-dpppgi11 \
+  --keep-going --no-write-lock-file -L --max-jobs 4 --cores 4
+nix build --no-link --keep-going --no-write-lock-file -L \
+  --max-jobs 3 --cores 4 \
+  path:/tmp/php-mustache-results-final-dpppgi11#php83-archive-benchmark \
+  path:/tmp/php-mustache-results-final-dpppgi11#php83-archive-benchmark-clang \
+  path:/tmp/php-mustache-results-final-dpppgi11#php83-archive-benchmark-sanitized
+```
+
+Logs are `/tmp/php-mustache-results-final-matrix.log`,
+`/tmp/php-mustache-results-final-archives.log`, and
+`/tmp/php-mustache-results-final-focused.log`. These temporary paths identify
+local evidence rather than repository artifacts. Only this plan was edited
+after the snapshot; the production sources, configuration,
+stubs, tests, guide, changelog, and manifest remained identical to it.
+
+All eight configured hooks passed. The stub hash matches the generated
+arginfo, explicit Markdown and local-link checks passed, and all 327 package
+manifest entries exist with no duplicates. All 295 PHPTs are represented in the
+manifest. Final diff and new-file whitespace checks passed.
+
+Verification was on x86_64 Linux. `config.w32` includes the new source file, but
+Windows and other operating systems or CPU architectures were not tested.
+Valgrind remains part of slice 3's combined verification and was not run here.
+The default remains template evaluation; choosing a different release default
+is still a separate decision. Slice 2 has passed review.

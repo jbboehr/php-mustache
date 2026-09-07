@@ -7,9 +7,11 @@
 
 #include "php_mustache.h"
 #include <algorithm>
+#include <utility>
 #include "mustache_exceptions.hpp"
 #include "mustache_lambda_helper.hpp"
 #include "mustache_lambda.hpp"
+#include "mustache_lambda_result.hpp"
 #include "mustache_zval.hpp"
 
 #undef min
@@ -55,7 +57,7 @@ class ZvalArguments {
 
 } // namespace
 
-std::string Lambda::invokeUserFunctionAsString(int param_count, zval params[])
+mustache::LambdaResult Lambda::invokeUserFunctionAsResult(int param_count, zval params[])
 {
   ZvalGuard result;
   int status = invokeUserFunction(result.get(), param_count, params);
@@ -63,7 +65,17 @@ std::string Lambda::invokeUserFunctionAsString(int param_count, zval params[])
     throw PhpInvalidParameterException();
   }
   if( status != SUCCESS || Z_ISUNDEF_P(result.get()) ) {
-    return std::string();
+    return mustache::LambdaResult::fromString(std::string());
+  }
+
+  zval * value = result.get();
+  ZVAL_DEREF(value);
+  if( Z_TYPE_P(value) == IS_OBJECT && php_mustache_is_lambda_result(Z_OBJCE_P(value)) ) {
+    zend_string * text = php_mustache_lambda_result_text(value);
+    std::string owned_text(ZSTR_VAL(text), ZSTR_LEN(text));
+    return Z_OBJCE_P(value) == MustacheLiteralResult_ce_ptr
+        ? mustache::LambdaResult::literal(std::move(owned_text))
+        : mustache::LambdaResult::templateSource(std::move(owned_text));
   }
 
   convert_to_string(result.get());
@@ -71,18 +83,19 @@ std::string Lambda::invokeUserFunctionAsString(int param_count, zval params[])
     throw PhpInvalidParameterException();
   }
   if( Z_TYPE_P(result.get()) != IS_STRING ) {
-    return std::string();
+    return mustache::LambdaResult::fromString(std::string());
   }
 
-  return std::string(Z_STRVAL_P(result.get()), Z_STRLEN_P(result.get()));
+  return mustache::LambdaResult::fromString(
+      std::string(Z_STRVAL_P(result.get()), Z_STRLEN_P(result.get())));
 }
 
-std::string Lambda::invoke()
+mustache::LambdaResult Lambda::invokeResult()
 {
-  return invokeUserFunctionAsString(0, NULL);
+  return invokeUserFunctionAsResult(0, NULL);
 }
 
-std::string Lambda::invoke(
+mustache::LambdaResult Lambda::invokeResult(
     std::string_view text, mustache::LambdaRenderContext context)
 {
   int param_count = std::clamp(getUserFunctionParamCount(), 0, 2);
@@ -100,5 +113,5 @@ std::string Lambda::invoke(
     payload->state->context = context;
   }
 
-  return invokeUserFunctionAsString(param_count, params.data());
+  return invokeUserFunctionAsResult(param_count, params.data());
 }

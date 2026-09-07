@@ -114,9 +114,20 @@ if test "$PHP_MUSTACHE" != "no"; then
     AC_MSG_ERROR([libmustache >= 0.6.0 and a C++17 compiler are required])
   ])
 
-  AC_MSG_CHECKING([whether libmustache provides configurable lambda string interpretation])
+  AC_MSG_CHECKING([whether libmustache provides configurable and explicit lambda results])
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <mustache/mustache.hpp>
+#include <mustache/lambda.hpp>
+
+class PhpMustacheResultProbe : public mustache::Lambda {
+  public:
+    mustache::LambdaResult invokeResult() override {
+      return mustache::LambdaResult::literal("text");
+    }
+    mustache::LambdaResult invokeResult(std::string_view, mustache::LambdaRenderContext) override {
+      return mustache::LambdaResult::templateSource("text");
+    }
+};
   ]], [[
     mustache::Mustache engine;
     engine.setLambdaStringMode(mustache::LambdaStringMode::Literal);
@@ -124,11 +135,14 @@ if test "$PHP_MUSTACHE" != "no"; then
     mustache::Data data;
     mustache::PartialMap partials;
     mustache::render(compiled, data, partials, mustache::RenderLimits(), engine.getLambdaStringMode());
+    PhpMustacheResultProbe callback;
+    callback.invokeResult().text();
+    mustache::LambdaResult::fromString("text").kind();
   ]])], [
     AC_MSG_RESULT([yes])
   ], [
     AC_MSG_RESULT([no])
-    AC_MSG_ERROR([libmustache with LambdaStringMode support is required; rebuild libmustache and this extension using the revision in flake.lock])
+    AC_MSG_ERROR([libmustache with LambdaStringMode and LambdaResult support is required; rebuild libmustache and this extension using the revision in flake.lock])
   ])
 
   if test "$PHP_MUSTACHE_ARCHIVE_BENCHMARK" = "yes"; then
@@ -167,6 +181,7 @@ if test "$PHP_MUSTACHE" != "no"; then
     mustache_template.cpp
     mustache_lambda.cpp
     mustache_lambda_helper.cpp
+    mustache_lambda_result.cpp
     mustache_class_method_lambda.cpp
     mustache_zend_closure_lambda.cpp
   ])

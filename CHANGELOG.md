@@ -13,6 +13,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Add `MustacheAST::NODE_*` constants for identifying node types in diagnostic parse trees, including `NODE_COMMENT` for comment extraction (GH-45).
 - Add opt-in per-instance partial-map limits with `Mustache::setPartialLimits()`, covering supplied entry count and aggregate text bytes.
 - Add `Mustache::setLambdaStringMode()` and `getLambdaStringMode()` with `LAMBDA_STRING_TEMPLATE` and `LAMBDA_STRING_LITERAL` constants. Literal mode displays callback strings without evaluating them as templates, while preserving HTML escaping (GH-68).
+- Add final, immutable `MustacheLiteralResult` and `MustacheTemplateResult` classes for individual callbacks to override the engine's string mode. Both preserve interpolation escaping and are accepted only as callback returns (GH-68).
 
 ### Changed
 

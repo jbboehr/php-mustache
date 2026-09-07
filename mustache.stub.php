@@ -351,6 +351,66 @@ final class MustacheLambdaHelper
     }
 }
 
+/**
+ * Returns callback text without evaluating it as a template.
+ *
+ * Immutable and final. Interpolation escaping still follows the template tag.
+ * Use only as a callback return; ordinary render data rejects these objects.
+ */
+final class MustacheLiteralResult
+{
+    /** @throws Error If this instance was already initialized. */
+    public function __construct(string $text)
+    {
+    }
+
+    public function getText(): string
+    {
+    }
+
+#if PHP_VERSION_ID < 80100
+    /** @internal PHP 8.0 serialization-denial hook. */
+    final public function __serialize(): array
+    {
+    }
+
+    /** @internal PHP 8.0 serialization-denial hook. */
+    final public function __unserialize(array $data): void
+    {
+    }
+#endif
+}
+
+/**
+ * Returns callback text to evaluate as template source, regardless of string mode.
+ *
+ * Immutable and final. Interpolation escaping still follows the template tag.
+ * Use only as a callback return; ordinary render data rejects these objects.
+ */
+final class MustacheTemplateResult
+{
+    /** @throws Error If this instance was already initialized. */
+    public function __construct(string $text)
+    {
+    }
+
+    public function getText(): string
+    {
+    }
+
+#if PHP_VERSION_ID < 80100
+    /** @internal PHP 8.0 serialization-denial hook. */
+    final public function __serialize(): array
+    {
+    }
+
+    /** @internal PHP 8.0 serialization-denial hook. */
+    final public function __unserialize(array $data): void
+    {
+    }
+#endif
+}
+
 class MustacheException extends Exception
 {
 }

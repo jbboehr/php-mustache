@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6e3bbc306d4c39ee26ab7a4da2a77c3ce66c5f6e */
+ * Stub hash: 611d3d42e3cbeb9ce0e4ba5533b44019d440ef86 */
 
 #if PHP_VERSION_ID < 80100
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Mustache___serialize, 0, 0, IS_ARRAY, 0)
@@ -118,3 +118,25 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_MustacheLambdaHelper_render, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, tmpl, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MustacheLiteralResult___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_MustacheLiteralResult_getText arginfo_class_Mustache_getStartSequence
+
+#if PHP_VERSION_ID < 80100
+#define arginfo_class_MustacheLiteralResult___serialize arginfo_class_Mustache___serialize
+
+#define arginfo_class_MustacheLiteralResult___unserialize arginfo_class_Mustache___unserialize
+#endif
+
+#define arginfo_class_MustacheTemplateResult___construct arginfo_class_MustacheLiteralResult___construct
+
+#define arginfo_class_MustacheTemplateResult_getText arginfo_class_Mustache_getStartSequence
+
+#if PHP_VERSION_ID < 80100
+#define arginfo_class_MustacheTemplateResult___serialize arginfo_class_Mustache___serialize
+
+#define arginfo_class_MustacheTemplateResult___unserialize arginfo_class_Mustache___unserialize
+#endif

@@ -208,7 +208,8 @@ Interpolation calls a lambda with no arguments. A section passes up to two
 arguments according to the callback's declared parameters: the unrendered
 section text and a `MustacheLambdaHelper`. A callback that declares no
 parameters receives none. Any further required parameter causes PHP's usual
-`ArgumentCountError`. Return a string to use as the lambda result.
+`ArgumentCountError`. Return a string or an explicit result object as described
+below.
 
 ### Callback string interpretation
 
@@ -248,6 +249,47 @@ retain their original mode. The getter reports the configured value for later
 calls. Parsed templates and `MustacheData` values can be reused under either
 mode; interpretation is selected when rendering.
 
+### Explicit callback results
+
+Return `MustacheLiteralResult` to display text without template evaluation, or
+`MustacheTemplateResult` to request evaluation. These choices override the
+engine's string mode for that callback result:
+
+```php
+<?php
+$mustache = new Mustache();
+$mustache->setLambdaStringMode(Mustache::LAMBDA_STRING_LITERAL);
+echo $mustache->render('{{literal}} | {{template}}', [
+    'name' => 'Ada',
+    'literal' => fn (): MustacheLiteralResult => new MustacheLiteralResult('Hello {{name}}'),
+    'template' => fn (): MustacheTemplateResult => new MustacheTemplateResult('Hello {{name}}'),
+]), "\n";
+// Hello {{name}} | Hello Ada
+```
+
+Both classes are final and immutable. Construct them with `new ...($text)` and
+read the original text with `getText(): string`. Text may be empty or contain
+NUL bytes. Each result owns its text, can be retained and returned repeatedly,
+and keeps no engine or section helper alive. `clone` produces a distinct object
+with the same text; `==` compares the class and exact text bytes, while `===`
+compares object identity. Calling the constructor again throws `Error`, and
+dynamic properties are rejected. PHP serialization and construction through
+`ReflectionClass::newInstanceWithoutConstructor()` are also rejected. To persist
+a result, store its text and reconstruct the intended class.
+
+These objects are accepted as callback returns, including returns by reference.
+Passing one directly in render data, to `MustacheData`, or to
+`debugDataStructure()` throws `ValueError`; wrap it in a callback instead.
+They do not implement `__toString()`. `MustacheTemplate` remains the existing
+root/partial source wrapper, and returning one from a callback still follows
+ordinary string conversion and the engine's string mode.
+
+Explicit results preserve the escaping and delimiter rules described above.
+For example, `new MustacheLiteralResult('<b>{{name}}</b>')` returned from an
+escaped interpolation produces `&lt;b&gt;{{name}}&lt;/b&gt;`. It does not mark
+the text as HTML-safe. Explicit template results can throw
+`MustacheParserException` if their source is invalid when evaluated.
+
 ### Section helpers
 
 For templates parsed from source, the section body preserves the original tag
@@ -281,6 +323,22 @@ PHP exceptions from callbacks propagate to the caller.
 The helper returns a string. In template mode, returning that string from a
 callback evaluates it again. In literal mode, it is returned without another
 template evaluation, preserving any Mustache-like text in the rendered data.
+
+Wrap helper output in `MustacheLiteralResult` to preserve it under either
+string mode:
+
+```php
+<?php
+$mustache = new Mustache();
+echo $mustache->render('{{#keep}}{{name}}{{/keep}}', [
+    'name' => '{{other}}',
+    'other' => 'Ada',
+    'keep' => function (string $text, MustacheLambdaHelper $helper): MustacheLiteralResult {
+        return new MustacheLiteralResult($helper->render($text));
+    },
+]), "\n";
+// {{other}}
+```
 
 On PHP versions with Fibers, renders can overlap on one `Mustache` instance
 when the templates and partials are source strings or `MustacheTemplate`

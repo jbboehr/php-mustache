@@ -14,6 +14,7 @@
 #include "mustache_data.hpp"
 #include "mustache_template.hpp"
 #include "mustache_lambda_helper.hpp"
+#include "mustache_lambda_result.hpp"
 
 
 /* {{{ prototypes */
@@ -56,6 +57,10 @@ static PHP_MINIT_FUNCTION(mustache)
   }
 
   if( PHP_MINIT(mustache_lambda_helper)(INIT_FUNC_ARGS_PASSTHRU) == FAILURE ) {
+    return FAILURE;
+  }
+
+  if( PHP_MINIT(mustache_lambda_result)(INIT_FUNC_ARGS_PASSTHRU) == FAILURE ) {
     return FAILURE;
   }
 
