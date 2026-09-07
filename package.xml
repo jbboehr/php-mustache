@@ -84,6 +84,7 @@
    <file name="tests/MustacheData__captures-container-values.phpt" role="test" />
    <file name="tests/MustacheData__conversion-errors-are-transactional.phpt" role="test" />
    <file name="tests/MustacheData__converts-lazy-object-contexts.phpt" role="test" />
+   <file name="tests/MustacheData__copies-properties-and-retains-method-state.phpt" role="test" />
    <file name="tests/MustacheData__object-custom-property-handlers.phpt" role="test" />
    <file name="tests/MustacheData__object-magic-accessors.phpt" role="test" />
    <file name="tests/MustacheData__object-property-hooks.phpt" role="test" />
@@ -92,6 +93,7 @@
    <file name="tests/MustacheData__omits-destructor-methods.phpt" role="test" />
    <file name="tests/MustacheData__omits-inherited-internal-destructor.phpt" role="test" />
    <file name="tests/MustacheData__owns-lambda-values.phpt" role="test" />
+   <file name="tests/MustacheData__preserves-sparse-array-order.phpt" role="test" />
    <file name="tests/MustacheData__rejects-container-limit-before-conversion.phpt" role="test" />
    <file name="tests/MustacheData__rejects-inheritance.phpt" role="test" />
    <file name="tests/MustacheData__rejects-reinitialization-during-render.phpt" role="test" />
@@ -113,6 +115,7 @@
    <file name="tests/Mustache__archive-benchmark-lambda-compatibility.phpt" role="test" />
    <file name="tests/Mustache__archive-benchmark-section-source.phpt" role="test" />
    <file name="tests/Mustache__debugDataStructure.phpt" role="test" />
+   <file name="tests/Mustache__delimiter-setters-preserve-settings-on-error.phpt" role="test" />
    <file name="tests/Mustache__getEscapeByDefault.phpt" role="test" />
    <file name="tests/Mustache__getStartSequence.phpt" role="test" />
    <file name="tests/Mustache__getStopSequence.phpt" role="test" />
