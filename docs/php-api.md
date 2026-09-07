@@ -210,6 +210,46 @@ section text and a `MustacheLambdaHelper`. A callback that declares no
 parameters receives none. Any further required parameter causes PHP's usual
 `ArgumentCountError`. Return a string to use as the lambda result.
 
+### Callback string interpretation
+
+By default, callback strings are evaluated as template source. Use
+`setLambdaStringMode()` to display their contents without that evaluation:
+
+```php
+<?php
+$mustache = new Mustache();
+$mustache->setLambdaStringMode(Mustache::LAMBDA_STRING_LITERAL);
+echo $mustache->render('{{value}}', [
+    'name' => 'Ada',
+    'value' => fn (): string => 'Hello {{name}}',
+]), "\n";
+// Hello {{name}}
+```
+
+`Mustache::LAMBDA_STRING_TEMPLATE` restores template evaluation and is the
+default for new instances. `getLambdaStringMode()` returns the configured
+constant. An unknown integer mode throws `ValueError` and leaves the setting
+unchanged; arguments otherwise follow PHP's usual integer parameter rules.
+The setting also applies after the existing conversion of scalar or stringable
+callback returns, including `MustacheTemplate` objects.
+
+Literal mode preserves the template's escaping rules: escaped interpolation
+still escapes HTML, while triple-brace and ampersand tags remain unescaped.
+Section results receive no additional section-wide escaping. Literal mode does
+not mark text as HTML-safe. In template mode, returned interpolation templates
+use default delimiters and returned section templates use the section's opening
+delimiters. The complete evaluated interpolation still follows the outer tag's
+escaping rules.
+
+Each render captures its mode before data conversion, template property reads,
+or rendering callbacks invoke PHP. Changes made during a render affect later
+calls, including nested calls, while the active render and its section helpers
+retain their original mode. The getter reports the configured value for later
+calls. Parsed templates and `MustacheData` values can be reused under either
+mode; interpretation is selected when rendering.
+
+### Section helpers
+
 For templates parsed from source, the section body preserves the original tag
 spelling, comments, and whitespace.
 
@@ -237,6 +277,10 @@ ADA
 The extension creates the helper. Use it only while its callback is active.
 Calling a saved helper after the callback finishes throws `MustacheException`.
 PHP exceptions from callbacks propagate to the caller.
+
+The helper returns a string. In template mode, returning that string from a
+callback evaluates it again. In literal mode, it is returned without another
+template evaluation, preserving any Mustache-like text in the rendered data.
 
 On PHP versions with Fibers, renders can overlap on one `Mustache` instance
 when the templates and partials are source strings or `MustacheTemplate`

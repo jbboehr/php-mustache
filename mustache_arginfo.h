@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: aef8baa9a20883e151bbf9fc69f35af237b951ef */
+ * Stub hash: 6e3bbc306d4c39ee26ab7a4da2a77c3ce66c5f6e */
 
 #if PHP_VERSION_ID < 80100
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Mustache___serialize, 0, 0, IS_ARRAY, 0)
@@ -14,6 +14,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Mustache___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Mustache_getEscapeByDefault, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Mustache_getLambdaStringMode, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Mustache_setLambdaStringMode, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Mustache_getStartSequence, 0, 0, IS_STRING, 0)

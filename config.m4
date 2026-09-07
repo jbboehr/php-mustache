@@ -114,16 +114,37 @@ if test "$PHP_MUSTACHE" != "no"; then
     AC_MSG_ERROR([libmustache >= 0.6.0 and a C++17 compiler are required])
   ])
 
+  AC_MSG_CHECKING([whether libmustache provides configurable lambda string interpretation])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <mustache/mustache.hpp>
+  ]], [[
+    mustache::Mustache engine;
+    engine.setLambdaStringMode(mustache::LambdaStringMode::Literal);
+    mustache::CompiledTemplate compiled;
+    mustache::Data data;
+    mustache::PartialMap partials;
+    mustache::render(compiled, data, partials, mustache::RenderLimits(), engine.getLambdaStringMode());
+  ]])], [
+    AC_MSG_RESULT([yes])
+  ], [
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([libmustache with LambdaStringMode support is required; rebuild libmustache and this extension using the revision in flake.lock])
+  ])
+
   if test "$PHP_MUSTACHE_ARCHIVE_BENCHMARK" = "yes"; then
     AC_MSG_CHECKING([whether libmustache provides archived templates])
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <mustache/archived_template.hpp>
+#include <mustache/data.hpp>
 
 #if !defined(MUSTACHE_HAVE_ARCHIVED_TEMPLATES)
 # error libmustache archived templates are unavailable
 #endif
     ]], [[
       mustache::ArchivedTemplateLimits limits;
+      mustache::ArchivedTemplate archived;
+      mustache::Data data;
+      mustache::render(archived, data, mustache::RenderLimits(), mustache::LambdaStringMode::Literal);
       return limits.maxArchiveBytes == 0;
     ]])], [
       AC_MSG_RESULT([yes])

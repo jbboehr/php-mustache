@@ -56,9 +56,11 @@ static zend_function_entry Mustache_methods[] = {
 #endif
   PHP_ME(Mustache, __construct, arginfo_class_Mustache___construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
   PHP_ME(Mustache, getEscapeByDefault, arginfo_class_Mustache_getEscapeByDefault, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, getLambdaStringMode, arginfo_class_Mustache_getLambdaStringMode, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, getStartSequence, arginfo_class_Mustache_getStartSequence, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, getStopSequence, arginfo_class_Mustache_getStopSequence, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, setEscapeByDefault, arginfo_class_Mustache_setEscapeByDefault, ZEND_ACC_PUBLIC)
+  PHP_ME(Mustache, setLambdaStringMode, arginfo_class_Mustache_setLambdaStringMode, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, setStartSequence, arginfo_class_Mustache_setStartSequence, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, setStopSequence, arginfo_class_Mustache_setStopSequence, ZEND_ACC_PUBLIC)
   PHP_ME(Mustache, setPartialLimits, arginfo_class_Mustache_setPartialLimits, ZEND_ACC_PUBLIC)
@@ -110,6 +112,7 @@ static zend_object * Mustache_obj_create(zend_class_entry * ce)
 
   try {
     intern = (struct php_obj_Mustache *) ecalloc(1, sizeof(php_obj_Mustache) + zend_object_properties_size(ce));
+    intern->lambda_string_mode = mustache::LambdaStringMode::Template;
     intern->max_partial_entries = -1;
     intern->max_partial_text_bytes = -1;
     zend_object_std_init(&intern->std, ce);
@@ -141,6 +144,10 @@ PHP_MINIT_FUNCTION(mustache_mustache)
     ce.ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 #endif
     Mustache_ce_ptr = zend_register_internal_class(&ce);
+    zend_declare_class_constant_long(Mustache_ce_ptr, ZEND_STRL("LAMBDA_STRING_TEMPLATE"),
+        static_cast<zend_long>(mustache::LambdaStringMode::Template));
+    zend_declare_class_constant_long(Mustache_ce_ptr, ZEND_STRL("LAMBDA_STRING_LITERAL"),
+        static_cast<zend_long>(mustache::LambdaStringMode::Literal));
     memcpy(&Mustache_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
     Mustache_obj_handlers.offset = XtOffsetOf(php_obj_Mustache, std);
     Mustache_obj_handlers.free_obj = Mustache_obj_free;
@@ -589,6 +596,46 @@ PHP_METHOD(Mustache, __construct)
 }
 /* }}} Mustache::__construct */
 
+/* {{{ proto int Mustache::getLambdaStringMode() */
+PHP_METHOD(Mustache, getLambdaStringMode)
+{
+  try {
+    zval * _this_zval = NULL;
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "O",
+            &_this_zval, Mustache_ce_ptr) == FAILURE ) {
+      throw PhpInvalidParameterException();
+    }
+    const php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
+    RETURN_LONG(static_cast<zend_long>(payload->lambda_string_mode));
+  } catch(...) {
+    mustache_exception_handler();
+  }
+}
+/* }}} Mustache::getLambdaStringMode */
+
+/* {{{ proto void Mustache::setLambdaStringMode(int mode) */
+PHP_METHOD(Mustache, setLambdaStringMode)
+{
+  try {
+    zend_long mode = 0;
+    zval * _this_zval = NULL;
+    if( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), (char *) "Ol",
+            &_this_zval, Mustache_ce_ptr, &mode) == FAILURE ) {
+      throw PhpInvalidParameterException();
+    }
+    if( mode != static_cast<zend_long>(mustache::LambdaStringMode::Template) &&
+        mode != static_cast<zend_long>(mustache::LambdaStringMode::Literal) ) {
+      mustache_argument_value_error(1, "must be Mustache::LAMBDA_STRING_TEMPLATE or Mustache::LAMBDA_STRING_LITERAL");
+    }
+    php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
+    // Active renders retain their snapshots, including the shared AST renderer.
+    payload->lambda_string_mode = static_cast<mustache::LambdaStringMode>(mode);
+  } catch(...) {
+    mustache_exception_handler();
+  }
+}
+/* }}} Mustache::setLambdaStringMode */
+
 /* {{{ proto void Mustache::setPartialLimits(?int maxEntries = null, ?int maxTextBytes = null) */
 PHP_METHOD(Mustache, setPartialLimits)
 {
@@ -881,6 +928,7 @@ PHP_METHOD(Mustache, render)
     struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
 
     // Prepare template data
+    const mustache::LambdaStringMode lambda_mode = payload->lambda_string_mode;
     PartialBudget partial_budget(*payload, 3);
     mustache::Data templateData;
     mustache::Data * templateDataPtr = &templateData;
@@ -908,6 +956,7 @@ PHP_METHOD(Mustache, render)
       if( templateValue != NULL && Z_TYPE_P(templateValue) == IS_STRING ) {
         output.reserve(Z_STRLEN_P(templateValue));
       }
+      payload->mustache->setLambdaStringMode(lambda_mode);
       payload->mustache->render(
           templateNodePtr, templateDataPtr, &templatePartials, &output);
     } else {
@@ -917,8 +966,8 @@ PHP_METHOD(Mustache, render)
       mustache_compile_template_param(tmpl, payload->mustache, compiledTemplate, 1);
       mustache::PartialMap compiledPartials;
       mustache_compile_partials(partials, payload->mustache, compiledPartials, 3, partial_budget);
-      output = payload->mustache->render(
-          compiledTemplate, *templateDataPtr, compiledPartials);
+      output = mustache::render(
+          compiledTemplate, *templateDataPtr, compiledPartials, mustache::RenderLimits(), lambda_mode);
     }
 
     // Output
@@ -1034,6 +1083,9 @@ PHP_METHOD(Mustache, benchmarkSerializeArchive)
 PHP_METHOD(Mustache, benchmarkRenderArchive)
 {
   try {
+    // String argument conversion can itself invoke PHP before data preparation.
+    const php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(getThis());
+    const mustache::LambdaStringMode lambda_mode = payload->lambda_string_mode;
     char * archiveStr = NULL;
     size_t archiveLen = 0;
     zval * data = NULL;
@@ -1043,14 +1095,14 @@ PHP_METHOD(Mustache, benchmarkRenderArchive)
       throw PhpInvalidParameterException();
     }
 
-    struct php_obj_Mustache * payload = php_mustache_mustache_object_fetch_object(_this_zval);
     mustache::Data templateData;
     mustache::Data * templateDataPtr = &templateData;
     mustache_parse_data_param(data, &templateDataPtr);
 
     const mustache::ArchivedTemplate archived = mustache::loadArchivedTemplate(
         std::string_view(archiveStr, archiveLen), mustache_archive_benchmark_limits());
-    const std::string output = payload->mustache->render(archived, *templateDataPtr);
+    const std::string output = mustache::render(
+        archived, *templateDataPtr, mustache::RenderLimits(), lambda_mode);
     RETVAL_STRINGL(output.c_str(), output.length());
   } catch(...) {
     mustache_exception_handler();

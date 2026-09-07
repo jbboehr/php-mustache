@@ -5,6 +5,11 @@
  */
 class Mustache
 {
+    /** @var int Evaluate ordinary callback strings as templates. */
+    public const LAMBDA_STRING_TEMPLATE = 0;
+    /** @var int Return ordinary callback strings without template evaluation. */
+    public const LAMBDA_STRING_LITERAL = 1;
+
 #if PHP_VERSION_ID < 80100
     /** @internal PHP 8.0 serialization-denial hook. */
     final public function __serialize(): array
@@ -25,6 +30,28 @@ class Mustache
      * Returns whether interpolation is escaped by default.
      */
     public function getEscapeByDefault(): bool
+    {
+    }
+
+    /**
+     * Returns the configured mode for subsequent renders. The default is template evaluation.
+     *
+     * @phpstan-return self::LAMBDA_STRING_TEMPLATE|self::LAMBDA_STRING_LITERAL
+     */
+    public function getLambdaStringMode(): int
+    {
+    }
+
+    /**
+     * Sets ordinary callback string interpretation without changing HTML escaping.
+     *
+     * Each render snapshots the mode before invoking PHP during preparation or rendering.
+     * Changes affect subsequent calls, including nested calls, but not active renders.
+     *
+     * @phpstan-param self::LAMBDA_STRING_TEMPLATE|self::LAMBDA_STRING_LITERAL $mode
+     * @throws ValueError If the mode is unknown.
+     */
+    public function setLambdaStringMode(int $mode): void
     {
     }
 

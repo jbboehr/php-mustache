@@ -12,6 +12,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Add explicit `MustacheAST::toBinary()` and `MustacheAST::fromBinary()` APIs for persistent parsed-template caches.
 - Add `MustacheAST::NODE_*` constants for identifying node types in diagnostic parse trees, including `NODE_COMMENT` for comment extraction (GH-45).
 - Add opt-in per-instance partial-map limits with `Mustache::setPartialLimits()`, covering supplied entry count and aggregate text bytes.
+- Add `Mustache::setLambdaStringMode()` and `getLambdaStringMode()` with `LAMBDA_STRING_TEMPLATE` and `LAMBDA_STRING_LITERAL` constants. Literal mode displays callback strings without evaluating them as templates, while preserving HTML escaping (GH-68).
 
 ### Changed
 
