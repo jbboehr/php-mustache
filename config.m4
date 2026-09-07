@@ -176,6 +176,7 @@ class PhpMustacheResultProbe : public mustache::Lambda {
     php_mustache.cpp
     mustache_ast.cpp
     mustache_mustache.cpp
+    mustache_operations.cpp
     mustache_exceptions.cpp
     mustache_data.cpp
     mustache_template.cpp

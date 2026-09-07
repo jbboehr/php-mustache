@@ -3,6 +3,18 @@
 
 #include "php_mustache.h"
 
+inline zval * mustache_dereference_zval(zval * value)
+{
+  if( value == NULL ) {
+    return NULL;
+  }
+  if( Z_TYPE_P(value) == IS_INDIRECT ) {
+    value = Z_INDIRECT_P(value);
+  }
+  ZVAL_DEREF(value);
+  return value;
+}
+
 class ZvalGuard {
   private:
     zval value;

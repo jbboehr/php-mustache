@@ -12,6 +12,9 @@ PHP_MINIT_FUNCTION(mustache_exceptions);
 
 void mustache_exception_handler();
 
+[[noreturn]] void mustache_argument_value_error(
+    uint32_t argument, const char * message);
+
 class PhpInvalidParameterException : public std::exception {
   public:
 };

@@ -55,7 +55,7 @@ The relevant surface extends beyond explicit template lambdas:
 | Boundary | Native ownership or cleanup obligation |
 | --- | --- |
 | [Lambda invocation and result coercion](../../mustache_lambda.cpp) | Result and argument zvals, section helper, and the enclosing renderer's data, templates, partials, and output. Result coercion can call `__toString()`. |
-| [Template and partial source reads](../../mustache_mustache.cpp) | A getter can run while converted data or earlier compiled partials already exist. The temporary property value and copied source also need cleanup. |
+| [Template and partial source reads](../../mustache_operations.cpp) | A getter can run while converted data or earlier compiled partials already exist. The temporary property value and copied source also need cleanup. |
 | [Recursive object conversion](../../mustache_data.cpp) | Property handlers can run PHP while container captures, keys, active-path sets, and partially converted native data are live. |
 | Native-to-PHP result construction | `RETVAL_STRINGL`, PHP array construction, and object initialization can allocate through Zend while C++ owners still exist. Callback-only coverage misses these boundaries. |
 | [Temporary zval release](../../mustache_zval.hpp) and native lambda destruction | Releasing a final PHP reference can invoke object cleanup. That can happen during normal return or while another C++ exception is already unwinding. |

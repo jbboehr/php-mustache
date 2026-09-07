@@ -254,7 +254,7 @@ patterns, and test constructor reentry and construction through reflection.
 
 For mode configuration, add a field to `php_obj_Mustache` and have the PHP
 setter update that field. A direct call to the upstream setter is insufficient:
-the [current render paths](../../mustache_mustache.cpp) use independent native
+the [current render paths](../../mustache_operations.cpp) use independent native
 renderers for compiled input but a shared renderer for AST input. Upstream
 rejects changing the latter while rendering.
 
@@ -287,7 +287,7 @@ without changing callbacks. Extend the existing configure feature probe to
 require the upstream mode API with a clear error for older development headers;
 the unchanged library version alone does not identify that capability.
 
-Main files: `mustache_mustache.cpp`, `mustache_mustache.hpp`, `config.m4`,
+Main files: `mustache_mustache.cpp`, `mustache_mustache.hpp`, `mustache_operations.cpp`, `config.m4`,
 `mustache.stub.php`, and generated `mustache_arginfo.h`.
 
 Tests cover default and switched modes; interpolation and sections; escaping;

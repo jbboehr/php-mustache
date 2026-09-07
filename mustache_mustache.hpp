@@ -13,6 +13,8 @@ struct php_obj_Mustache {
     zend_object std;
 };
 
+extern zend_class_entry * Mustache_ce_ptr;
+
 php_obj_Mustache * php_mustache_mustache_object_fetch_object(zval * zv);
 
 PHP_MINIT_FUNCTION(mustache_mustache);

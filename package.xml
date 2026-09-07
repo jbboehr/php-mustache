@@ -50,6 +50,7 @@
    <file name="mustache_lambda_result.hpp" role="src" />
    <file name="mustache_mustache.cpp" role="src" />
    <file name="mustache_mustache.hpp" role="src" />
+   <file name="mustache_operations.cpp" role="src" />
    <file name="mustache_template.cpp" role="src" />
    <file name="mustache_template.hpp" role="src" />
    <file name="mustache_zval.hpp" role="src" />

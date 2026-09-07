@@ -43,6 +43,13 @@ PHP_MINIT_FUNCTION(mustache_exceptions)
 }
 /* }}} */
 
+[[noreturn]] void mustache_argument_value_error(
+    uint32_t argument, const char * message)
+{
+  zend_argument_value_error(argument, "%s", message);
+  throw PhpInvalidParameterException();
+}
+
 /* {{{ mustache_exception_handler */
 void mustache_exception_handler()
 {
