@@ -1,8 +1,8 @@
 # PHP lambda results: implementation proposal
 
-Status: slices 1 and 2 implement the mode API and two dedicated final result
-classes and have passed review. Slice 3's compatibility and release verification
-remains.
+Status: all three slices are complete and have passed review: the mode API,
+two dedicated final result classes, compatibility verification, and the local
+[issue-resolution draft](issue-68-resolution.md).
 The base is dependency-update commit `73587cf`. The dependency is
 libmustache `c43ad034850bab310d754bc3bba760cc31b08ef4`; its
 [update report](libmustache-update-2026-09-07.md) records verification and
@@ -538,3 +538,74 @@ Windows and other operating systems or CPU architectures were not tested.
 Valgrind remains part of slice 3's combined verification and was not run here.
 The default remains template evaluation; choosing a different release default
 is still a separate decision. Slice 2 has passed review.
+
+## Slice 3 verification
+
+Verification used the combined implementation at `5b952be`. This slice changes
+only this plan and the [issue 68 resolution draft](issue-68-resolution.md).
+
+A fresh PHP 8.3.33 GCC build passed the full suite normally and under Valgrind
+3.26.0 Memcheck. Both selected 295 PHPTs: 279 passed, 16 skipped, zero failures
+and zero test warnings. The Valgrind run used `USE_ZEND_ALLOC=0` and the PHP test
+runner's `-m` option and reported zero leaked tests. The optional archive bridge
+was disabled for that run.
+
+The full Nix checks and all three archive builds also passed:
+
+```sh
+nix flake check --keep-going --no-write-lock-file -L --max-jobs 4 --cores 4
+nix build --no-link --keep-going --no-write-lock-file -L \
+  --max-jobs 3 --cores 4 \
+  .#php83-archive-benchmark \
+  .#php83-archive-benchmark-clang \
+  .#php83-archive-benchmark-sanitized
+nix build --no-link --keep-going --no-write-lock-file -L \
+  --max-jobs 2 --cores 4 .#php83-gcc-valgrind
+```
+
+The 17 runtime checks and three archive checks reused the successful slice 2
+builds, including the ASan/UBSan builds. They were not fresh rebuilds in this
+slice. All 17 runtime derivation and output paths match the slice 2 snapshot,
+and all tracked files except this plan were byte-identical to that snapshot
+before this slice's edits. The per-configuration counts in the slice 2 table
+therefore remain the combined implementation's matrix results. The Nix
+pre-commit check ran afresh and passed all eight hooks.
+
+Additional fresh runtime checks used the GCC builds:
+
+- The general arginfo, result-value, and string-mode PHPTs passed on PHP
+  8.0.30, 8.1.34, 8.2.33, 8.3.33, 8.4.24, and 8.5.9. These check the public
+  signatures, parameter names, result-class finality, and mode constants and
+  defaults against native reflection and behavior.
+- The PHP 8.3.33 archive build passed its full suite: 287 passed, eight skipped,
+  zero failures and zero test warnings.
+- The four PHP-lambda examples in the public guide and both examples in the
+  issue draft were executed on all six PHP versions and the PHP 8.3 archive
+  build. All 42 executions matched their documented output with no diagnostics.
+  The draft's literal-mode example checks both escaped and unescaped HTML
+  interpolation while preserving brace-containing callback text.
+
+All eight local repository hooks also passed after the documentation edits.
+Explicit Markdown lint included the untracked draft, and local documentation
+links passed. The generated stub hash matches. All 327 package manifest entries
+exist with no duplicates, and all 295 PHPTs are represented. Final diff and
+new-file whitespace checks passed.
+
+Local evidence is in `/tmp/php-mustache-lambda-results-valgrind.log`,
+`/tmp/php-mustache-lambda-results-compatibility-matrix.log`,
+`/tmp/php-mustache-lambda-results-compatibility-archives.log`, and
+`/tmp/php-mustache-lambda-results-compatibility-focused.log`. These temporary
+logs are not repository artifacts.
+
+All runtime evidence is from x86_64 Linux. Windows and other operating systems
+or CPU architectures remain unverified. Valgrind covered the ordinary build,
+while the optional archive bridge has the separate sanitizer evidence above.
+These runs do not establish safety across actual Zend bailouts. F7 and arena
+work remain deferred.
+
+Ordinary callback strings still default to template evaluation, so this feature
+requires no default-change migration. Literal mode and the explicit classes are
+opt-in. The local issue draft describes the unreleased APIs and has not been
+posted. Slice 3 has passed review. Issue closure and release work remain
+separate actions. The three implementation slices have no further code changes
+planned.
