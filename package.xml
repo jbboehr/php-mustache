@@ -107,6 +107,8 @@
    <file name="tests/Mustache__archive-benchmark-boundaries.phpt" role="test" />
    <file name="tests/Mustache__archive-benchmark-bridge.phpt" role="test" />
    <file name="tests/Mustache__archive-benchmark-default-api-absence.phpt" role="test" />
+   <file name="tests/Mustache__archive-benchmark-lambda-compatibility.phpt" role="test" />
+   <file name="tests/Mustache__archive-benchmark-section-source.phpt" role="test" />
    <file name="tests/Mustache__debugDataStructure.phpt" role="test" />
    <file name="tests/Mustache__getEscapeByDefault.phpt" role="test" />
    <file name="tests/Mustache__getStartSequence.phpt" role="test" />

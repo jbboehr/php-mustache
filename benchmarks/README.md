@@ -2,6 +2,8 @@
 
 `archive-cache-vs-source.php` measures libmustache's protected archived-template format across the PHP and APCu cache boundary. The archived-template methods are compiled only into the dedicated benchmark package; they are not part of the normal extension API.
 
+The pinned libmustache uses archive format generation 3, which preserves original section callback text. Earlier experimental archives are rejected and must be regenerated from template source. This does not change the separate `MustacheAST::toBinary()` format.
+
 Run the complete benchmark with:
 
 ```console
