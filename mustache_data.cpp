@@ -408,35 +408,22 @@ class DataConverter {
           continue;
         }
 
-        const char * property_name = ZSTR_VAL(key);
-        zend_string * property_name_source = key;
         bool is_visible = true;
 
         if( class_entry != NULL ) {
           zval * property_value = zend_hash_find(&class_entry->properties_info, key);
           if( property_value != NULL ) {
             zend_property_info * property = (zend_property_info *) Z_PTR_P(property_value);
-            const char * declaring_class_name = NULL;
             is_visible = is_valid_property(property);
-            if( zend_unmangle_property_name(property->name, &declaring_class_name, &property_name) == SUCCESS ) {
-              property_name_source = property->name;
-            }
           }
         }
         if( !is_visible ) {
           continue;
         }
 
-        size_t property_name_offset =
-            static_cast<size_t>(property_name - ZSTR_VAL(property_name_source));
-        if( property_name_offset > ZSTR_LEN(property_name_source) ) {
-          fail("Invalid object property name");
-        }
-        size_t property_name_length = ZSTR_LEN(property_name_source) - property_name_offset;
-
         addContainerEntry();
-        addString(property_name_length);
-        entries.emplace_back(property_name, property_name_length, value);
+        addString(ZSTR_LEN(key));
+        entries.emplace_back(ZSTR_VAL(key), ZSTR_LEN(key), value);
       } ZEND_HASH_FOREACH_END();
 
       for( CapturedEntry& entry : entries ) {
