@@ -22,6 +22,12 @@ jobs:
 
             - uses: cachix/install-nix-action@v31
 
+            - name: Restore and save Nix store
+              uses: nix-community/cache-nix-action@7df957e333c1e5da7721f60227dbba6d06080569 # v7
+              with:
+                  primary-key: nix-${{ runner.os }}-${{ runner.arch }}-fuzz-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+                  restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}-fuzz-
+
             - name: Use nix-phps Cache
               uses: cachix/cachix-action@v17
               with:
