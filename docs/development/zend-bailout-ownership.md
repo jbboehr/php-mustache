@@ -1,9 +1,8 @@
 # Zend bailout ownership review
 
 This is the F7 design slice for php-mustache at `bd30d9e`, with libmustache
-revision `fea4160d02238c7503d72e4f2705fda7b65edef5` from `flake.lock`. It follows
-the [original finding](project-review-2026-09-04.md#f7-zend-fatal-error-bailouts-bypass-native-callback-cleanup)
-and the [data ownership review](data-conversion-ownership.md).
+revision `fea4160d02238c7503d72e4f2705fda7b65edef5` from `flake.lock` at that time.
+It complements the [data ownership notes](data-conversion-ownership.md).
 
 F7 remains unresolved, with production integration
 [deferred after the feasibility review](zend-bailout-adapter-contract.md#integration-gate-and-next-work).

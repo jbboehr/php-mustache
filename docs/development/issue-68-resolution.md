@@ -2,8 +2,9 @@
 
 Local draft for [issue #68](https://github.com/jbboehr/php-mustache/issues/68).
 The implementation is on `develop` and is unreleased. This text has not been
-posted, and the issue has not been closed. Verification is recorded in the
-[PHP lambda results plan](php-lambda-results-plan.md#slice-3-verification).
+posted, and the issue has not been closed. See the
+[remaining release work](README.md#remaining-planned-work) and
+[binding compatibility notes](libmustache-compatibility.md#callback-results).
 
 ## Draft comment
 
