@@ -1,7 +1,7 @@
 # libmustache compatibility
 
 The extension currently pins libmustache
-`efacbb5d11baa63baa554ff7eebe958b0e5075a0` in
+`b4b60fe00989ddb82b8d84c5341401edbd73d58b` from `master` in
 [flake.lock](../../flake.lock). Check this note when changing that dependency or
 preparing a release.
 
@@ -12,9 +12,12 @@ The earlier transition from `e6b2de0` to `c43ad03` added lambda virtual methods
 and changed renderer layout, requiring consumer rebuilds. A version-only
 dependency on 0.6.0 cannot distinguish those incompatible snapshots.
 
-The current update from `c43ad03` to `efacbb5` adds non-virtual render-context
+The update from `c43ad03` to `efacbb5` adds non-virtual render-context
 helpers. The PHP binding continues using its existing APIs. The historical ABI
 break above does not describe this update.
+
+The switch from `efacbb5` to `master` at `b4b60fe` changes only upstream release
+notes; the library implementation is unchanged.
 
 Deploy the library revision used to verify the extension. The Nix build uses
 the exact library store path. Repository CI and PIE smoke scripts build both
