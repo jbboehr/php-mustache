@@ -20,7 +20,7 @@
 (buildPecl rec {
   pname = "mustache";
   name = "mustache-${version}";
-  version = "v0.9.3";
+  version = "v0.10.0";
 
   inherit src;
 

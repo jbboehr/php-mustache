@@ -7,6 +7,8 @@
 
 C++ implementation of [Mustache](http://mustache.github.com/) as a PHP extension.
 
+Upgrading from 0.9.x? Read the [migration guide](docs/upgrading.md) before updating.
+
 ## Installation
 
 ### PIE

@@ -6,6 +6,13 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-09-08
+
+Requires PHP 8.0 or newer, libmustache 0.6.0 or newer, and a C++17 compiler.
+Read the [migration guide](docs/upgrading.md) for breaking changes to data,
+errors, wrappers, and template caches. Ordinary callback strings continue to
+default to template evaluation.
+
 ### Added
 
 - Add PIE package metadata while retaining the existing PECL package metadata.
@@ -17,6 +24,9 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Changed
 
+- Require PHP 8.0 and libmustache 0.6.0 with C++17 support.
+- Capture each data container's immediate entries before converting its children, preserving captured values across lazy-object initialization.
+- Preserve original section callback text, including tag spelling, comments, and whitespace. Binary serialization rejects section metadata it cannot preserve.
 - Make `MustacheData` and `MustacheLambdaHelper` final. Existing subclasses must use composition; helpers continue to be supplied by the extension to lambda callbacks. PHP also rejects creating these classes through `ReflectionClass::newInstanceWithoutConstructor()`.
 - Compare generated Mustache specification output with exact whitespace boundaries instead of ignoring whitespace differences.
 - Follow Mustache standalone-tag whitespace and partial-indentation rules provided by libmustache.
@@ -34,6 +44,9 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Fixed
 
+- Resolve dotted-name components through nested contexts instead of letting literal dotted keys override them.
+- Escape the complete evaluated result of interpolation lambdas, including literal fragments and partial output.
+- Omit destructor methods from template lambdas, including inherited internal destructors.
 - Stop data conversion when an object property handler throws, preserving lazy initializer exceptions instead of replacing them with later template errors.
 - Initialize declared property defaults on `Mustache` subclasses, including before a custom constructor runs or when construction is bypassed through reflection.
 - Accept explicit `null` for the optional partial map, matching the public signature and an omitted argument.
@@ -143,7 +156,8 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 - Lambda support (@adambaratz)
 
-[Unreleased]: https://github.com/jbboehr/php-mustache/compare/v0.9.3...HEAD
+[Unreleased]: https://github.com/jbboehr/php-mustache/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/jbboehr/php-mustache/compare/v0.9.3...v0.10.0
 [0.9.3]: https://github.com/jbboehr/php-mustache/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/jbboehr/php-mustache/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/jbboehr/php-mustache/compare/v0.9.0...v0.9.1

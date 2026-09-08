@@ -13,24 +13,35 @@ The [PHP API guide](../php-api.md) documents the caller-facing contracts.
   [adapter contract](zend-bailout-adapter-contract.md) retain the unresolved F7
   design and integration gate. The native boundary prototype remains with them.
 - [Issue 68 resolution](issue-68-resolution.md) is the prepared, unposted comment.
+- [Upgrading to 0.10.0](../upgrading.md) covers application and cache migration.
 - [Benchmarks](../../benchmarks/README.md) and [fuzzing](../../fuzz/README.md)
   describe their existing tools.
 
 ## Remaining planned work
 
-Before tagging a release:
+The release target is **0.10.0**, with template evaluation retained as the
+callback-string default. The version fields, package notes, changelog, and
+migration guide are prepared. The date in the package and extension metadata
+is provisional until publication.
 
-1. Select a compatible libmustache release or exact pin and rebuild the extension
-   against it. Review the [deployment and cache constraints](libmustache-compatibility.md).
-2. Update the extension version, package metadata, changelog, and migration
-   guidance. The implementation keeps template evaluation as the callback-string
-   default. The earlier proposal to make literal mode the release default remains
-   a separate compatibility decision.
-3. Verify the packaged PECL and PIE installation paths for the release artifacts.
+Before tagging:
 
-The lambda string-mode API, explicit result classes, and compatibility
-implementation are complete. Publishing the issue 68 comment and closing the
-issue remain separate external actions.
+1. Confirm the libmustache 0.6 release and its relationship to the tested
+   `b4b60fe` master pin. No upstream 0.6 tag was available during this preparation.
+   An older development snapshot reporting 0.6.0 is insufficient. Review the
+   [deployment and cache constraints](libmustache-compatibility.md), update the
+   lock if needed, and retest any dependency change.
+2. Complete the platform checks for the release candidate. Windows, macOS,
+   ARM64, and Docker container runs remain unverified locally.
+3. Set the actual publication date in `package.xml`, `php_mustache.h`, and
+   `CHANGELOG.md`. Keep version 0.10.0 consistent with `nix/derivation.nix`.
+   Rebuild the PECL package and verify the final PECL and PIE artifacts after
+   any source or metadata change.
+
+Tagging `v0.10.0` and publishing the release remain separate actions. Composer
+derives the PIE package version from the tag, so `composer.json` has no hardcoded
+version. Once the release is available, update the issue 68 draft's unreleased
+wording, publish the comment, and close the issue.
 
 Zend bailout integration and arena work remain deferred. Default partial-map
 thresholds and complete memory/node accounting also remain deferred, with
@@ -45,7 +56,20 @@ nix flake check --keep-going --no-write-lock-file
 nix develop --no-write-lock-file --command pre-commit run --all-files
 ```
 
-The flake defines the compiler, PHP-version, coverage, and sanitizer checks.
+Run runtime checks explicitly, as CI does. For example, on x86_64 Linux:
+
+```sh
+nix build --no-link --keep-going --no-write-lock-file \
+  .#checks.x86_64-linux.php83-gcc \
+  .#checks.x86_64-linux.php83-gcc-sanitized \
+  .#php83-archive-benchmark .#php83-gcc-valgrind
+```
+
+The complete compiler, PHP-version, coverage, and sanitizer matrix is listed by
+`nix eval --json .#githubActions.matrix`. Build every applicable matrix attribute
+for release verification. A successful `nix flake check` alone does not establish
+that the runtime suites executed.
+
 Available results depend on the host platform. Git-backed flake inputs and
 `pre-commit --all-files` omit untracked files, so include new files explicitly
 when verifying a working tree.
