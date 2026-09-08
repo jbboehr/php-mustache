@@ -1,21 +1,25 @@
 # libmustache compatibility
 
 The extension currently pins libmustache
-`c43ad034850bab310d754bc3bba760cc31b08ef4` in
+`efacbb5d11baa63baa554ff7eebe958b0e5075a0` in
 [flake.lock](../../flake.lock). Check this note when changing that dependency or
 preparing a release.
 
 ## Build and deployment
 
-This development snapshot reports version 0.6.0 and SONAME `libmustache.so.6`,
-as did the preceding snapshot. Added lambda virtual methods and renderer layout
-changes require consumer rebuilds. Those snapshots are not binary
-interchangeable, and a version-only dependency on 0.6.0 cannot distinguish them.
+The development line reports version 0.6.0 and SONAME `libmustache.so.6`.
+The earlier transition from `e6b2de0` to `c43ad03` added lambda virtual methods
+and changed renderer layout, requiring consumer rebuilds. A version-only
+dependency on 0.6.0 cannot distinguish those incompatible snapshots.
 
-Rebuild and deploy libmustache and php-mustache together. The Nix build uses the
-exact library store path. Repository CI and PIE smoke scripts build both
+The current update from `c43ad03` to `efacbb5` adds non-virtual render-context
+helpers. The PHP binding continues using its existing APIs. The historical ABI
+break above does not describe this update.
+
+Deploy the library revision used to verify the extension. The Nix build uses
+the exact library store path. Repository CI and PIE smoke scripts build both
 components from the locked revision. Release packaging must preserve that
-compatibility requirement.
+tested pairing.
 
 ## AST source ownership
 
@@ -50,6 +54,12 @@ compiled or archived renderer. AST input applies the captured mode to the shared
 renderer immediately before rendering, preserving its existing overlap
 rejection. Avoid temporarily changing and restoring instance settings around
 callbacks or Fiber suspension.
+
+Upstream also provides `LambdaRenderContext::renderResult()` and
+`renderTemplate()` helpers that return literal results. The PHP helper keeps
+its existing [rendering contract](../php-api.md#section-helpers): it tokenizes
+with default delimiters and returns a string. PHP callbacks can wrap that
+string in `MustacheLiteralResult` to preserve already-rendered text.
 
 If a release changes the default to literal mode, migration guidance must show
 how to retain template interpretation with
