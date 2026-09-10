@@ -127,7 +127,7 @@ void mustache_node_to_zval(const mustache::Node& node, zval * current)
 /* {{{ php_mustache_ast_object_fetch_object */
 static inline struct php_obj_MustacheAST * php_mustache_ast_fetch_object(zend_object * obj)
 {
-  return (struct php_obj_MustacheAST *)((char*)(obj) - XtOffsetOf(struct php_obj_MustacheAST, std));
+  return (struct php_obj_MustacheAST *)((char*)(obj) - offsetof(struct php_obj_MustacheAST, std));
 }
 
 struct php_obj_MustacheAST * php_mustache_ast_object_fetch_object(zval * zv)
@@ -181,7 +181,7 @@ PHP_MINIT_FUNCTION(mustache_ast)
     zend_class_entry ce;
 
     memcpy(&MustacheAST_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-    MustacheAST_obj_handlers.offset = XtOffsetOf(struct php_obj_MustacheAST, std);
+    MustacheAST_obj_handlers.offset = offsetof(struct php_obj_MustacheAST, std);
     MustacheAST_obj_handlers.free_obj = MustacheAST_obj_free;
     MustacheAST_obj_handlers.clone_obj = NULL;
 

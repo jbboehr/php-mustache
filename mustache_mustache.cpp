@@ -70,7 +70,7 @@ static zend_function_entry Mustache_methods[] = {
 /* {{{ php_mustache_mustache_object_fetch_object */
 static inline struct php_obj_Mustache * php_mustache_mustache_fetch_object(zend_object * obj)
 {
-  return (struct php_obj_Mustache *) ((char *)(obj) - XtOffsetOf(struct php_obj_Mustache, std));
+  return (struct php_obj_Mustache *) ((char *)(obj) - offsetof(struct php_obj_Mustache, std));
 }
 
 struct php_obj_Mustache * php_mustache_mustache_object_fetch_object(zval * zv)
@@ -140,7 +140,7 @@ PHP_MINIT_FUNCTION(mustache_mustache)
     zend_declare_class_constant_long(Mustache_ce_ptr, ZEND_STRL("LAMBDA_STRING_LITERAL"),
         static_cast<zend_long>(mustache::LambdaStringMode::Literal));
     memcpy(&Mustache_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-    Mustache_obj_handlers.offset = XtOffsetOf(php_obj_Mustache, std);
+    Mustache_obj_handlers.offset = offsetof(php_obj_Mustache, std);
     Mustache_obj_handlers.free_obj = Mustache_obj_free;
     Mustache_obj_handlers.clone_obj = NULL;
 
