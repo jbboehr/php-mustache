@@ -22,7 +22,7 @@ struct php_obj_MustacheLambdaResult {
 
 static php_obj_MustacheLambdaResult * mustache_lambda_result_fetch(zend_object * object)
 {
-  return (php_obj_MustacheLambdaResult *)((char *) object - XtOffsetOf(php_obj_MustacheLambdaResult, std));
+  return (php_obj_MustacheLambdaResult *)((char *) object - offsetof(php_obj_MustacheLambdaResult, std));
 }
 
 zend_string * php_mustache_lambda_result_text(zval * value)
@@ -152,7 +152,7 @@ static zend_function_entry MustacheTemplateResult_methods[] = {
 PHP_MINIT_FUNCTION(mustache_lambda_result)
 {
   memcpy(&MustacheLambdaResult_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-  MustacheLambdaResult_obj_handlers.offset = XtOffsetOf(php_obj_MustacheLambdaResult, std);
+  MustacheLambdaResult_obj_handlers.offset = offsetof(php_obj_MustacheLambdaResult, std);
   MustacheLambdaResult_obj_handlers.free_obj = MustacheLambdaResult_obj_free;
   MustacheLambdaResult_obj_handlers.clone_obj = MustacheLambdaResult_obj_clone;
   MustacheLambdaResult_obj_handlers.compare = MustacheLambdaResult_obj_compare;

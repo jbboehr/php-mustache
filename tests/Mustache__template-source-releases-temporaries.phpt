@@ -40,6 +40,10 @@ function sourceRefcount($source)
     ob_start();
     debug_zval_dump($source);
     $dump = ob_get_clean();
+    if (PHP_VERSION_ID >= 80600) {
+        // may be interned with opcache
+        return 0;
+    }
     if (!preg_match('/refcount\((\d+)\)/', $dump, $matches)) {
         throw new RuntimeException('Expected a refcounted source string');
     }

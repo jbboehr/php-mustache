@@ -28,7 +28,7 @@ static zend_function_entry MustacheLambdaHelper_methods[] = {
 /* {{{ php_mustache_lambda_helper_object_fetch_object */
 static inline struct php_obj_MustacheLambdaHelper * php_mustache_lambda_helper_fetch_object(zend_object * obj)
 {
-  return (struct php_obj_MustacheLambdaHelper *)((char*)(obj) - XtOffsetOf(struct php_obj_MustacheLambdaHelper, std));
+  return (struct php_obj_MustacheLambdaHelper *)((char*)(obj) - offsetof(struct php_obj_MustacheLambdaHelper, std));
 }
 
 struct php_obj_MustacheLambdaHelper * php_mustache_lambda_helper_object_fetch_object(zval * zv)
@@ -84,7 +84,7 @@ PHP_MINIT_FUNCTION(mustache_lambda_helper)
   ce.create_object = MustacheLambdaHelper_obj_create;
   MustacheLambdaHelper_ce_ptr = zend_register_internal_class(&ce);
   memcpy(&MustacheLambdaHelper_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-  MustacheLambdaHelper_obj_handlers.offset = XtOffsetOf(struct php_obj_MustacheLambdaHelper, std);
+  MustacheLambdaHelper_obj_handlers.offset = offsetof(struct php_obj_MustacheLambdaHelper, std);
   MustacheLambdaHelper_obj_handlers.free_obj = MustacheLambdaHelper_obj_free;
   MustacheLambdaHelper_obj_handlers.clone_obj = NULL;
 

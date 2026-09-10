@@ -9,7 +9,7 @@
 ClassMethodLambda::~ClassMethodLambda()
 {
   zval_ptr_dtor(&object);
-  zval_dtor(&function_name);
+  zval_ptr_dtor_nogc(&function_name);
 }
 
 void ClassMethodLambda::addGcValues(zend_get_gc_buffer * gc_buffer)
