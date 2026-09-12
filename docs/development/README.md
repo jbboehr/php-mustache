@@ -5,6 +5,8 @@ The [PHP API guide](../php-api.md) documents the caller-facing contracts.
 
 - [libmustache compatibility](libmustache-compatibility.md) covers matched builds,
   AST source ownership, callback results, and cache migration.
+- [PIE binary releases](binary-releases.md) covers pinned SDKs, platform packages,
+  release branch drafts, and tag publication.
 - [Data conversion ownership](data-conversion-ownership.md) records capture,
   constructor publication, and destructor-method rules.
 - [Partial-map budgets](partial-map-budget.md) records current accounting and
@@ -19,26 +21,26 @@ The [PHP API guide](../php-api.md) documents the caller-facing contracts.
 
 ## Remaining planned work
 
-The release target is **0.10.0**, with template evaluation retained as the
+The release target is **0.10.1**, with template evaluation retained as the
 callback-string default. The version fields, package notes, changelog, and
 migration guide are prepared. The date in the package and extension metadata
 is provisional until publication.
 
 Before tagging:
 
-1. Confirm the libmustache 0.6 release and its relationship to the tested
-   `b4b60fe` master pin. No upstream 0.6 tag was available during this preparation.
-   An older development snapshot reporting 0.6.0 is insufficient. Review the
-   [deployment and cache constraints](libmustache-compatibility.md), update the
-   lock if needed, and retest any dependency change.
+1. Keep the libmustache source pin and binary SDK manifest aligned with
+   `v0.6.2` (`c155e10`). Review the
+   [deployment and cache constraints](libmustache-compatibility.md) and retest
+   any dependency change.
 2. Complete the platform checks for the release candidate. Windows, macOS,
    ARM64, and Docker container runs remain unverified locally.
 3. Set the actual publication date in `package.xml`, `php_mustache.h`, and
-   `CHANGELOG.md`. Keep version 0.10.0 consistent with `nix/derivation.nix`.
+   `CHANGELOG.md`. Keep version 0.10.1 consistent with `nix/derivation.nix`.
    Rebuild the PECL package and verify the final PECL and PIE artifacts after
    any source or metadata change.
 
-Tagging `v0.10.0` and publishing the release remain separate actions. Composer
+Pushing `v0.10.1` now requests automatic publication after CI succeeds, as
+described in [binary releases](binary-releases.md). Composer
 derives the PIE package version from the tag, so `composer.json` has no hardcoded
 version. Once the release is available, update the issue 68 draft's unreleased
 wording, publish the comment, and close the issue.

@@ -25,9 +25,11 @@ builds without libyaml, so PHP data conversion is unaffected. The PHP binding
 continues using its existing APIs.
 
 Deploy the library revision used to verify the extension. The Nix build uses
-the exact library store path. Repository CI and PIE smoke scripts build both
-components from the locked revision. Release packaging must preserve that
-tested pairing.
+the exact library store path. Source CI and the Unix PIE smoke script build both
+components from the locked revision. The Windows and macOS binary jobs consume
+the matching release SDKs pinned in `.github/libmustache-sdk.json`, verifying
+their checksums before extraction. See [binary releases](binary-releases.md)
+for the tested platform matrix and publication workflow.
 
 ## AST source ownership
 

@@ -23,8 +23,9 @@
     },
     "php-ext": {
         "extension-name": "mustache",
-        "os-families-exclude": [
-            "windows"
+        "download-url-method": [
+            "pre-packaged-binary",
+            "composer-default"
         ],
         "configure-options": [
             {

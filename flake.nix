@@ -280,6 +280,12 @@
               files = "^\\.github/(scripts/(linux|suite)\\.sh|tests/test_php_tools\\.py)$";
               pass_filenames = false;
             };
+            binary-release = {
+              enable = true;
+              entry = "${pkgs.python3}/bin/python3 .github/tests/test_binary_release.py";
+              files = "^(\\.github/(libmustache-sdk\\.json|scripts/(binary_release\\.py|macos-binary\\.sh)|tests/test_binary_release\\.py|workflows/(ci|release)\\.yml)|flake\\.lock|php_mustache\\.h)$";
+              pass_filenames = false;
+            };
             generate-tests = {
               enable = true;
               entry = "${pkgs.python3}/bin/python3 .github/tests/test_generate_tests.py --php ${pkgs.php83}/bin/php";

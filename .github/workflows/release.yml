@@ -1,0 +1,60 @@
+name: Release binaries
+
+on:
+    workflow_call:
+        inputs:
+            package-ref:
+                required: true
+                type: string
+        secrets:
+            RELEASE_TOKEN:
+                description: Optional token for drafting workflow changes before they reach master
+                required: false
+
+permissions:
+    contents: read
+
+jobs:
+    release:
+        name: Validate and upload PIE packages
+        if: github.event_name == 'push' && ((github.ref_type == 'branch' && (github.ref_name == 'release' || startsWith(github.ref_name, 'release/'))) || (github.ref_type == 'tag' && startsWith(github.ref_name, 'v')))
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        permissions:
+            contents: write
+        concurrency:
+            group: release-assets-${{ inputs.package-ref }}
+            cancel-in-progress: false
+            queue: max
+        env:
+            PACKAGE_REF: ${{ inputs.package-ref }}
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                  persist-credentials: false
+
+            - uses: actions/setup-python@v6
+              with:
+                  python-version: "3.13"
+
+            - name: Download tested release packages
+              uses: actions/download-artifact@v8
+              with:
+                  pattern: php_mustache-*.zip
+                  path: release-packages
+                  merge-multiple: true
+
+            - name: Validate complete release matrix and checksums
+              run: python .github/scripts/binary_release.py validate release-packages "$PACKAGE_REF"
+
+            - name: Upload draft release packages
+              if: github.event_name == 'push' && github.ref_type == 'branch' && (github.ref_name == 'release' || startsWith(github.ref_name, 'release/'))
+              env:
+                  GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
+              run: python .github/scripts/binary_release.py draft release-packages "$PACKAGE_REF"
+
+            - name: Publish version tag release
+              if: github.event_name == 'push' && github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: python .github/scripts/binary_release.py publish release-packages "$PACKAGE_REF"

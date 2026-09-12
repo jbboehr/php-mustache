@@ -1,0 +1,6 @@
+# actionlint 1.7.12 predates GitHub's concurrency queue option.
+# https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency
+paths:
+    .github/workflows/release.yml:
+        ignore:
+            - 'unexpected key "queue" for "concurrency" section'

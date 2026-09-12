@@ -14,13 +14,26 @@ Upgrading from 0.9.x? Read the [migration guide](docs/upgrading.md) before updat
 ### PIE
 
 [PIE](https://github.com/php/pie) requires PHP 8.1 or newer to run, but it can
-install the extension for PHP 8.0. Install libmustache 0.6.0 or newer, then run:
+install the extension for PHP 8.0:
 
 ```sh
 pie install jbboehr/php-mustache
 ```
 
-If libmustache is installed under a non-standard prefix, pass it explicitly:
+For releases with matching binary assets, PIE downloads the extension with
+libmustache linked statically. These packages target Windows x64 with PHP
+8.0–8.5 and macOS 15 or newer on Apple Silicon with PHP 8.2–8.5, in both
+thread-safe and non-thread-safe modes. Check the
+[release assets](https://github.com/jbboehr/php-mustache/releases) for availability.
+
+On Windows, PIE requires a matching binary; it cannot compile the extension.
+Other Windows architectures and PHP builds are unsupported by these packages.
+
+On Unix systems, including macOS, PIE builds from source when no matching
+binary is available. Install the [source requirements](#source), including
+libmustache 0.6.0 or newer. For source builds with libmustache under a non-standard
+prefix, pass it explicitly. This option selects a source build on Unix even when
+a matching binary is available:
 
 ```sh
 pie install jbboehr/php-mustache --with-libmustache=/path/to/prefix
@@ -79,10 +92,15 @@ as `php85-gcc` to select another PHP version.
 
 ### Windows
 
-Windows source builds require the PHP SDK, Visual Studio 2022, CMake, and a
-static libmustache build. The [Windows CI script](.github/scripts/windows.ps1)
-contains the setup currently used to build the extension. Pre-built PIE DLLs
-are not currently published, so PIE installation is not available on Windows.
+PIE installation requires a matching DLL ZIP in the selected release; it cannot
+fall back to compiling on Windows. The binary includes libmustache, so no
+separate libmustache installation is needed.
+
+For source builds, install the PHP SDK and matching Visual C++ toolset. Download
+a [static libmustache SDK](https://github.com/jbboehr/libmustache/blob/master/docs/windows-binaries.md)
+matching PHP's architecture and toolset, and pass its extracted directory as
+`--with-libmustache=C:\path\to\libmustache`. Use v142 for PHP 8.0–8.3 and v143
+for PHP 8.4–8.5. Both TS and NTS builds use the SDK's `/MD` runtime variant.
 
 ## Usage
 

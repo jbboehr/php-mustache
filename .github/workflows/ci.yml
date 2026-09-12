@@ -7,18 +7,44 @@ on:
             - github-actions
             - ci
             - develop
+            - release
+            - "release/**"
+        tags:
+            - "v*"
     pull_request:
         branches:
             - master
+            - develop
+            - release
+            - "release/**"
 
 permissions:
     contents: read
 
 concurrency:
     group: ci-${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
+    cancel-in-progress: ${{ github.ref_type != 'tag' && github.ref_name != 'release' && !startsWith(github.ref_name, 'release/') }}
 
 jobs:
+    binary-metadata:
+        name: Binary package metadata
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        outputs:
+            package-ref: ${{ steps.metadata.outputs.package-ref }}
+            windows: ${{ steps.metadata.outputs.windows }}
+            macos: ${{ steps.metadata.outputs.macos }}
+        steps:
+            - uses: actions/checkout@v7
+            - uses: actions/setup-python@v6
+              with:
+                  python-version: "3.13"
+            - name: Test binary packaging and publishing rules
+              run: python .github/tests/test_binary_release.py
+            - id: metadata
+              name: Check dependency pin and package version
+              run: python .github/scripts/binary_release.py metadata
+
     linux:
         runs-on: ubuntu-latest
         timeout-minutes: 20
@@ -96,35 +122,118 @@ jobs:
               run: bash ./.github/scripts/osx.sh
 
     windows:
-        name: "windows (PHP ${{ matrix.PHP.version }}, ${{ matrix.PHP_THREAD_SAFETY }}, x64)"
+        name: "windows (PHP ${{ matrix.php }}, ${{ matrix.ts }}, x64)"
         runs-on: windows-2022
         timeout-minutes: 20
+        needs: binary-metadata
         strategy:
             fail-fast: false
-            matrix:
-                PHP:
-                    - version: "8.1"
-                      toolset: v142
-                    - version: "8.5"
-                      toolset: v143
-                PHP_THREAD_SAFETY:
-                    - nts
-                    - ts
+            matrix: ${{ fromJSON(needs.binary-metadata.outputs.windows) }}
         steps:
             - uses: actions/checkout@v7
 
-            - id: libmustache
-              name: Build libmustache
+            - uses: actions/setup-python@v6
+              with:
+                  python-version: "3.13"
+
+            - name: Cache libmustache SDK downloads
+              uses: actions/cache@v5
+              with:
+                  path: ${{ runner.temp }}/libmustache-downloads
+                  key: libmustache-sdk-${{ matrix.sdk }}-${{ hashFiles('.github/libmustache-sdk.json') }}
+
+            - name: Verify and extract libmustache SDK
               shell: pwsh
-              run: ./.github/scripts/windows.ps1 -Toolset '${{ matrix.PHP.toolset }}'
+              env:
+                  LIBMUSTACHE_SDK: ${{ matrix.sdk }}
+              run: >-
+                  python .github/scripts/binary_release.py sdk "$env:LIBMUSTACHE_SDK"
+                  "$env:RUNNER_TEMP/libmustache-downloads" "$env:RUNNER_TEMP/libmustache-sdk"
 
             - name: Build and test extension
               uses: php/php-windows-builder/extension@36b2fc0672ba93bfa75bdd393edf2ef652961b4a
+              env:
+                  TEST_PHP_JUNIT: ${{ runner.temp }}/phpt-junit.xml
               with:
-                  php-version: ${{ matrix.PHP.version }}
+                  # The builder uses the checkout; this ref names the PIE package.
+                  extension-ref: ${{ needs.binary-metadata.outputs.package-ref }}
+                  php-version: ${{ matrix.php }}
                   arch: x64
-                  ts: ${{ matrix.PHP_THREAD_SAFETY }}
-                  args: --enable-mustache --with-libmustache=${{ steps.libmustache.outputs.prefix }}
+                  ts: ${{ matrix.ts }}
+                  args: --enable-mustache --with-libmustache="${{ runner.temp }}/libmustache-sdk"
+
+            - name: Upload Windows test diagnostics
+              if: always()
+              uses: actions/upload-artifact@v7
+              with:
+                  name: phpt-windows-${{ matrix.php }}-${{ matrix.ts }}-x64
+                  path: |
+                      ${{ runner.temp }}/phpt-junit.xml
+                      build/**/tests/**/*.diff
+                      build/**/tests/**/*.log
+                  if-no-files-found: ignore
+
+    macos-binaries:
+        name: "macOS binary (PHP ${{ matrix.php }}, ${{ matrix.ts }}, arm64)"
+        runs-on: macos-15
+        timeout-minutes: 20
+        needs: binary-metadata
+        strategy:
+            fail-fast: false
+            matrix: ${{ fromJSON(needs.binary-metadata.outputs.macos) }}
+        env:
+            MACOSX_DEPLOYMENT_TARGET: "15.0"
+            PHP_VERSION: ${{ matrix.php }}
+            PHP_THREAD_SAFETY: ${{ matrix.ts }}
+            PACKAGE_REF: ${{ needs.binary-metadata.outputs.package-ref }}
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: actions/setup-python@v6
+              with:
+                  python-version: "3.13"
+
+            - name: Cache libmustache SDK downloads
+              uses: actions/cache@v5
+              with:
+                  path: ${{ runner.temp }}/libmustache-downloads
+                  key: libmustache-sdk-macos-aarch64-static-${{ hashFiles('.github/libmustache-sdk.json') }}
+
+            - name: Verify and extract libmustache SDK
+              run: >-
+                  python .github/scripts/binary_release.py sdk macos-aarch64-static
+                  "$RUNNER_TEMP/libmustache-downloads" "$RUNNER_TEMP/libmustache-sdk"
+
+            - name: Install PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  coverage: none
+                  php-version: ${{ matrix.php }}
+              env:
+                  phpts: ${{ matrix.ts }}
+
+            - name: Build, test, and package macOS extension
+              id: package
+              run: bash .github/scripts/macos-binary.sh
+
+            - name: Upload macOS package
+              uses: actions/upload-artifact@v7
+              with:
+                  name: ${{ steps.package.outputs.package }}
+                  path: artifacts/${{ steps.package.outputs.package }}
+                  if-no-files-found: error
+
+            - name: Upload macOS test diagnostics
+              if: always()
+              uses: actions/upload-artifact@v7
+              with:
+                  name: phpt-macos-${{ matrix.php }}-${{ matrix.ts }}-arm64
+                  path: |
+                      ${{ runner.temp }}/phpt-junit.xml
+                      ${{ runner.temp }}/phpt-results.txt
+                      tests/**/*.diff
+                      tests/**/*.log
+                  if-no-files-found: ignore
 
     pie:
         runs-on: ubuntu-latest
@@ -206,6 +315,46 @@ jobs:
                   format: lcov
                   flag-name: ${{ matrix.name }}
                   parallel: true
+
+    binary-validation:
+        name: Validate complete PIE package matrix
+        needs: [binary-metadata, windows, macos-binaries]
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        permissions:
+            contents: read
+        env:
+            PACKAGE_REF: ${{ needs.binary-metadata.outputs.package-ref }}
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                  persist-credentials: false
+
+            - uses: actions/setup-python@v6
+              with:
+                  python-version: "3.13"
+
+            - name: Download tested release packages
+              uses: actions/download-artifact@v8
+              with:
+                  pattern: php_mustache-*.zip
+                  path: release-packages
+                  merge-multiple: true
+
+            - name: Validate complete release matrix and checksums
+              run: python .github/scripts/binary_release.py validate release-packages "$PACKAGE_REF"
+
+    release:
+        name: Release binaries
+        if: github.event_name == 'push' && ((github.ref_type == 'branch' && (github.ref_name == 'release' || startsWith(github.ref_name, 'release/'))) || (github.ref_type == 'tag' && startsWith(github.ref_name, 'v')))
+        needs: [binary-metadata, binary-validation, linux, docker, docker-fedora, osx, windows, macos-binaries, pie, nix, coveralls-finished]
+        uses: ./.github/workflows/release.yml
+        with:
+            package-ref: ${{ needs.binary-metadata.outputs.package-ref }}
+        secrets:
+            RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        permissions:
+            contents: write
 
     coveralls-finished:
         if: always() && !cancelled()

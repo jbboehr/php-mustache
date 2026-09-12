@@ -1,0 +1,9 @@
+{
+    "version": "0.6.2",
+    "revision": "c155e10070aa0d7bfdb22b5e2a4e0b8fc05c69f6",
+    "sha256": {
+        "windows-x64-v142-md-static": "fde6134d26d7f64defd59d7b86d8815e6a9c6dbad061906b3f722cf515d4aafe",
+        "windows-x64-v143-md-static": "872bfcaf4f381229c4b4ef692509df29626f8416a22e7a2da765f832598ccc9f",
+        "macos-aarch64-static": "b291e852a84214aff407393648828f590f9ac7222a626d53f2f520b58eb31e59"
+    }
+}
