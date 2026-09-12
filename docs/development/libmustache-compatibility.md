@@ -1,13 +1,13 @@
 # libmustache compatibility
 
 The extension currently pins libmustache
-`b4b60fe00989ddb82b8d84c5341401edbd73d58b` from `master` in
-[flake.lock](../../flake.lock). Check this note when changing that dependency or
-preparing a release.
+`c155e10070aa0d7bfdb22b5e2a4e0b8fc05c69f6` from `master` in
+[flake.lock](../../flake.lock), which is the `v0.6.2` tag. Check this note when
+changing that dependency or preparing a release.
 
 ## Build and deployment
 
-The development line reports version 0.6.0 and SONAME `libmustache.so.6`.
+The development line reports version 0.6.2 and SONAME `libmustache.so.6`.
 The earlier transition from `e6b2de0` to `c43ad03` added lambda virtual methods
 and changed renderer layout, requiring consumer rebuilds. A version-only
 dependency on 0.6.0 cannot distinguish those incompatible snapshots.
@@ -16,8 +16,13 @@ The update from `c43ad03` to `efacbb5` adds non-virtual render-context
 helpers. The PHP binding continues using its existing APIs. The historical ABI
 break above does not describe this update.
 
-The switch from `efacbb5` to `master` at `b4b60fe` changes only upstream release
-notes; the library implementation is unchanged.
+The switch from `efacbb5` to `b4b60fe` is the `v0.6.0` tag and changes only
+upstream release notes; the library implementation is unchanged.
+
+The switch from `b4b60fe` (`v0.6.0`) to `c155e10` (`v0.6.2`) keeps ABI 6. It
+adds packaging, Windows SDK, LTO, and YAML 1.1 typed scalars. The Nix package
+builds without libyaml, so PHP data conversion is unaffected. The PHP binding
+continues using its existing APIs.
 
 Deploy the library revision used to verify the extension. The Nix build uses
 the exact library store path. Repository CI and PIE smoke scripts build both
