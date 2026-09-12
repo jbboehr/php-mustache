@@ -6,6 +6,12 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ## [Unreleased]
 
+## [0.10.1] - 2026-09-11
+
+### Fixed
+
+- PHP 8.6 compat (@remicollet)
+
 ## [0.10.0] - 2026-09-08
 
 Requires PHP 8.0 or newer, libmustache 0.6.0 or newer, and a C++17 compiler.
@@ -156,7 +162,8 @@ default to template evaluation.
 
 - Lambda support (@adambaratz)
 
-[Unreleased]: https://github.com/jbboehr/php-mustache/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/jbboehr/php-mustache/compare/v0.10.1...HEAD
+[0.10.1]: https://github.com/jbboehr/php-mustache/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/jbboehr/php-mustache/compare/v0.9.3...v0.10.0
 [0.9.3]: https://github.com/jbboehr/php-mustache/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/jbboehr/php-mustache/compare/v0.9.1...v0.9.2

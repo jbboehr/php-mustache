@@ -10,10 +10,10 @@
   <email>jbboehr@php.net</email>
   <active>yes</active>
  </lead>
- <date>2026-09-08</date>
+ <date>2026-09-11</date>
  <version>
-  <release>0.10.0</release>
-  <api>0.10.0</api>
+  <release>0.10.1</release>
+  <api>0.10.1</api>
  </version>
  <stability>
   <release>stable</release>
@@ -21,13 +21,7 @@
  </stability>
  <license uri="https://opensource.org/licenses/MIT">MIT</license>
  <notes>
- - Require PHP 8.0+, libmustache 0.6.0+, and a C++17 compiler.
- - Add PIE installation metadata, explicit AST binary APIs, and opt-in partial-map limits.
- - Add configurable callback string interpretation and explicit literal/template result classes.
- - Preserve scalar data types and make parse/render failures throw exceptions.
- - Make MustacheData and MustacheLambdaHelper final and enforce wrapper lifetimes.
- - Correct dotted-name lookup, lambda escaping, section source preservation, and INI defaults.
- - See docs/upgrading.md for breaking changes and cache migration guidance.
+ - PHP 8.6 compat (@remicollet)
  </notes>
  <contents>
   <dir name="/">
