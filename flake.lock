@@ -336,6 +336,23 @@
         "type": "github"
       }
     },
+    "php-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789171259,
+        "narHash": "sha256-4e+Pgz9uNAzr8H3cpK+IzFBA9VvQzszvRN4FDl7Ajvk=",
+        "owner": "php",
+        "repo": "php-src",
+        "rev": "8b1668d84245dbdecb3c094ec86c9305c84e2a57",
+        "type": "github"
+      },
+      "original": {
+        "owner": "php",
+        "ref": "master",
+        "repo": "php-src",
+        "type": "github"
+      }
+    },
     "pre-commit-hooks": {
       "inputs": {
         "flake-compat": "flake-compat_2",
@@ -369,6 +386,7 @@
         "nix-github-actions": "nix-github-actions_2",
         "nix-phps": "nix-phps",
         "nixpkgs": "nixpkgs_3",
+        "php-src": "php-src",
         "systems": "systems"
       }
     },

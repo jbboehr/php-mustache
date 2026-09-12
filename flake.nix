@@ -27,6 +27,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-phps.url = "github:fossar/nix-phps";
+    php-src = {
+      url = "github:php/php-src/master";
+      flake = false;
+    };
     libmustache = {
       url = "github:jbboehr/libmustache/master";
       inputs.agent-badge.follows = "agent-badge";
@@ -51,6 +55,7 @@
     git-hooks,
     nix-github-actions,
     nix-phps,
+    php-src,
     libmustache,
     mustache_spec,
     ...
@@ -108,6 +113,32 @@
             '';
           dontStrip = true;
         });
+        phpMasterVersion = let
+          header = builtins.readFile "${php-src}/main/php_version.h";
+          match = builtins.match ".*#define PHP_VERSION \"([0-9]+\\.[0-9]+\\.[0-9]+)[^\"]*\".*" header;
+        in
+          if match == null
+          then throw "Could not parse PHP_VERSION from php-src"
+          else builtins.head match;
+        # Minimal php-src master: CLI only. Keep this out of checks and CI.
+        phpMaster = pkgs.php85.override {
+          phpSrc = php-src;
+          version = phpMasterVersion;
+          cgiSupport = false;
+          fpmSupport = false;
+          pearSupport = false;
+          pharSupport = false;
+          phpdbgSupport = false;
+          argon2Support = false;
+          systemdSupport = false;
+          valgrindSupport = false;
+          extensions = _: [];
+          # php84's apache2handler hunk no longer applies on master, and this
+          # build does not compile gettext.
+          phpAttrsOverrides = _: _: {
+            patches = [];
+          };
+        };
         src' = gitignore.lib.gitignoreSource ./.;
 
         src = pkgs.lib.cleanSourceWith {
@@ -264,7 +295,13 @@
           };
         };
 
-        makeDevShell = package:
+        makeDevShell = package: let
+          # Master PHP is CLI-only; Composer still needs a stock interpreter.
+          composer =
+            if package.php.version == phpMasterVersion
+            then pkgs.php.packages.composer
+            else package.php.packages.composer;
+        in
           (pkgs.mkShell.override {
             stdenv = package.stdenv;
           }) {
@@ -275,7 +312,7 @@
               autoconf-archive
               lcov
               gdb
-              package.php.packages.composer
+              composer
               pre-commit
               valgrind
             ];
@@ -419,6 +456,11 @@
           packages'
           // {
             default = packages'.php83-gcc;
+            # Opt-in PHP master shell; excluded from checks and CI.
+            php-master-gcc = makePackage {
+              php = phpMaster;
+              stdenv = matrix.stdenv.gcc;
+            };
           };
         packages =
           developmentPackages
